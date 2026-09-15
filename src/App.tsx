@@ -1,122 +1,109 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Header } from './components/layout/Header'
+import { HelpModal } from './components/modals/HelpModal'
+import { StatsModal, type DailySnapshot } from './components/stats/StatsModal'
+import { ToastStack } from './components/toast/ToastStack'
+import { useTodayPuzzleNumber } from './hooks/useDailyClock'
+import { usePrefs } from './hooks/usePrefs'
+import { useRouter } from './hooks/useRouter'
+import { useStats } from './hooks/useStats'
+import { OverlayProvider } from './providers/OverlayProvider'
+import { PrefsProvider } from './providers/PrefsProvider'
+import { RouterProvider } from './providers/RouterProvider'
+import { StatsProvider } from './providers/StatsProvider'
+import { ToastProvider } from './providers/ToastProvider'
+import { getDailyAnswer } from './lib/daily/select'
+import { loadDaily } from './lib/storage/schema'
+import { ArchiveGameScreen } from './screens/ArchiveGameScreen'
+import { ArchiveScreen } from './screens/ArchiveScreen'
+import { DailyScreen } from './screens/DailyScreen'
+import { NotFoundScreen } from './screens/NotFoundScreen'
+import { PracticeScreen } from './screens/PracticeScreen'
 
-function App() {
-  const [count, setCount] = useState(0)
+function initialDailySnapshot(todayNumber: number): DailySnapshot | null {
+  const saved = loadDaily()
+  if (!saved || saved.puzzleNumber !== todayNumber) return null
+  return {
+    puzzleNumber: saved.puzzleNumber,
+    answer: getDailyAnswer(saved.puzzleNumber),
+    guesses: saved.guesses,
+    status: saved.status,
+  }
+}
+
+function AppShell() {
+  const { route } = useRouter()
+  const { prefs, markHelpSeen } = usePrefs()
+  const { stats } = useStats()
+  const todayNumber = useTodayPuzzleNumber()
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
+  const [daily, setDaily] = useState<DailySnapshot | null>(() => initialDailySnapshot(todayNumber))
+
+  // First visit: show the tutorial automatically.
+  useEffect(() => {
+    if (prefs.hasSeenHelp) return
+    const id = setTimeout(() => setHelpOpen(true), 250)
+    return () => clearTimeout(id)
+  }, [prefs.hasSeenHelp])
+
+  const closeHelp = useCallback(() => {
+    setHelpOpen(false)
+    if (!prefs.hasSeenHelp) markHelpSeen()
+  }, [prefs.hasSeenHelp, markHelpSeen])
+
+  const onSnapshot = useCallback((snapshot: DailySnapshot) => setDaily(snapshot), [])
+  const openStats = useCallback(() => setStatsOpen(true), [])
+
+  const todayAnswer = useMemo(() => getDailyAnswer(todayNumber).normalized, [todayNumber])
+
+  let screen: React.ReactNode
+  switch (route.name) {
+    case 'daily':
+      screen = <DailyScreen todayNumber={todayNumber} onSnapshot={onSnapshot} onShowResults={openStats} />
+      break
+    case 'practice':
+      screen = <PracticeScreen />
+      break
+    case 'archive':
+      screen = <ArchiveScreen todayNumber={todayNumber} />
+      break
+    case 'archive-game':
+      screen = <ArchiveGameScreen puzzleNumber={route.puzzleNumber} todayNumber={todayNumber} />
+      break
+    default:
+      screen = <NotFoundScreen />
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="app-shell bg-bg text-ink">
+      <Header onOpenHelp={() => setHelpOpen(true)} onOpenStats={openStats} />
+      <main className="relative flex min-h-0 flex-1 flex-col">{screen}</main>
+      <ToastStack />
+      <HelpModal open={helpOpen} onClose={closeHelp} excludeAnswer={todayAnswer} />
+      <StatsModal
+        open={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        stats={stats}
+        todayNumber={todayNumber}
+        daily={daily && daily.puzzleNumber === todayNumber ? daily : null}
+      />
+    </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <PrefsProvider>
+      <ToastProvider>
+        <StatsProvider>
+          <RouterProvider>
+            <OverlayProvider>
+              <AppShell />
+            </OverlayProvider>
+          </RouterProvider>
+        </StatsProvider>
+      </ToastProvider>
+    </PrefsProvider>
+  )
+}

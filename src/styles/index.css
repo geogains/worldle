@@ -1,0 +1,621 @@
+@import 'tailwindcss';
+
+/* Dark mode is driven by data-theme on <html>, resolved from the user's
+   preference (or system preference) in src/hooks/useTheme.ts and pre-applied
+   by the inline script in index.html to avoid a flash. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                        */
+/* ------------------------------------------------------------------ */
+:root {
+  --c-bg: #f7f6f2;
+  --c-surface: #ffffff;
+  --c-surface-2: #f0efeb;
+  --c-text: #1b1b1c;
+  --c-muted: #6b6b6d;
+  --c-border: #d6d8dc;
+  --c-border-strong: #8a8d91;
+  --c-divider: #e6e6e3;
+
+  --c-key: #dcdee2;
+  --c-key-hover: #cfd2d7;
+  --c-key-text: #1b1b1c;
+
+  --c-correct: #4a9350;
+  --c-present: #b8951f;
+  --c-absent: #6e7276;
+  --c-on-status: #ffffff;
+
+  --c-toast-bg: #1b1b1c;
+  --c-toast-text: #ffffff;
+  --c-backdrop: rgba(20, 20, 22, 0.45);
+  --c-focus: #2f6fed;
+
+  --tile-bg: var(--c-surface);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --c-bg: #121213;
+  --c-surface: #121213;
+  --c-surface-2: #1e1e20;
+  --c-text: #f3f3f2;
+  --c-muted: #9b9b9d;
+  --c-border: #3a3a3c;
+  --c-border-strong: #6c6c6e;
+  --c-divider: #2b2b2d;
+
+  --c-key: #7f8183;
+  --c-key-hover: #8f9193;
+  --c-key-text: #ffffff;
+
+  --c-correct: #4f9a55;
+  --c-present: #b9962a;
+  --c-absent: #3a3a3c;
+  --c-on-status: #ffffff;
+
+  --c-toast-bg: #f3f3f2;
+  --c-toast-text: #121213;
+  --c-backdrop: rgba(0, 0, 0, 0.6);
+  --c-focus: #7aa7ff;
+
+  --tile-bg: var(--c-surface);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-ink: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-border);
+  --color-line-strong: var(--c-border-strong);
+  --color-divider: var(--c-divider);
+  --color-key: var(--c-key);
+  --color-key-hover: var(--c-key-hover);
+  --color-key-text: var(--c-key-text);
+  --color-correct: var(--c-correct);
+  --color-present: var(--c-present);
+  --color-absent: var(--c-absent);
+  --color-on-status: var(--c-on-status);
+  --color-toast-bg: var(--c-toast-bg);
+  --color-toast-text: var(--c-toast-text);
+  --color-focus: var(--c-focus);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                 */
+/* ------------------------------------------------------------------ */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Only show focus rings for keyboard users. */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Dialog panels receive programmatic focus; no ring needed on the container. */
+[role='dialog']:focus-visible {
+  outline: none;
+}
+
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tiles                                                                */
+/* ------------------------------------------------------------------ */
+.tile {
+  --status-bg: var(--tile-bg);
+  width: var(--tile);
+  height: var(--tile);
+  font-size: calc(var(--tile) * 0.52);
+  line-height: 1;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--c-border);
+  background-color: var(--tile-bg);
+  color: var(--c-text);
+  border-radius: 3px;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.tile--filled {
+  border-color: var(--c-border-strong);
+}
+
+.tile--correct,
+.tile--present,
+.tile--absent {
+  border-color: var(--status-bg);
+  background-color: var(--status-bg);
+  color: var(--c-on-status);
+}
+.tile--correct {
+  --status-bg: var(--c-correct);
+}
+.tile--present {
+  --status-bg: var(--c-present);
+}
+.tile--absent {
+  --status-bg: var(--c-absent);
+}
+
+/* Small tiles for the How to Play examples. */
+.tile--example {
+  --tile: 2.5rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Animations                                                           */
+/* ------------------------------------------------------------------ */
+@keyframes tile-pop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  45% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes row-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+/* The unrevealed look is held during the animation-delay (fill-mode: both),
+   the colour switches exactly at the half-turn. */
+@keyframes tile-flip {
+  0% {
+    transform: rotateX(0);
+    background-color: var(--tile-bg);
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+  49.99% {
+    transform: rotateX(-90deg);
+    background-color: var(--tile-bg);
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+  50% {
+    transform: rotateX(-90deg);
+    background-color: var(--status-bg);
+    border-color: var(--status-bg);
+    color: var(--c-on-status);
+  }
+  100% {
+    transform: rotateX(0);
+    background-color: var(--status-bg);
+    border-color: var(--status-bg);
+    color: var(--c-on-status);
+  }
+}
+
+@keyframes tile-fade {
+  0% {
+    background-color: var(--tile-bg);
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+  100% {
+    background-color: var(--status-bg);
+    border-color: var(--status-bg);
+    color: var(--c-on-status);
+  }
+}
+
+@keyframes tile-bounce {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-28%);
+  }
+  50% {
+    transform: translateY(6%);
+  }
+  60% {
+    transform: translateY(-16%);
+  }
+  80% {
+    transform: translateY(3%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tile--pop {
+  animation: tile-pop 120ms var(--ease-out-quad);
+}
+.row--shake {
+  animation: row-shake 600ms var(--ease-in-out);
+}
+.tile--flip {
+  animation: tile-flip var(--flip-duration, 520ms) var(--ease-in-out) both;
+  animation-delay: calc(var(--i) * var(--flip-stagger, 280ms));
+  backface-visibility: hidden;
+}
+.tile--bounce {
+  animation: tile-bounce 900ms var(--ease-in-out);
+  animation-delay: calc(var(--i) * 90ms);
+}
+.anim-fade-in {
+  animation: fade-in 180ms var(--ease-out-quad) both;
+}
+.anim-fade-out {
+  animation: fade-out 150ms var(--ease-out-quad) both;
+}
+.anim-modal-in {
+  animation: modal-in 220ms var(--ease-out-quad) both;
+}
+.anim-modal-out {
+  animation: modal-out 150ms var(--ease-out-quad) both;
+}
+.anim-toast-in {
+  animation: toast-in 160ms var(--ease-out-quad) both;
+}
+.anim-toast-out {
+  animation: toast-out 200ms var(--ease-out-quad) both;
+}
+.anim-menu-in {
+  animation: menu-in 120ms var(--ease-out-quad) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile--pop,
+  .row--shake,
+  .tile--bounce {
+    animation: none;
+  }
+  .tile--flip {
+    animation: tile-fade 160ms linear both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .anim-fade-in,
+  .anim-fade-out,
+  .anim-modal-in,
+  .anim-modal-out,
+  .anim-toast-in,
+  .anim-toast-out,
+  .anim-menu-in {
+    animation-duration: 1ms;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Keyboard                                                             */
+/* ------------------------------------------------------------------ */
+.key {
+  background-color: var(--c-key);
+  color: var(--c-key-text);
+  border: 0;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    background-color 120ms ease,
+    transform 80ms ease;
+}
+.key:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .key:hover {
+    background-color: var(--c-key-hover);
+  }
+}
+.key--correct,
+.key--present,
+.key--absent {
+  color: var(--c-on-status);
+}
+.key--correct {
+  background-color: var(--c-correct);
+}
+.key--present {
+  background-color: var(--c-present);
+}
+.key--absent {
+  background-color: var(--c-absent);
+}
+@media (hover: hover) {
+  .key--correct:hover,
+  .key--present:hover,
+  .key--absent:hover {
+    filter: brightness(1.08);
+    background-color: inherit;
+  }
+  .key--correct:hover {
+    background-color: var(--c-correct);
+  }
+  .key--present:hover {
+    background-color: var(--c-present);
+  }
+  .key--absent:hover {
+    background-color: var(--c-absent);
+  }
+}
+.key[disabled] {
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                              */
+/* ------------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.7rem 1.4rem;
+  min-height: 44px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    transform 80ms ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn--primary {
+  background-color: var(--c-correct);
+  color: var(--c-on-status);
+}
+@media (hover: hover) {
+  .btn--primary:hover {
+    filter: brightness(1.06);
+  }
+}
+.btn--secondary {
+  background-color: transparent;
+  color: var(--c-text);
+  border-color: var(--c-border-strong);
+}
+@media (hover: hover) {
+  .btn--secondary:hover {
+    background-color: var(--c-surface-2);
+  }
+}
+.btn--ghost {
+  background-color: transparent;
+  color: var(--c-text);
+  padding: 0.5rem 0.9rem;
+  min-height: 40px;
+}
+@media (hover: hover) {
+  .btn--ghost:hover {
+    background-color: var(--c-surface-2);
+  }
+}
+
+.icon-btn {
+  /* display is set by utilities (inline-flex / hidden) so responsive toggles work */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  color: var(--c-text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+@media (hover: hover) {
+  .icon-btn:hover {
+    background-color: var(--c-surface-2);
+  }
+}
+.icon-btn:active {
+  background-color: var(--c-surface-2);
+}
+
+.nav-link {
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+@media (hover: hover) {
+  .nav-link:hover {
+    color: var(--c-text);
+    background-color: var(--c-surface-2);
+  }
+}
+.nav-link[aria-current='page'] {
+  color: var(--c-text);
+  background-color: var(--c-surface-2);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--c-text);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+}
+@media (hover: hover) {
+  .menu-item:hover {
+    background-color: var(--c-surface-2);
+  }
+}
+.menu-item[aria-current='page'] {
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Full-height shell with a dvh fallback for older mobile browsers. */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}

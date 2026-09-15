@@ -9,7 +9,8 @@ const EMOJI: Record<TileStatus, string> = {
 }
 
 export interface ShareInput {
-  puzzleNumber: number
+  /** Omit (or null) for modes without a puzzle number, e.g. practice. */
+  puzzleNumber?: number | null
   guesses: readonly string[]
   answer: string
   won: boolean
@@ -30,7 +31,8 @@ export function buildEmojiGrid(guesses: readonly string[], answer: string): stri
 /** Spoiler-free share text: "Daily Worldle #42 4/6" + emoji grid. */
 export function buildShareText(input: ShareInput): string {
   const score = input.won ? String(input.guesses.length) : 'X'
-  const header = `${input.label ?? branding.name} #${input.puzzleNumber} ${score}/${MAX_ATTEMPTS}`
+  const number = input.puzzleNumber == null ? '' : ` #${input.puzzleNumber}`
+  const header = `${input.label ?? branding.name}${number} ${score}/${MAX_ATTEMPTS}`
   return `${header}\n\n${buildEmojiGrid(input.guesses, input.answer)}`
 }
 

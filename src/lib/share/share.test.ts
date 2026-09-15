@@ -22,6 +22,11 @@ describe('buildShareText', () => {
     const grid = buildEmojiGrid(['COSTARICA'], 'COSTARICA')
     expect(Array.from(grid)).toHaveLength(9)
   })
+  it('omits the number when none is given', () => {
+    expect(buildShareText({ answer: 'PERU', guesses: ['PERU'], won: true, label: 'Practice' })).toMatch(
+      /^Practice 1\/6\n/,
+    )
+  })
   it('supports a custom label', () => {
     expect(buildShareText({ puzzleNumber: 1, answer: 'PERU', guesses: ['PERU'], won: true, label: 'Practice' })).toMatch(
       /^Practice #1 1\/6/,
