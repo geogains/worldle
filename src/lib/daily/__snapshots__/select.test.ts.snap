@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getDailyAnswer > the schedule is stable (snapshot of the first 10 answers) 1`] = `
+[
+  "tanzania",
+  "slovakia",
+  "morocco",
+  "moldova",
+  "san-marino",
+  "samoa",
+  "india",
+  "ukraine",
+  "cyprus",
+  "vanuatu",
+]
+`;
