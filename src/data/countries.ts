@@ -1,3 +1,4 @@
+import { toCountrySlug } from '../lib/country/slug'
 import { normalizeCountryName } from '../lib/text/normalize'
 
 export interface Country {
@@ -12,9 +13,39 @@ export interface Country {
 }
 
 /**
- * Canonical V1 dataset: the commonly recognised 195-country set
- * (193 UN member states + Palestine + Vatican City), using practical English
- * names rather than formal diplomatic names.
+ * Canonical V1 dataset: the commonly recognised 193 UN member states +
+ * Palestine + Vatican City + Taiwan + Kosovo + England + Scotland + Wales
+ * (200 entries), using practical English names rather than formal
+ * diplomatic names.
+ *
+ * Taiwan and Kosovo are deliberate departures from the original 195-entry
+ * baseline (193 UN members + Palestine + Vatican City): both are partially
+ * recognised, disputed-status entities that are nonetheless included for
+ * gameplay purposes, under their plain common name ("Taiwan", "Kosovo")
+ * with no political qualifier, and treated identically to every other entry
+ * by normalization, validation and answer eligibility. This dataset does
+ * not use UN membership as a strict inclusion test — it is a deliberate,
+ * curated gameplay list, and future disputed/partially-recognised entities
+ * can be added the same way: add the plain name here (see the historical/
+ * tail note below for how the daily schedule absorbs it safely) and wire it
+ * into the flag mapping (data/countryDetails/flags.ts) if an asset exists.
+ *
+ * England, Scotland and Wales are a further departure in the same spirit:
+ * constituent countries of the United Kingdom, not sovereign ISO 3166-1
+ * states, included under their plain common names and treated identically
+ * to every other entry by normalization, validation and answer eligibility.
+ * "United Kingdom" itself remains a separate, distinct entry (too long to
+ * be a playable answer, but still a valid guess) — adding these three does
+ * not merge, alias or replace it. Northern Ireland is deliberately NOT a
+ * standalone canonical entry here (and none is planned) — it is mentioned
+ * only where it belongs, as part of the United Kingdom's own factual data
+ * (officialName / fact text in countryRecords.ts), never as its own country,
+ * flag mapping or Study entry.
+ * See data/countryDetails/countryRecords.ts for how their results-page
+ * records omit iso2/iso3 (no ISO 3166-1 code exists for a constituent
+ * country) and data/countryDetails/flags.ts for how their flags use real
+ * ISO 3166-2 subdivision codes (GB-ENG/GB-SCT/GB-WLS) rather than sharing
+ * the United Kingdom's plain GB code.
  *
  * Naming decisions worth knowing about:
  *  - "Congo" is the Republic of the Congo; "DR Congo" is the Democratic
@@ -25,11 +56,16 @@ export interface Country {
  *    strips them (SAOTOMEANDPRINCIPE).
  *  - "Micronesia" is the Federated States of Micronesia.
  *  - "Bahamas" and "Gambia" are used without the leading article.
+ *  - "Taiwan" and "Kosovo" are included without qualifiers; see above.
  *
  * IMPORTANT: the daily schedule is derived from the eligible pool built from
- * this list. Adding, removing or renaming an entry changes the eligible pool
- * and therefore future daily answers. A snapshot test guards against
- * accidental changes; see src/lib/daily/select.test.ts.
+ * this list, but it is NOT simply "reshuffle whenever the list changes" — see
+ * the historical/tail split in src/lib/daily/select.ts, which lets this list
+ * grow (as it did for Taiwan, then Kosovo, then England/Scotland/Wales)
+ * without disturbing already-scheduled puzzles.
+ * Renaming or removing an existing entry is not covered by that safeguard
+ * and would still change its historical mapping; a snapshot test guards
+ * against accidental changes either way — see src/lib/daily/select.test.ts.
  */
 const RAW_COUNTRY_NAMES: readonly string[] = [
   'Afghanistan',
@@ -84,6 +120,7 @@ const RAW_COUNTRY_NAMES: readonly string[] = [
   'Ecuador',
   'Egypt',
   'El Salvador',
+  'England',
   'Equatorial Guinea',
   'Eritrea',
   'Estonia',
@@ -121,6 +158,7 @@ const RAW_COUNTRY_NAMES: readonly string[] = [
   'Kazakhstan',
   'Kenya',
   'Kiribati',
+  'Kosovo',
   'Kuwait',
   'Kyrgyzstan',
   'Laos',
@@ -183,6 +221,7 @@ const RAW_COUNTRY_NAMES: readonly string[] = [
   'San Marino',
   'São Tomé and Príncipe',
   'Saudi Arabia',
+  'Scotland',
   'Senegal',
   'Serbia',
   'Seychelles',
@@ -202,6 +241,7 @@ const RAW_COUNTRY_NAMES: readonly string[] = [
   'Sweden',
   'Switzerland',
   'Syria',
+  'Taiwan',
   'Tajikistan',
   'Tanzania',
   'Thailand',
@@ -224,18 +264,18 @@ const RAW_COUNTRY_NAMES: readonly string[] = [
   'Vatican City',
   'Venezuela',
   'Vietnam',
+  'Wales',
   'Yemen',
   'Zambia',
   'Zimbabwe',
 ]
 
+/**
+ * Stable identifier = the public country slug (lib/country/slug.ts), so
+ * `/results/:slug` resolves straight back to a dataset entry by id.
+ */
 export function toCountryId(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
+  return toCountrySlug(name)
 }
 
 export function buildCountry(name: string): Country {
@@ -275,6 +315,11 @@ export function findCountryByNormalized(normalized: string): Country | undefined
 
 export function findCountryById(id: string): Country | undefined {
   return BY_ID.get(id)
+}
+
+/** Public URL slug -> country. Alias of findCountryById; slugs and ids are the same value. */
+export function findCountryBySlug(slug: string): Country | undefined {
+  return BY_ID.get(slug)
 }
 
 export function countriesOfLength(length: number): Country[] {

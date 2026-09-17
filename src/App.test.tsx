@@ -17,6 +17,7 @@ describe('App (daily flow)', () => {
     vi.useFakeTimers()
     vi.setSystemTime(EPOCH_UTC + 3600_000) // puzzle #1, 01:00 UTC
     window.localStorage.setItem(storageKey('prefs'), JSON.stringify({ theme: 'light', hasSeenHelp: true }))
+    window.history.replaceState(null, '', '/')
     // jsdom lacks ResizeObserver
     vi.stubGlobal(
       'ResizeObserver',
@@ -41,7 +42,7 @@ describe('App (daily flow)', () => {
     expect(JSON.parse(window.localStorage.getItem(storageKey('prefs')) ?? '{}').hasSeenHelp).toBe(true)
   })
 
-  it('rejects short and invalid guesses without consuming attempts, then wins and records stats', () => {
+  it('rejects short and invalid guesses without consuming attempts, then wins, records stats and continues to the country results page', () => {
     const answer = getDailyAnswer(1)
     render(<App />)
     expect(screen.getByText(`Daily Worldle #1`)).toBeInTheDocument()
@@ -83,9 +84,38 @@ describe('App (daily flow)', () => {
     expect(stats.wins).toBe(1)
     expect(stats.currentStreak).toBe(1)
     expect(stats.completedPuzzles).toEqual([1])
-    const dialog = screen.getByRole('dialog', { name: /statistics/i })
-    expect(dialog).toHaveTextContent(answer.name)
-    expect(dialog).toHaveTextContent(/next daily worldle/i)
+    // Completion is a real route transition into the country results page,
+    // not the Statistics modal (that is only reachable from the header now).
+    expect(window.location.pathname).toBe(`/results/${answer.id}`)
+    expect(screen.queryByRole('dialog', { name: /statistics/i })).not.toBeInTheDocument()
+    const dialog = screen.getByRole('dialog', { name: new RegExp(`${answer.name} results`, 'i') })
+    expect(dialog).toHaveTextContent(`Daily Worldle #1`)
+    expect(dialog).toHaveTextContent('Solved in 1/6')
+    // The completed board is rendered beneath the card from the daily store.
+    expect(screen.getByRole('grid', { name: /game board/i })).toBeInTheDocument()
+    expect(JSON.parse(window.localStorage.getItem(storageKey('lastResult')) ?? '{}')).toMatchObject({
+      source: 'daily',
+      countryId: answer.id,
+      puzzleNumber: 1,
+    })
+  })
+
+  it('keeps the header Statistics control separate from the completed-game Results button', () => {
+    const answer = getDailyAnswer(1)
+    window.localStorage.setItem(
+      storageKey('daily'),
+      JSON.stringify({ puzzleNumber: 1, guesses: [answer.normalized], current: '', status: 'won', updatedAt: 1 }),
+    )
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /^statistics$/i }))
+    expect(screen.getByRole('dialog', { name: /statistics/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^close$/i }))
+    act(() => vi.advanceTimersByTime(400))
+
+    fireEvent.click(screen.getByRole('button', { name: /^results$/i }))
+    expect(window.location.pathname).toBe(`/results/${answer.id}`)
+    expect(screen.queryByRole('dialog', { name: /statistics/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: new RegExp(`${answer.name} results`, 'i') })).toBeInTheDocument()
   })
 
   it('restores a completed game without re-applying stats', () => {

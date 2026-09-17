@@ -20,16 +20,24 @@ export function HelpModal({ open, onClose, excludeAnswer }: HelpModalProps) {
       <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[0.95rem] leading-snug">
         <li>Each guess must be a valid country.</li>
         <li>Each guess must contain the same number of letters as today's country.</li>
-        <li>Spaces and punctuation are ignored — only letters count.</li>
         <li>The colour of the tiles shows how close your guess was.</li>
       </ul>
+
+      <div className="mt-5">
+        <h4 className="text-[0.95rem] font-bold">Country name formatting</h4>
+        <p className="mt-1.5 text-[0.95rem] leading-snug text-secondary">
+          Spaces and punctuation are removed on the game board, so country names appear as one
+          continuous sequence of letters — for example, <strong className="text-ink">Costa Rica</strong> is
+          displayed as <strong className="font-extrabold tracking-wide text-ink">COSTARICA</strong>.
+        </p>
+      </div>
 
       <h4 className="mt-6 text-[0.95rem] font-bold">Examples</h4>
       <div className="mt-3 space-y-4">
         {examples.map((ex) => (
           <div key={ex.status}>
-            <div className="flex gap-1.5" role="grid" aria-label={`Example: ${ex.word}`}>
-              <div className="flex gap-1.5" role="row">
+            <div className="help-tile-row" role="grid" aria-label={`Example: ${ex.word}`}>
+              <div className="help-tile-row" role="row">
                 {ex.word.split('').map((letter, i) => (
                   <Tile
                     key={i}

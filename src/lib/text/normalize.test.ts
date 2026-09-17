@@ -16,6 +16,9 @@ describe('normalizeCountryName', () => {
     expect(normalizeCountryName('São Tomé and Príncipe')).toBe('SAOTOMEANDPRINCIPE')
     expect(normalizeCountryName('Curaçao')).toBe('CURACAO')
   })
+  it('normalizes Taiwan the same way as every other plain-name country', () => {
+    expect(normalizeCountryName('Taiwan')).toBe('TAIWAN')
+  })
   it('handles arbitrary punctuation and lowercase input', () => {
     expect(normalizeCountryName('  ivory coast. ')).toBe('IVORYCOAST')
     expect(normalizeCountryName('')).toBe('')

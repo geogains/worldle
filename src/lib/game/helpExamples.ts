@@ -8,21 +8,31 @@ export interface HelpExample {
   text: string
 }
 
+/**
+ * All examples use 9-letter normalized country names so the tutorial board
+ * doesn't visually imply a five-letter-only game. Each status lists the
+ * primary demo word first, plus two alternates used only if the primary
+ * happens to be today's actual answer (see getHelpExamples below) — every
+ * word here must stay a real 9-letter entry in the country dataset.
+ * "Costa Rica" (COSTARICA) is the primary correct-position example: it's
+ * the clearest demonstration that a country's board form can come from a
+ * display name containing a space.
+ */
 const CANDIDATES: Record<TileStatus, readonly { word: string; index: number }[]> = {
   correct: [
-    { word: 'SPAIN', index: 0 },
-    { word: 'JAPAN', index: 0 },
-    { word: 'KENYA', index: 0 },
+    { word: 'COSTARICA', index: 1 }, // Costa Rica -> COSTARICA; highlights "O"
+    { word: 'AUSTRALIA', index: 1 },
+    { word: 'LITHUANIA', index: 3 },
   ],
   present: [
-    { word: 'ITALY', index: 1 },
-    { word: 'NEPAL', index: 1 },
-    { word: 'CHILE', index: 1 },
+    { word: 'SINGAPORE', index: 4 },
+    { word: 'INDONESIA', index: 3 },
+    { word: 'GUATEMALA', index: 3 },
   ],
   absent: [
-    { word: 'GHANA', index: 1 },
-    { word: 'MALTA', index: 1 },
-    { word: 'YEMEN', index: 1 },
+    { word: 'ARGENTINA', index: 2 },
+    { word: 'VENEZUELA', index: 5 },
+    { word: 'NICARAGUA', index: 1 },
   ],
 }
 

@@ -24,6 +24,12 @@ describe('validateGuess', () => {
     expect(validateGuess('TIMORLESTE', 10).ok).toBe(true)
     expect(validateGuess('DRCONGO', 7).ok).toBe(true)
   })
+  it('accepts Taiwan as a valid six-letter guess', () => {
+    const r = validateGuess('TAIWAN', 6)
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.country.name).toBe('Taiwan')
+    expect(validateGuess('TAIWAN', 5)).toEqual({ ok: false, reason: 'wrong-length' })
+  })
 })
 
 describe('deriveStatus', () => {

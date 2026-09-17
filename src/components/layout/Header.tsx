@@ -1,20 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { branding } from '../../config/branding'
-import { useOverlays } from '../../hooks/useOverlays'
 import { usePrefs } from '../../hooks/usePrefs'
 import { useRouter } from '../../hooks/useRouter'
 import { PATHS } from '../../lib/router/routes'
-import {
-  CalendarIcon,
-  CloseIcon,
-  GlobeIcon,
-  HelpIcon,
-  MenuIcon,
-  MoonIcon,
-  ShuffleIcon,
-  StatsIcon,
-  SunIcon,
-} from '../ui/icons'
+import { NavigationDrawer } from './NavigationDrawer'
+import { ThemeToggle } from './ThemeToggle'
+import { BookIcon, CalendarIcon, GlobeIcon, MenuIcon, ShuffleIcon } from '../ui/icons'
 
 export interface HeaderProps {
   onOpenHelp: () => void
@@ -28,19 +19,15 @@ interface NavItem {
   icon: React.ReactNode
 }
 
+const DRAWER_ID = 'navigation-drawer'
+
 export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
   const { route, navigate } = useRouter()
-  const { resolvedTheme, toggleTheme } = usePrefs()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const { register } = useOverlays()
-
-  // Pause physical-keyboard game input while the menu is open.
-  useEffect(() => {
-    if (!menuOpen) return
-    return register()
-  }, [menuOpen, register])
+  const { resolvedTheme } = usePrefs()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
+  const navLinkRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const [underline, setUnderline] = useState<{ x: number; w: number } | null>(null)
 
   const items: NavItem[] = [
     { label: 'Daily', path: PATHS.daily, active: route.name === 'daily', icon: <GlobeIcon size={20} /> },
@@ -56,58 +43,67 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
       active: route.name === 'archive' || route.name === 'archive-game',
       icon: <CalendarIcon size={20} />,
     },
+    { label: 'Study', path: PATHS.study, active: route.name === 'study', icon: <BookIcon size={20} /> },
   ]
+  const activeNavPath = items.find((item) => item.active)?.path ?? null
 
-  useEffect(() => {
-    if (!menuOpen) return
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as Node
-      if (menuRef.current?.contains(target) || menuButtonRef.current?.contains(target)) return
-      setMenuOpen(false)
+  // Shared underline indicator: measure the active link's position/width and
+  // slide a single element there, instead of each link owning its own
+  // underline. useLayoutEffect (not useEffect) measures and commits before
+  // the browser paints, so the very first render already shows the underline
+  // in the right place — it never animates in from zero width on mount, only
+  // when activeNavPath actually changes afterwards. Also re-measures on
+  // resize and once webfonts finish loading, since a fallback-font width at
+  // first paint would otherwise leave the underline very slightly misaligned
+  // until the next route change.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = activeNavPath ? navLinkRefs.current[activeNavPath] : null
+      setUnderline(el ? { x: el.offsetLeft, w: el.offsetWidth } : null)
     }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpen(false)
-        menuButtonRef.current?.focus()
-      }
-    }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('touchstart', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('touchstart', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [menuOpen])
+    measure()
+    window.addEventListener('resize', measure)
+    document.fonts?.ready?.then(measure).catch(() => {})
+    return () => window.removeEventListener('resize', measure)
+  }, [activeNavPath])
 
   const go = (path: string) => {
-    setMenuOpen(false)
+    setDrawerOpen(false)
     navigate(path)
   }
 
-  const themeLabel = resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-
   return (
-    <header className="relative z-30 border-b border-divider">
-      <div className="mx-auto flex h-[52px] max-w-[1000px] items-center px-2 sm:px-4">
-        {/* Left: menu (mobile) / nav (desktop) */}
+    <header className="relative z-30 bg-[var(--c-surface-glass-strong)] shadow-[0_2px_12px_rgba(13,49,90,0.1)] backdrop-blur-md">
+      <div className="mx-auto flex h-[56px] max-w-[1000px] items-center px-2 sm:px-4">
+        {/* Left: menu trigger (mobile) / nav (desktop). The trigger opens the
+            NavigationDrawer, which owns its own focus trap, Escape handling
+            and focus restoration — it isn't reachable by Tab while the
+            drawer is open, so its own icon never needs to swap to a second
+            close affordance. */}
         <div className="flex flex-1 items-center gap-1">
           <button
-            ref={menuButtonRef}
             type="button"
             className="icon-btn inline-flex sm:hidden"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            aria-controls="app-menu"
-            onClick={() => setMenuOpen((v) => !v)}
+            // Static label: the trigger only ever opens the drawer (its own
+            // close button handles closing, and this button isn't reachable
+            // by Tab while the drawer is open anyway), so it never needs to
+            // say "Close menu" — that label belongs to the drawer's own X,
+            // and having both share it would give two controls the same
+            // accessible name at once. aria-expanded still communicates state.
+            aria-label="Open menu"
+            aria-expanded={drawerOpen}
+            aria-controls={DRAWER_ID}
+            onClick={() => setDrawerOpen((v) => !v)}
           >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            <MenuIcon />
           </button>
-          <nav className="hidden items-center gap-1 sm:flex" aria-label="Game modes">
+          <nav ref={navRef} className="relative hidden items-center gap-1 sm:flex" aria-label="Game modes">
             {items.map((item) => (
               <button
                 key={item.path}
+                ref={(el) => {
+                  navLinkRefs.current[item.path] = el
+                }}
                 type="button"
                 className="nav-link"
                 aria-current={item.active ? 'page' : undefined}
@@ -116,75 +112,62 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
                 {item.label}
               </button>
             ))}
+            {underline && (
+              <span
+                className="nav-underline"
+                aria-hidden="true"
+                style={{ width: underline.w, transform: `translateX(${underline.x}px)` }}
+              />
+            )}
           </nav>
         </div>
 
-        {/* Center: title */}
+        {/* Center: wordmark. The button's aria-label carries the accessible
+            name, so the image's alt (also the product name) is redundant to
+            assistive tech rather than duplicated — see Header CSS for the
+            crop that removes the logo PNGs' transparent framing. Dark mode
+            swaps to the purpose-made white asset (same intrinsic dimensions
+            and framing as the light one) rather than filtering/recolouring
+            a single asset, driven by the existing resolvedTheme from
+            usePrefs — no separate theme state. */}
         <button
           type="button"
-          className="shrink-0 rounded px-2 text-[1.35rem] font-extrabold tracking-[-0.02em] text-ink sm:text-[1.5rem]"
+          className="shrink-0 rounded px-2"
           onClick={() => go(PATHS.daily)}
           aria-label={`${branding.name} home`}
         >
-          {branding.name}
+          <span className="header-logo">
+            <img
+              src={resolvedTheme === 'dark' ? '/Worldle-white.png' : '/Worldle.png'}
+              alt={branding.name}
+              className="header-logo__img"
+            />
+          </span>
         </button>
 
         {/* Right: help / stats / theme */}
         <div className="flex flex-1 items-center justify-end gap-0.5">
           <button type="button" className="icon-btn inline-flex" onClick={onOpenHelp} aria-label="How to play" title="How to play">
-            <HelpIcon />
+            <span aria-hidden="true" className="text-[1.25rem] leading-none">
+              ℹ️
+            </span>
           </button>
           <button type="button" className="icon-btn inline-flex" onClick={onOpenStats} aria-label="Statistics" title="Statistics">
-            <StatsIcon />
+            <span aria-hidden="true" className="text-[1.25rem] leading-none">
+              📊
+            </span>
           </button>
-          <button
-            type="button"
-            className="icon-btn hidden sm:inline-flex"
-            onClick={toggleTheme}
-            aria-label={themeLabel}
-            title={themeLabel}
-          >
-            {resolvedTheme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
+          <ThemeToggle className="hidden sm:inline-flex" />
         </div>
       </div>
 
-      {menuOpen && (
-        <div
-          id="app-menu"
-          ref={menuRef}
-          role="menu"
-          aria-label="Menu"
-          className="anim-menu-in absolute top-[56px] left-2 w-[220px] rounded-xl border border-line bg-surface p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.16)] sm:hidden"
-        >
-          {items.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              role="menuitem"
-              className="menu-item"
-              aria-current={item.active ? 'page' : undefined}
-              onClick={() => go(item.path)}
-            >
-              <span className="text-muted">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-          <div className="my-1 border-t border-divider" role="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            className="menu-item"
-            onClick={() => {
-              toggleTheme()
-              setMenuOpen(false)
-            }}
-          >
-            <span className="text-muted">{resolvedTheme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}</span>
-            {resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
-          </button>
-        </div>
-      )}
+      <NavigationDrawer
+        id={DRAWER_ID}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        items={items}
+        onNavigate={go}
+      />
     </header>
   )
 }

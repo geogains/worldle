@@ -123,3 +123,67 @@ export function GlobeIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function BookIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 5.5A2 2 0 0 1 6 3.5h5.5a1 1 0 0 1 1 1V20a1 1 0 0 0-1-1H6a2 2 0 0 0-2 2z" />
+      <path d="M20 5.5A2 2 0 0 0 18 3.5h-5.5a1 1 0 0 0-1 1V20a1 1 0 0 1 1-1H18a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
+export function FlagIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 21V4" />
+      <path d="M5 4.5c2-1.3 4-1.3 6 0s4 1.3 6 0v9c-2 1.3-4 1.3-6 0s-4-1.3-6 0z" />
+    </svg>
+  )
+}
+
+export function LandmarkIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 21h18" />
+      <path d="M4 21V10M9 21V10M15 21V10M20 21V10" />
+      <path d="M2 10l10-6 10 6z" />
+    </svg>
+  )
+}
+
+export function CoinIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M12 7.5v9M9.5 9.3a2.6 2.6 0 0 1 2.5-1.5c1.6 0 2.7.8 2.7 2s-1.1 1.8-2.7 2-2.7.8-2.7 2 1.1 2 2.7 2a2.7 2.7 0 0 0 2.5-1.4" />
+    </svg>
+  )
+}
+
+export function ChatIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 5.5h16v11H9.5L5 20v-3.5H4z" />
+      <path d="M8 9.5h8M8 12.5h5" />
+    </svg>
+  )
+}
+
+export function LightbulbIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 18h6" />
+      <path d="M10 21h4" />
+      <path d="M12 3a6.5 6.5 0 0 0-3.6 11.9c.7.5 1.1 1.3 1.1 2.1h5c0-.8.4-1.6 1.1-2.1A6.5 6.5 0 0 0 12 3z" />
+    </svg>
+  )
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4.5 12.5l5 5 10-11" />
+    </svg>
+  )
+}

@@ -6,63 +6,135 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /* ------------------------------------------------------------------ */
-/* Design tokens                                                        */
+/* Design tokens — GeoRanks visual system                              */
 /* ------------------------------------------------------------------ */
 :root {
-  --c-bg: #f7f6f2;
+  /* Brand */
+  --brand-navy: #0d315a;
+  --brand-mint: #b4f3e9;
+  --brand-sky: #38bdf8;
+  --brand-coral-start: #ff9770;
+  --brand-coral-end: #ff6f61;
+
+  /* Gameplay feedback semantics — GeoRanks-compatible, not NYT-matched.
+     Submitted tiles and keys use the established word-game treatment of
+     white lettering on a coloured chip, so each chip is a darker derivative
+     of the GeoRanks green / amber / slate tuned to pass WCAG AA (>= 4.5:1)
+     against white even at keyboard-key text sizes:
+       correct #09855d -> 4.64:1, present #a96400 -> 4.66:1, absent #55647f -> 5.97:1 */
+  --feedback-correct: #09855d;
+  --feedback-correct-ink: #ffffff;
+  --feedback-present: #a96400;
+  --feedback-present-ink: #ffffff;
+  --feedback-absent: #55647f;
+  --feedback-absent-ink: #ffffff;
+
+  /* Readable status text (archive "solved"/"not solved" labels etc.) — kept
+     separate from the vivid tile/key chip colours above, which are tuned for
+     use as filled backgrounds, not as small text on a light surface. */
+  --c-status-good-text: #047857;
+  --c-status-bad-text: #b45309;
+
+  /* Page background: the signature GeoRanks mint -> sky diagonal. */
+  --c-bg: #bdeee4;
+  --c-bg-gradient: linear-gradient(135deg, var(--brand-mint) 0%, var(--brand-sky) 100%);
+
+  /* Surfaces */
   --c-surface: #ffffff;
-  --c-surface-2: #f0efeb;
-  --c-text: #1b1b1c;
-  --c-muted: #6b6b6d;
-  --c-border: #d6d8dc;
-  --c-border-strong: #8a8d91;
-  --c-divider: #e6e6e3;
+  --c-surface-2: #f2f7fb;
+  --c-surface-glass: rgba(255, 255, 255, 0.68);
+  --c-surface-glass-strong: rgba(255, 255, 255, 0.72);
+  --c-surface-glass-border: rgba(255, 255, 255, 0.45);
 
-  --c-key: #dcdee2;
-  --c-key-hover: #cfd2d7;
-  --c-key-text: #1b1b1c;
+  /* Text */
+  --c-text: #1e1e1e;
+  --c-ink: var(--brand-navy);
+  --c-secondary: #374151;
+  --c-muted: #6b7280;
 
-  --c-correct: #4a9350;
-  --c-present: #b8951f;
-  --c-absent: #6e7276;
-  --c-on-status: #ffffff;
+  /* Borders */
+  --c-border: rgba(13, 49, 90, 0.16);
+  --c-border-strong: rgba(13, 49, 90, 0.32);
+  --c-divider: rgba(13, 49, 90, 0.1);
 
-  --c-toast-bg: #1b1b1c;
+  /* Keyboard */
+  --c-key: rgba(255, 255, 255, 0.82);
+  --c-key-hover: #ffffff;
+  --c-key-text: var(--brand-navy);
+
+  /* Modal panel: opaque white in light mode so the mint/sky page doesn't
+     bleed through the card. Dark mode keeps its navy glass (see below). */
+  --c-modal-bg: #ffffff;
+  --c-modal-border: rgba(13, 49, 90, 0.08);
+  --c-modal-blur: 0px;
+
+  --c-toast-bg: var(--brand-navy);
   --c-toast-text: #ffffff;
-  --c-backdrop: rgba(20, 20, 22, 0.45);
-  --c-focus: #2f6fed;
+  --c-backdrop: rgba(13, 49, 90, 0.72);
+  --c-focus: var(--brand-coral-end);
 
-  --tile-bg: var(--c-surface);
+  --tile-bg: rgba(255, 255, 255, 0.92);
+
+  /* Radii */
+  --radius-control: 8px;
+  --radius-tile: 7px;
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --radius-modal: 28px;
+
+  /* Shadows */
+  --shadow-soft: 0 8px 24px rgba(13, 49, 90, 0.12);
+  --shadow-lifted: 0 12px 32px rgba(13, 49, 90, 0.18);
+  --shadow-modal: 0 24px 80px rgba(9, 30, 55, 0.35);
+  --shadow-coral: 0 6px 20px rgba(255, 111, 97, 0.4);
+  --shadow-coral-hover: 0 10px 28px rgba(255, 111, 97, 0.52);
+
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   color-scheme: light;
 }
 
 [data-theme='dark'] {
-  --c-bg: #121213;
-  --c-surface: #121213;
-  --c-surface-2: #1e1e20;
-  --c-text: #f3f3f2;
-  --c-muted: #9b9b9d;
-  --c-border: #3a3a3c;
-  --c-border-strong: #6c6c6e;
-  --c-divider: #2b2b2d;
+  --c-bg: #0a1626;
+  --c-bg-gradient: linear-gradient(135deg, #0a1a2e 0%, #123a63 100%);
 
-  --c-key: #7f8183;
-  --c-key-hover: #8f9193;
-  --c-key-text: #ffffff;
+  --c-surface: #10233d;
+  --c-surface-2: #15304f;
+  --c-surface-glass: rgba(15, 33, 58, 0.72);
+  --c-surface-glass-strong: rgba(10, 22, 38, 0.78);
+  --c-surface-glass-border: rgba(255, 255, 255, 0.08);
 
-  --c-correct: #4f9a55;
-  --c-present: #b9962a;
-  --c-absent: #3a3a3c;
-  --c-on-status: #ffffff;
+  --c-text: #eef2f7;
+  --c-ink: #f2f6fb;
+  --c-secondary: #c7d3e2;
+  --c-muted: #93a5bd;
 
-  --c-toast-bg: #f3f3f2;
-  --c-toast-text: #121213;
-  --c-backdrop: rgba(0, 0, 0, 0.6);
-  --c-focus: #7aa7ff;
+  --c-border: rgba(255, 255, 255, 0.14);
+  --c-border-strong: rgba(255, 255, 255, 0.28);
+  --c-divider: rgba(255, 255, 255, 0.1);
 
-  --tile-bg: var(--c-surface);
+  --c-key: rgba(255, 255, 255, 0.09);
+  --c-key-hover: rgba(255, 255, 255, 0.17);
+  --c-key-text: #eef2f7;
+
+  --c-status-good-text: #34d399;
+  --c-status-bad-text: #fbbf24;
+
+  --c-modal-bg: var(--c-surface-glass-strong);
+  --c-modal-border: var(--c-surface-glass-border);
+  --c-modal-blur: 24px;
+
+  --c-toast-bg: #eef2f7;
+  --c-toast-text: var(--brand-navy);
+  --c-backdrop: rgba(3, 12, 23, 0.85);
+  --c-focus: var(--brand-coral-start);
+
+  --tile-bg: rgba(255, 255, 255, 0.06);
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lifted: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.55);
   color-scheme: dark;
 }
 
@@ -70,23 +142,34 @@
   --color-bg: var(--c-bg);
   --color-surface: var(--c-surface);
   --color-surface-2: var(--c-surface-2);
-  --color-ink: var(--c-text);
+  --color-ink: var(--c-ink);
   --color-muted: var(--c-muted);
+  --color-secondary: var(--c-secondary);
   --color-line: var(--c-border);
   --color-line-strong: var(--c-border-strong);
   --color-divider: var(--c-divider);
   --color-key: var(--c-key);
   --color-key-hover: var(--c-key-hover);
   --color-key-text: var(--c-key-text);
-  --color-correct: var(--c-correct);
-  --color-present: var(--c-present);
-  --color-absent: var(--c-absent);
-  --color-on-status: var(--c-on-status);
+  --color-correct: var(--feedback-correct);
+  --color-present: var(--feedback-present);
+  --color-absent: var(--feedback-absent);
+  --color-on-correct: var(--feedback-correct-ink);
+  --color-on-present: var(--feedback-present-ink);
+  --color-on-absent: var(--feedback-absent-ink);
+  --color-on-status: var(--feedback-absent-ink);
+  --color-status-good: var(--c-status-good-text);
+  --color-status-bad: var(--c-status-bad-text);
   --color-toast-bg: var(--c-toast-bg);
   --color-toast-text: var(--c-toast-text);
   --color-focus: var(--c-focus);
+  --color-coral-start: var(--brand-coral-start);
+  --color-coral-end: var(--brand-coral-end);
+  --color-navy: var(--brand-navy);
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-display: 'Rubik', 'Poppins', sans-serif;
 }
 
 /* ------------------------------------------------------------------ */
@@ -99,7 +182,8 @@ body,
 }
 
 html {
-  background: var(--c-bg);
+  background: var(--c-bg-gradient);
+  background-attachment: fixed;
   color: var(--c-text);
   font-family: var(--font-sans);
   -webkit-text-size-adjust: 100%;
@@ -112,12 +196,23 @@ body {
   overflow: hidden;
 }
 
-/* Only show focus rings for keyboard users. */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 700;
+  color: var(--c-ink);
+  letter-spacing: -0.01em;
+}
+
+/* Only show focus rings for keyboard users. GeoRanks source relies on
+   shadow-only focus with `outline: none`; Daily Worldle keeps a real
+   outline so keyboard focus stays clearly visible. */
 :focus {
   outline: none;
 }
 :focus-visible {
-  outline: 2px solid var(--c-focus);
+  outline: 2.5px solid var(--c-focus);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -131,11 +226,155 @@ body {
   user-select: none;
 }
 
+/* Small uppercase micro-label, e.g. the "Practice" eyebrow and modal titles. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-ink);
+}
+.eyebrow--pill {
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--brand-navy) 10%, transparent);
+}
+[data-theme='dark'] .eyebrow--pill {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Numeric display treatment for statistics (Rubik, used sparingly). */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* ------------------------------------------------------------------ */
+/* Modal — translucent, blurred scrim; opaque card in light mode        */
+/* ------------------------------------------------------------------ */
+.modal-scrim {
+  background-color: var(--c-backdrop);
+  /* Unprefixed only: the CSS minifier drops the standard property when a
+     -webkit- copy follows it, and adds the prefix itself for its targets. */
+  backdrop-filter: blur(6px);
+}
+.modal-panel {
+  background-color: var(--c-modal-bg);
+  border: 1px solid var(--c-modal-border);
+  color: var(--c-secondary);
+  box-shadow: var(--shadow-modal);
+  border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+}
+/* Dark mode keeps its navy glass panel; light mode is solid so no blur. */
+[data-theme='dark'] .modal-panel {
+  backdrop-filter: blur(var(--c-modal-blur));
+}
+@media (min-width: 640px) {
+  .modal-panel {
+    border-radius: var(--radius-modal);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Mode bar — status + actions strip between the header and the board  */
+/* ------------------------------------------------------------------ */
+.mode-bar {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  margin: 0.625rem auto;
+  padding: 0 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-height: 2.25rem;
+  color: var(--c-secondary);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+.mode-bar__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+.mode-bar__status .eyebrow--pill {
+  flex-shrink: 0;
+}
+.mode-bar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+@media (min-width: 640px) {
+  .mode-bar {
+    margin: 1rem auto 0.875rem;
+    gap: 0.5rem 1rem;
+  }
+  /* Desktop: one clean horizontal line — pill, supporting text, actions. */
+  .mode-bar__status {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+/* Narrow screens: status on its own row, actions on a second full-width
+   row with the two controls sharing the space. */
+@media (max-width: 479px) {
+  .mode-bar__actions {
+    flex: 1 0 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+  .mode-bar__actions > .btn {
+    flex: 1 1 0;
+  }
+}
+@media (max-width: 380px) {
+  .mode-bar {
+    padding: 0 0.5rem;
+    margin: 0.5rem auto;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Game surface — restrained GeoRanks glass panel around board+keyboard */
+/* ------------------------------------------------------------------ */
+.game-surface {
+  box-sizing: border-box;
+  background: var(--c-surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--c-surface-glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(0.375rem, 2vw, 1rem) clamp(0.25rem, 1.5vw, 0.75rem);
+  transition:
+    background-color 0.3s var(--ease-standard),
+    border-color 0.3s var(--ease-standard);
+}
+@media (max-width: 380px) {
+  .game-surface {
+    background: color-mix(in srgb, var(--c-surface-glass) 55%, transparent);
+    border-radius: 14px;
+    padding: 0.25rem 0.125rem;
+    box-shadow: none;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Tiles                                                                */
 /* ------------------------------------------------------------------ */
 .tile {
   --status-bg: var(--tile-bg);
+  --status-ink: var(--c-ink);
   width: var(--tile);
   height: var(--tile);
   font-size: calc(var(--tile) * 0.52);
@@ -147,16 +386,20 @@ body {
   justify-content: center;
   border: 2px solid var(--c-border);
   background-color: var(--tile-bg);
-  color: var(--c-text);
-  border-radius: 3px;
+  color: var(--status-ink);
+  border-radius: var(--radius-tile);
   box-sizing: border-box;
   -webkit-user-select: none;
   user-select: none;
   will-change: transform;
+  transition:
+    border-color 0.15s var(--ease-standard),
+    box-shadow 0.15s var(--ease-standard);
 }
 
 .tile--filled {
   border-color: var(--c-border-strong);
+  box-shadow: 0 1px 3px rgba(13, 49, 90, 0.1);
 }
 
 .tile--correct,
@@ -164,21 +407,42 @@ body {
 .tile--absent {
   border-color: var(--status-bg);
   background-color: var(--status-bg);
-  color: var(--c-on-status);
+  color: var(--status-ink);
 }
 .tile--correct {
-  --status-bg: var(--c-correct);
+  --status-bg: var(--feedback-correct);
+  --status-ink: var(--feedback-correct-ink);
 }
 .tile--present {
-  --status-bg: var(--c-present);
+  --status-bg: var(--feedback-present);
+  --status-ink: var(--feedback-present-ink);
 }
 .tile--absent {
-  --status-bg: var(--c-absent);
+  --status-bg: var(--feedback-absent);
+  --status-ink: var(--feedback-absent-ink);
 }
 
-/* Small tiles for the How to Play examples. */
+/* Small tiles for the How to Play examples. Sized independently of the real
+   game board (useBoardMetrics) — these are always 9 tiles regardless of
+   today's answer length, so on narrow phones they need to shrink below the
+   board's own minimum to fit the modal without horizontal scrolling. The
+   clamp scales smoothly with viewport width and settles back at the
+   original 2.5rem on anything wider than a phone, so desktop is unchanged. */
 .tile--example {
-  --tile: 2.5rem;
+  --tile: clamp(1.65rem, 7vw, 2.5rem);
+}
+
+/* Row of How to Play example tiles: a tighter gap on narrow phones (the 9
+   tiles are noticeably wider than the previous 5-tile examples) restores to
+   the original spacing from the sm breakpoint up, where there's room. */
+.help-tile-row {
+  display: flex;
+  gap: 4px;
+}
+@media (min-width: 640px) {
+  .help-tile-row {
+    gap: 6px;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -225,25 +489,25 @@ body {
     transform: rotateX(0);
     background-color: var(--tile-bg);
     border-color: var(--c-border-strong);
-    color: var(--c-text);
+    color: var(--c-ink);
   }
   49.99% {
     transform: rotateX(-90deg);
     background-color: var(--tile-bg);
     border-color: var(--c-border-strong);
-    color: var(--c-text);
+    color: var(--c-ink);
   }
   50% {
     transform: rotateX(-90deg);
     background-color: var(--status-bg);
     border-color: var(--status-bg);
-    color: var(--c-on-status);
+    color: var(--status-ink);
   }
   100% {
     transform: rotateX(0);
     background-color: var(--status-bg);
     border-color: var(--status-bg);
-    color: var(--c-on-status);
+    color: var(--status-ink);
   }
 }
 
@@ -251,12 +515,12 @@ body {
   0% {
     background-color: var(--tile-bg);
     border-color: var(--c-border-strong);
-    color: var(--c-text);
+    color: var(--c-ink);
   }
   100% {
     background-color: var(--status-bg);
     border-color: var(--status-bg);
-    color: var(--c-on-status);
+    color: var(--status-ink);
   }
 }
 
@@ -336,17 +600,6 @@ body {
     opacity: 0;
   }
 }
-@keyframes menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .tile--pop {
   animation: tile-pop 120ms var(--ease-out-quad);
 }
@@ -380,9 +633,6 @@ body {
 .anim-toast-out {
   animation: toast-out 200ms var(--ease-out-quad) both;
 }
-.anim-menu-in {
-  animation: menu-in 120ms var(--ease-out-quad) both;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .tile--pop,
@@ -399,8 +649,7 @@ body {
   .anim-modal-in,
   .anim-modal-out,
   .anim-toast-in,
-  .anim-toast-out,
-  .anim-menu-in {
+  .anim-toast-out {
     animation-duration: 1ms;
   }
 }
@@ -411,9 +660,9 @@ body {
 .key {
   background-color: var(--c-key);
   color: var(--c-key-text);
-  border: 0;
-  border-radius: 4px;
-  font-weight: 700;
+  border: 1px solid var(--c-surface-glass-border);
+  border-radius: var(--radius-control);
+  font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
   cursor: pointer;
@@ -422,15 +671,18 @@ body {
   justify-content: center;
   height: 100%;
   padding: 0;
+  box-shadow: 0 1px 2px rgba(13, 49, 90, 0.12);
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
   transition:
     background-color 120ms ease,
+    box-shadow 120ms ease,
     transform 80ms ease;
 }
 .key:active {
   transform: scale(0.96);
+  box-shadow: none;
 }
 @media (hover: hover) {
   .key:hover {
@@ -440,16 +692,19 @@ body {
 .key--correct,
 .key--present,
 .key--absent {
-  color: var(--c-on-status);
+  border-color: transparent;
 }
 .key--correct {
-  background-color: var(--c-correct);
+  background-color: var(--feedback-correct);
+  color: var(--feedback-correct-ink);
 }
 .key--present {
-  background-color: var(--c-present);
+  background-color: var(--feedback-present);
+  color: var(--feedback-present-ink);
 }
 .key--absent {
-  background-color: var(--c-absent);
+  background-color: var(--feedback-absent);
+  color: var(--feedback-absent-ink);
 }
 @media (hover: hover) {
   .key--correct:hover,
@@ -459,17 +714,21 @@ body {
     background-color: inherit;
   }
   .key--correct:hover {
-    background-color: var(--c-correct);
+    background-color: var(--feedback-correct);
   }
   .key--present:hover {
-    background-color: var(--c-present);
+    background-color: var(--feedback-present);
   }
   .key--absent:hover {
-    background-color: var(--c-absent);
+    background-color: var(--feedback-absent);
   }
 }
 .key[disabled] {
   cursor: default;
+  /* Daily/Practice never pass `disabled` today (locking happens via the
+     game engine's own phase guard instead), so this only visibly applies
+     to the Quiz Type Answer keyboard during its feedback lock. */
+  opacity: 0.6;
 }
 
 /* ------------------------------------------------------------------ */
@@ -480,7 +739,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-button);
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.7rem 1.4rem;
@@ -488,10 +748,11 @@ body {
   cursor: pointer;
   border: 1px solid transparent;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease,
-    transform 80ms ease;
+    background-color 0.2s var(--ease-standard),
+    color 0.2s var(--ease-standard),
+    border-color 0.2s var(--ease-standard),
+    transform 0.2s var(--ease-standard),
+    box-shadow 0.2s var(--ease-standard);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -499,33 +760,80 @@ body {
   transform: scale(0.98);
 }
 .btn--primary {
-  background-color: var(--c-correct);
-  color: var(--c-on-status);
+  background: linear-gradient(135deg, var(--brand-coral-start) 0%, var(--brand-coral-end) 100%);
+  color: #ffffff;
+  box-shadow: var(--shadow-coral);
 }
 @media (hover: hover) {
   .btn--primary:hover {
-    filter: brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-coral-hover);
   }
 }
+.btn--primary:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-coral);
+}
 .btn--secondary {
-  background-color: transparent;
-  color: var(--c-text);
-  border-color: var(--c-border-strong);
+  background-color: var(--c-surface);
+  color: var(--c-ink);
+  border-color: var(--c-border);
+  box-shadow: 0 1px 3px rgba(13, 49, 90, 0.08);
 }
 @media (hover: hover) {
   .btn--secondary:hover {
+    transform: translateY(-1px);
     background-color: var(--c-surface-2);
+    box-shadow: var(--shadow-soft);
   }
 }
 .btn--ghost {
   background-color: transparent;
-  color: var(--c-text);
+  color: var(--c-ink);
   padding: 0.5rem 0.9rem;
   min-height: 40px;
 }
 @media (hover: hover) {
   .btn--ghost:hover {
-    background-color: var(--c-surface-2);
+    background-color: color-mix(in srgb, var(--brand-navy) 7%, transparent);
+  }
+  [data-theme='dark'] .btn--ghost:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}
+/* Tertiary text action inside modals: quieter than a ghost button. */
+.btn--text {
+  background-color: transparent;
+  color: var(--c-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.9rem;
+  min-height: 40px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .btn--text:hover {
+    color: var(--c-ink);
+    text-decoration-color: currentColor;
+  }
+}
+/* Compact size for in-page controls (mode bar), keeps a 36px hit target. */
+.btn--sm {
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  border-radius: 11px;
+  gap: 0.4rem;
+}
+.btn--sm.btn--primary {
+  box-shadow: 0 4px 14px rgba(255, 111, 97, 0.32);
+}
+@media (hover: hover) {
+  .btn--sm.btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(255, 111, 97, 0.42);
   }
 }
 
@@ -536,68 +844,391 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 9999px;
-  color: var(--c-text);
+  color: var(--c-ink);
   background: transparent;
   border: 0;
   cursor: pointer;
-  transition: background-color 120ms ease;
+  transition: background-color 0.2s var(--ease-standard);
 }
 @media (hover: hover) {
   .icon-btn:hover {
-    background-color: var(--c-surface-2);
+    background-color: color-mix(in srgb, var(--brand-navy) 8%, transparent);
   }
 }
 .icon-btn:active {
-  background-color: var(--c-surface-2);
+  background-color: color-mix(in srgb, var(--brand-navy) 12%, transparent);
+}
+[data-theme='dark'] .icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme='dark'] .icon-btn:active {
+  background-color: rgba(255, 255, 255, 0.16);
 }
 
-.nav-link {
+/* Header wordmark image (light mode only — see Header.tsx for the dark-mode
+   text fallback). The source PNG (public/Worldle.png, 1795x590) carries a
+   symmetric transparent margin above/below the artwork (roughly 157px of its
+   590px height on each side, so the mark itself is centred), presumably a
+   fixed frame meant for reuse elsewhere. A fixed-height clipping window
+   crops that margin away instead of shrinking the whole canvas, so the
+   wordmark itself renders at the intended size rather than a fraction of it. */
+.header-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: 24px;
+}
+.header-logo__img {
+  height: 51px;
+  width: auto;
+  max-width: none;
+  display: block;
+}
+@media (min-width: 640px) {
+  .header-logo {
+    height: 34px;
+  }
+  .header-logo__img {
+    height: 73px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Theme toggle — compact animated light/dark switch                   */
+/* ------------------------------------------------------------------ */
+/* Sized for the existing 56px header: a 32px-tall control leaves 12px of
+   breathing room, comparable to the 40px icon buttons it sits beside.
+   Visibility (hidden below the sm nav breakpoint) is set by the utility
+   classes the caller passes in, same pattern as .icon-btn above — the
+   hamburger menu keeps handling theme switching below that breakpoint. */
+.theme-toggle {
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   border-radius: 9999px;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme-toggle:active .theme-toggle__track {
+  transform: scale(0.96);
+}
+.theme-toggle__track {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #e7edf3;
+  box-shadow:
+    inset 0 2px 5px rgba(13, 49, 90, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(13, 49, 90, 0.06);
+  transition:
+    background-color 0.3s var(--ease-standard),
+    box-shadow 0.3s var(--ease-standard),
+    transform 0.15s var(--ease-standard);
+}
+.theme-toggle[data-theme-state='dark'] .theme-toggle__track {
+  background: #0b1b30;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.theme-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-navy);
+  background: #ffffff;
+  box-shadow:
+    0 2px 4px rgba(13, 49, 90, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 2px rgba(13, 49, 90, 0.06);
+  /* The spring-like overshoot on transform (rather than a linear/ease-out
+     curve) is what gives the thumb its tactile feel without a JS spring
+     library — reduced-motion below flattens this to a near-instant snap. */
+  transition:
+    transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.3s var(--ease-standard),
+    color 0.3s var(--ease-standard);
+}
+.theme-toggle[data-theme-state='dark'] .theme-toggle__thumb {
+  background: #22375a;
+  color: #eef2f7;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.25);
+}
+/* Restrained switching feedback: a brief glow behind the thumb, not the
+   reference's expanding particle rings — plays once via onAnimationEnd. */
+.theme-toggle__glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-coral-end) 55%, transparent) 0%,
+    transparent 70%
+  );
+  animation: theme-toggle-glow 480ms var(--ease-out-quad);
+  pointer-events: none;
+}
+@keyframes theme-toggle-glow {
+  from {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__track,
+  .theme-toggle__thumb {
+    transition-duration: 1ms;
+  }
+  .theme-toggle__glow {
+    animation: none;
+    display: none;
+  }
+}
+
+/* Game-mode nav: text + a single shared underline indicator (Header.tsx
+   measures the active link and positions/sizes this one element), not a
+   pill per link. Padding stays generous purely for tap-target size — it is
+   never painted as a background, so it's invisible until you tap/hover. */
+.nav-link {
   padding: 0.35rem 0.75rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--c-muted);
   background: transparent;
   border: 0;
   cursor: pointer;
-  transition:
-    background-color 120ms ease,
-    color 120ms ease;
+  transition: color 150ms ease;
 }
 @media (hover: hover) {
   .nav-link:hover {
-    color: var(--c-text);
-    background-color: var(--c-surface-2);
+    color: var(--c-ink);
   }
 }
 .nav-link[aria-current='page'] {
-  color: var(--c-text);
-  background-color: var(--c-surface-2);
+  color: var(--c-ink);
+  font-weight: 600;
 }
 
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  text-align: left;
-  padding: 0.7rem 0.9rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--c-text);
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  min-height: 44px;
+.nav-underline {
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  height: 2.5px;
+  border-radius: 9999px;
+  background-color: var(--c-ink);
+  pointer-events: none;
+  transition:
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-@media (hover: hover) {
-  .menu-item:hover {
-    background-color: var(--c-surface-2);
+@media (prefers-reduced-motion: reduce) {
+  .nav-underline {
+    transition-duration: 1ms;
   }
 }
-.menu-item[aria-current='page'] {
+
+/* ------------------------------------------------------------------ */
+/* Navigation drawer — left-side sliding menu (replaces the old dropdown) */
+/* ------------------------------------------------------------------ */
+/* Full-viewport scrim behind the panel. Phones don't need it to be visible
+   (the panel itself covers the whole viewport there) but it stays mounted
+   and click-closeable at every width for a single, simple implementation. */
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(13, 49, 90, 0.45);
+  backdrop-filter: blur(4px);
+}
+[data-theme='dark'] .nav-drawer-backdrop {
+  background: rgba(3, 10, 20, 0.6);
+}
+.nav-drawer-backdrop--in {
+  animation: fade-in 320ms var(--ease-out-quad) both;
+}
+.nav-drawer-backdrop--out {
+  animation: fade-out 320ms var(--ease-out-quad) both;
+}
+@media (max-width: 639px) {
+  /* The panel already covers the full viewport at this width, so the tint
+     would only be visible for an instant at the drawer's own edges. */
+  .nav-drawer-backdrop {
+    background: transparent;
+    backdrop-filter: none;
+  }
+}
+
+@keyframes nav-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes nav-drawer-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 56;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  color: var(--c-secondary);
+  overflow: hidden;
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+.nav-drawer--in {
+  animation-name: nav-drawer-in;
+}
+.nav-drawer--out {
+  animation-name: nav-drawer-out;
+}
+@media (min-width: 640px) {
+  .nav-drawer {
+    width: min(390px, 90vw);
+    box-shadow: 16px 0 48px rgba(13, 49, 90, 0.16);
+  }
+  [data-theme='dark'] .nav-drawer {
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-drawer,
+  .nav-drawer-backdrop--in,
+  .nav-drawer-backdrop--out {
+    animation-duration: 1ms;
+  }
+}
+
+.nav-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 0.75rem 0.75rem 1rem;
+  border-bottom: 1px solid var(--c-divider);
+}
+/* Same crop technique as the header wordmark (see .header-logo): both PNGs
+   share identical transparent framing, just a smaller visible mark here so
+   it reads as menu branding rather than a second hero logo. */
+.nav-drawer__logo {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  height: 22px;
+}
+.nav-drawer__logo-img {
+  height: 47px;
+  width: auto;
+  max-width: none;
+  display: block;
+}
+
+.nav-drawer__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nav-drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  min-height: 52px;
+  text-align: left;
+  padding: 0.85rem 0.9rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--c-secondary);
+  background: transparent;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+}
+@media (hover: hover) {
+  .nav-drawer__item:hover {
+    background-color: var(--c-surface-2);
+    color: var(--c-ink);
+  }
+}
+.nav-drawer__item:active {
+  background-color: var(--c-surface-2);
+}
+.nav-drawer__item[aria-current='page'] {
+  background-color: var(--c-surface-2);
+  border-left-color: var(--brand-coral-end);
+  color: var(--c-ink);
   font-weight: 700;
+}
+.nav-drawer__item-icon {
+  display: inline-flex;
+  color: var(--c-muted);
+  flex-shrink: 0;
+}
+.nav-drawer__item[aria-current='page'] .nav-drawer__item-icon {
+  color: inherit;
+}
+
+.nav-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--c-divider);
+}
+.nav-drawer__footer-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-secondary);
 }
 
 .sr-only {
@@ -618,4 +1249,834 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
+}
+
+/* ------------------------------------------------------------------ */
+/* Country results — /results/:slug card (overlay + standalone page)    */
+/* ------------------------------------------------------------------ */
+.country-result {
+  text-align: center;
+}
+.country-result__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Flag assets are 512px transparent squares with a 3:2 flag across the
+   middle 66% (rows 88-424). object-fit: contain never crops; the negative
+   block margin only trims the transparent band so layout hugs the flag. */
+.country-result__flag {
+  --flag-w: clamp(96px, 30vw, 116px);
+  width: var(--flag-w);
+  height: var(--flag-w);
+  object-fit: contain;
+  margin-block: calc(var(--flag-w) * -0.17);
+  filter: drop-shadow(0 6px 14px rgba(13, 49, 90, 0.22));
+}
+[data-theme='dark'] .country-result__flag {
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
+}
+.country-result__flag-placeholder {
+  width: clamp(96px, 30vw, 124px);
+  aspect-ratio: 3 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1.5px dashed var(--c-border-strong);
+  background: var(--c-surface-2);
+  color: var(--c-muted);
+}
+.country-result__name {
+  margin-top: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 6.5vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+.country-result__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+.country-result__summary {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--c-secondary);
+}
+.country-result__summary--won {
+  color: var(--c-status-good-text);
+}
+.country-result__summary--lost {
+  color: var(--c-status-bad-text);
+}
+
+/* Always two columns, 320px included: Capital/Population, Continent/Currency,
+   then Languages spanning the full width. minmax(0, 1fr) lets long values
+   wrap inside their column instead of widening the card. */
+.country-result__facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.9rem 1rem;
+  margin: 1.35rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--c-divider);
+  text-align: left;
+}
+.country-result__fact {
+  min-width: 0;
+}
+.country-result__fact:last-child {
+  grid-column: 1 / -1;
+}
+.country-result__fact-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.country-result__fact-value {
+  margin: 0.15rem 0 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--c-ink);
+  /* Long single words (e.g. a 15-letter capital in a 320px column) hyphenate
+     where the browser can, and break as a last resort so the column never
+     widens the card. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+.country-result__fact-value--placeholder {
+  font-weight: 500;
+  color: var(--c-muted);
+}
+
+/* Narrow or short phones (320x568, 375x667; not 390x844): tighten the header region by
+   roughly 15-20% without changing the hierarchy — slightly smaller flag,
+   tighter gaps, and the card pulled up under the dialog's close row. */
+@media (max-width: 380px), (max-height: 700px) {
+  [role='dialog'] .country-result {
+    margin-top: -0.75rem;
+  }
+  .country-result__flag {
+    --flag-w: clamp(80px, 24vw, 100px);
+  }
+  .country-result__flag-placeholder {
+    width: clamp(80px, 24vw, 100px);
+  }
+  .country-result__name {
+    margin-top: 0.5rem;
+  }
+  .country-result__result {
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+  }
+  .country-result__facts {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+  }
+}
+
+.country-result__fun-fact {
+  margin-top: 1.1rem;
+  padding: 0.95rem 1.1rem 1.05rem;
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in srgb, var(--brand-sky) 28%, transparent);
+  background: color-mix(in srgb, var(--brand-mint) 32%, var(--c-surface));
+  text-align: left;
+}
+[data-theme='dark'] .country-result__fun-fact {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+.country-result__fun-fact-title {
+  color: var(--brand-coral-end);
+}
+[data-theme='dark'] .country-result__fun-fact-title {
+  color: var(--brand-coral-start);
+}
+.country-result__fun-fact-text {
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--c-secondary);
+}
+
+.country-result__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+}
+@media (min-width: 480px) {
+  .country-result__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.country-result__tertiary {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* Standalone page (direct visit with no completed game): the card is the
+   page, scrolling within main since body never scrolls. */
+.country-result-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+}
+.country-result-page__panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-modal);
+}
+@media (min-width: 640px) {
+  .country-result-page {
+    padding-top: 2rem;
+  }
+  .country-result-page__panel {
+    padding: 2rem 1.75rem;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Study tab: browse-all-countries index (/study)                      */
+/* ------------------------------------------------------------------ */
+
+.study-search {
+  margin-top: 1.25rem;
+}
+.study-search__label {
+  /* Visually hidden but present for assistive tech; the input's own
+     placeholder carries the visible hint, matching how other controls in
+     this app pair a visible affordance with a real accessible name. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.study-search__input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-control);
+  border: 1.5px solid var(--c-border);
+  background-color: var(--c-surface);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  transition:
+    border-color 0.15s var(--ease-standard),
+    box-shadow 0.15s var(--ease-standard);
+}
+.study-search__input::placeholder {
+  color: var(--c-muted);
+}
+.study-search__input:hover {
+  border-color: var(--c-border-strong);
+}
+/* Remove the native WebKit "x" clear-button/search decorations so the
+   control matches this app's own visual language instead of the browser's
+   default search-field chrome. */
+.study-search__input::-webkit-search-decoration,
+.study-search__input::-webkit-search-cancel-button,
+.study-search__input::-webkit-search-results-button,
+.study-search__input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+.study-status {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+
+.study-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 480px) {
+  .study-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 640px) {
+  .study-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+@media (min-width: 900px) {
+  .study-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1200px) {
+  .study-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.study-grid__item {
+  display: flex;
+}
+
+.study-tile {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 0.6rem;
+  min-height: 44px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.2s var(--ease-standard),
+    box-shadow 0.2s var(--ease-standard),
+    background-color 0.2s var(--ease-standard);
+}
+@media (hover: hover) {
+  .study-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+  }
+}
+.study-tile:active {
+  transform: translateY(0) scale(0.98);
+}
+.study-tile__flag {
+  width: 100%;
+  max-width: 72px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(13, 49, 90, 0.18));
+}
+[data-theme='dark'] .study-tile__flag {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+.study-tile__flag-placeholder {
+  width: 100%;
+  max-width: 72px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1.5px dashed var(--c-border-strong);
+  background: var(--c-surface-2);
+  color: var(--c-muted);
+}
+.study-tile__name {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ */
+/* Quiz setup (/quiz): Phase 1 — config selection only                 */
+/* ------------------------------------------------------------------ */
+
+/* The rounded surface grouping all four setup sections + summary + Start
+   Quiz — same glass/card language as .quiz-play__card (Flags gameplay) and
+   .study-tile, not a new visual system. The heading/intro text stays
+   outside it (in QuizScreen.tsx), separated by this card's own margin-top. */
+.quiz-setup-card {
+  margin-top: 1.75rem;
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
+}
+@media (min-width: 640px) {
+  .quiz-setup-card {
+    padding: 2rem 2.25rem;
+  }
+}
+/* First section sits flush under the card's own top padding — no doubled gap. */
+.quiz-setup-card > .quiz-section:first-child {
+  margin-top: 0;
+}
+
+.quiz-section {
+  margin-top: 1.5rem;
+}
+.quiz-section__title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--c-ink);
+  margin-bottom: 0.6rem;
+}
+
+.quiz-option-group {
+  display: grid;
+  gap: 0.65rem;
+}
+.quiz-option-group--grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.quiz-option-group--grid-3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 480px) {
+  .quiz-option-group--grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.quiz-option-group--row {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+}
+
+/* Country Pool only: Familiar + Explorer stay side by side on mobile, with
+   World Expert (the 3rd option) spanning the full row beneath them, rather
+   than sitting alone in a single column. Kept separate from
+   --grid-3 (Quiz Type's 6-option grid) so this span rule can never leak
+   into an unrelated section that happens to share the same column count. */
+.quiz-option-group--pool {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.quiz-option-group--pool > *:nth-child(3) {
+  grid-column: 1 / -1;
+}
+@media (min-width: 480px) {
+  .quiz-option-group--pool {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .quiz-option-group--pool > *:nth-child(3) {
+    grid-column: auto;
+  }
+}
+
+.quiz-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--radius-card);
+  border: 1.5px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.2s var(--ease-standard),
+    box-shadow 0.2s var(--ease-standard),
+    border-color 0.2s var(--ease-standard),
+    background-color 0.2s var(--ease-standard);
+}
+@media (hover: hover) {
+  .quiz-option:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lifted);
+  }
+}
+.quiz-option:active {
+  transform: translateY(0) scale(0.98);
+}
+.quiz-option--selected {
+  border-color: var(--brand-coral-end);
+  background: color-mix(in srgb, var(--brand-coral-end) 12%, var(--c-surface-glass));
+  box-shadow: var(--shadow-coral);
+}
+
+/* tile: icon-on-top, centered (Quiz Type) */
+.quiz-option--tile {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 0.6rem;
+}
+.quiz-option--tile .quiz-option__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-ink);
+}
+.quiz-option--tile.quiz-option--selected .quiz-option__icon {
+  color: var(--brand-coral-end);
+}
+.quiz-option--tile .quiz-option__text {
+  align-items: center;
+}
+
+/* card: label + description, left-aligned (Country Pool) */
+.quiz-option--card {
+  align-items: flex-start;
+}
+
+/* pill: compact, label-only (Answer Style, Question Count) */
+.quiz-option--pill {
+  justify-content: center;
+  text-align: center;
+  padding: 0.7rem 0.75rem;
+  border-radius: var(--radius-button);
+}
+
+.quiz-option__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.quiz-option__label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--c-ink);
+}
+.quiz-option__description {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--c-muted);
+}
+.quiz-summary {
+  margin-top: 1.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-control);
+  background: var(--c-surface-2);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.quiz-start {
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 1.05rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Flags quiz gameplay (/quiz/flags) + shared quiz results             */
+/* ------------------------------------------------------------------ */
+
+.quiz-play-page {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* The rounded gameplay surface — same glass/card language as .study-tile
+   and .quiz-option (translucent white in light mode, navy glass in dark),
+   not the bottom-sheet .modal-panel treatment, so it reads as a content
+   card rather than a modal. */
+.quiz-play__card {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1.25rem 1.75rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
+}
+@media (min-width: 640px) {
+  .quiz-play__card {
+    padding: 2rem 2.25rem 2.25rem;
+  }
+}
+
+.quiz-progress {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.quiz-progress__label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--c-secondary);
+  text-align: center;
+}
+.quiz-progress__bar {
+  margin-top: 0.4rem;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--c-surface-2);
+  overflow: hidden;
+}
+.quiz-progress__fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--brand-coral-start) 0%, var(--brand-coral-end) 100%);
+  transition: width 0.3s var(--ease-standard);
+}
+
+.quiz-play__question {
+  margin-top: 1rem;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--c-ink);
+}
+
+.quiz-play__flag {
+  --flag-w: clamp(160px, 55vw, 260px);
+  width: var(--flag-w);
+  height: var(--flag-w);
+  object-fit: contain;
+  margin-block: calc(var(--flag-w) * -0.17);
+  margin-top: calc(0.9rem + var(--flag-w) * -0.17);
+  filter: drop-shadow(0 8px 20px rgba(13, 49, 90, 0.22));
+}
+[data-theme='dark'] .quiz-play__flag {
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5));
+}
+.quiz-play__flag-placeholder {
+  width: clamp(160px, 55vw, 260px);
+  aspect-ratio: 3 / 2;
+  margin-top: 0.9rem;
+  border-radius: 12px;
+  border: 1.5px dashed var(--c-border-strong);
+  background: var(--c-surface-2);
+}
+
+.quiz-answers {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+  width: 100%;
+  /* Larger on mobile for clearer separation from the flag/question above;
+     the flag's own negative block-margin (trimming its PNG's transparent
+     frame, see .quiz-play__flag) collapses against this, so this needs to
+     be noticeably bigger than the visual gap it actually produces. */
+  margin-top: 4rem;
+}
+@media (min-width: 640px) {
+  .quiz-answers {
+    /* 1.25rem alone would collapse against the flag's own negative
+       block-margin trim into a small visual overlap at desktop's capped
+       flag-w (260px) — see .quiz-play__flag — so this needs to be larger
+       than it looks to still net out to a real, if modest, gap. */
+    margin-top: 3.25rem;
+  }
+}
+@media (min-width: 420px) {
+  .quiz-answers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.quiz-answer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-button);
+  border: 1.5px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-standard),
+    box-shadow 0.2s var(--ease-standard),
+    border-color 0.2s var(--ease-standard),
+    background-color 0.2s var(--ease-standard);
+}
+@media (hover: hover) {
+  .quiz-answer:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lifted);
+  }
+}
+.quiz-answer:disabled {
+  cursor: default;
+}
+.quiz-answer--correct {
+  border-color: var(--feedback-correct);
+  background: color-mix(in srgb, var(--feedback-correct) 16%, var(--c-surface-glass));
+  color: var(--c-status-good-text);
+}
+.quiz-answer--incorrect {
+  border-color: var(--feedback-absent);
+  background: color-mix(in srgb, var(--feedback-absent) 14%, var(--c-surface-glass));
+  color: var(--c-status-bad-text);
+}
+.quiz-answer__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.quiz-answer--correct .quiz-answer__icon {
+  color: var(--feedback-correct);
+}
+.quiz-answer--incorrect .quiz-answer__icon {
+  color: var(--feedback-absent);
+}
+
+.quiz-type-answer {
+  width: 100%;
+  /* See .quiz-answers above for why this needs to be noticeably larger
+     than the desired visual gap (the flag's negative block-margin trim
+     collapses against it). */
+  margin-top: 4rem;
+}
+@media (min-width: 640px) {
+  .quiz-type-answer {
+    /* See .quiz-answers above for the same margin-collapse reasoning. */
+    margin-top: 3.25rem;
+  }
+}
+.quiz-type-answer__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.quiz-type-answer__row {
+  display: flex;
+  gap: 0.5rem;
+}
+.quiz-type-answer__input {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-control);
+  border: 1.5px solid var(--c-border);
+  background-color: var(--c-surface);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+.quiz-type-answer__input:hover {
+  border-color: var(--c-border-strong);
+}
+.quiz-type-answer__input:disabled {
+  opacity: 0.7;
+}
+/* Subtle brand-blue focus ring instead of the site-wide coral
+   :focus-visible outline (index.css ":focus-visible") — that treatment
+   suits nav links/buttons but reads as too aggressive on a text field.
+   Scoped to this input only; every other control keeps the coral ring. */
+.quiz-type-answer__input:focus-visible {
+  outline: none;
+  border-color: var(--brand-sky);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-sky) 30%, transparent);
+}
+.quiz-type-answer__submit {
+  min-height: 48px;
+  flex-shrink: 0;
+}
+.quiz-type-answer__keyboard {
+  width: 100%;
+  margin-top: 1.25rem;
+}
+.quiz-type-answer__feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.quiz-type-answer__feedback--correct {
+  color: var(--c-status-good-text);
+}
+.quiz-type-answer__feedback--incorrect {
+  color: var(--c-status-bad-text);
+}
+
+.quiz-results {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+.quiz-results__score {
+  margin-top: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 2.5rem;
+  color: var(--c-ink);
+}
+.quiz-results__percent {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--c-muted);
+}
+.quiz-results__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.quiz-results__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 1.5rem;
 }

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "audit:countries": "tsx scripts/audit-countries.ts",
+    "audit:flags": "tsx scripts/audit-flags.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {

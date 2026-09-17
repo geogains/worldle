@@ -33,7 +33,7 @@ export function ArchiveScreen({ todayNumber }: { todayNumber: number }) {
 
       <button
         type="button"
-        className="mt-5 flex w-full items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-surface-2"
+        className="mt-5 flex w-full items-center justify-between rounded-2xl border border-[var(--c-surface-glass-border)] bg-[var(--c-surface-glass)] px-4 py-3 text-left shadow-[var(--shadow-soft)] backdrop-blur-md transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
         onClick={() => navigate(PATHS.daily)}
       >
         <span>
@@ -48,7 +48,10 @@ export function ArchiveScreen({ todayNumber }: { todayNumber: number }) {
           No previous puzzles yet. Today is the very first {branding.name}. Come back tomorrow!
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-divider rounded-xl border border-line" aria-label="Previous puzzles">
+        <ul
+          className="mt-4 divide-y divide-divider rounded-2xl border border-[var(--c-surface-glass-border)] bg-[var(--c-surface-glass)] shadow-[var(--shadow-soft)] backdrop-blur-md"
+          aria-label="Previous puzzles"
+        >
           {previous.map((n) => {
             const s = statusFor(n)
             return (
@@ -64,7 +67,7 @@ export function ArchiveScreen({ todayNumber }: { todayNumber: number }) {
                   </span>
                   <span
                     className={`text-[0.85rem] font-semibold ${
-                      s.tone === 'won' ? 'text-correct' : s.tone === 'lost' ? 'text-present' : 'text-muted'
+                      s.tone === 'won' ? 'text-status-good' : s.tone === 'lost' ? 'text-status-bad' : 'text-muted'
                     }`}
                   >
                     {s.text}

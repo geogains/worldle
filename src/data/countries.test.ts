@@ -13,9 +13,14 @@ import { auditCountries } from './audit'
 describe('country dataset', () => {
   const audit = auditCountries()
 
-  it('contains the 195-country set', () => {
-    expect(COUNTRIES.length).toBe(195)
-    expect(audit.totalCountries).toBe(195)
+  it('contains the 200-country set (195-country baseline + Taiwan + Kosovo + England + Scotland + Wales)', () => {
+    expect(COUNTRIES.length).toBe(200)
+    expect(audit.totalCountries).toBe(200)
+  })
+  it('includes Kosovo as a plain, unqualified, six-letter entry', () => {
+    expect(findCountryById('kosovo')).toMatchObject({ name: 'Kosovo', normalized: 'KOSOVO', length: 6 })
+    expect(findCountryByNormalized('KOSOVO')?.name).toBe('Kosovo')
+    expect(ANSWER_POOL.some((c) => c.id === 'kosovo')).toBe(true)
   })
   it('has no duplicate names, ids or normalization collisions', () => {
     expect(audit.duplicateNames).toEqual([])
@@ -32,6 +37,38 @@ describe('country dataset', () => {
     expect(findCountryById('chad')).toMatchObject({ normalized: 'CHAD', length: 4 })
     expect(findCountryById('dr-congo')).toMatchObject({ normalized: 'DRCONGO', length: 7 })
     expect(findCountryById('congo')).toMatchObject({ normalized: 'CONGO', length: 5 })
+  })
+  it('includes Taiwan as a plain, unqualified, six-letter entry', () => {
+    expect(findCountryById('taiwan')).toMatchObject({ name: 'Taiwan', normalized: 'TAIWAN', length: 6 })
+    expect(findCountryByNormalized('TAIWAN')?.name).toBe('Taiwan')
+    expect(ANSWER_POOL.some((c) => c.id === 'taiwan')).toBe(true)
+  })
+  it('includes England, Scotland and Wales as plain, unqualified entries, each resolving uniquely', () => {
+    expect(findCountryById('england')).toMatchObject({ name: 'England', normalized: 'ENGLAND', length: 7 })
+    expect(findCountryById('scotland')).toMatchObject({ name: 'Scotland', normalized: 'SCOTLAND', length: 8 })
+    expect(findCountryById('wales')).toMatchObject({ name: 'Wales', normalized: 'WALES', length: 5 })
+    expect(findCountryByNormalized('ENGLAND')?.name).toBe('England')
+    expect(findCountryByNormalized('SCOTLAND')?.name).toBe('Scotland')
+    expect(findCountryByNormalized('WALES')?.name).toBe('Wales')
+    expect(ANSWER_POOL.some((c) => c.id === 'england')).toBe(true)
+    expect(ANSWER_POOL.some((c) => c.id === 'scotland')).toBe(true)
+    expect(ANSWER_POOL.some((c) => c.id === 'wales')).toBe(true)
+  })
+  it('Ireland is unchanged and remains a distinct entry from England/Scotland/Wales', () => {
+    expect(findCountryById('ireland')).toMatchObject({ name: 'Ireland', normalized: 'IRELAND', length: 7 })
+    expect(findCountryByNormalized('IRELAND')?.name).toBe('Ireland')
+  })
+  it('United Kingdom remains a separate, non-playable entry (normalized length > 10) and is not merged with England/Scotland/Wales', () => {
+    const uk = findCountryById('united-kingdom')!
+    expect(uk).toMatchObject({ name: 'United Kingdom', normalized: 'UNITEDKINGDOM', length: 13 })
+    expect(uk.length).toBeGreaterThan(MAX_ANSWER_LENGTH)
+    expect(ANSWER_POOL.some((c) => c.id === 'united-kingdom')).toBe(false)
+  })
+  it('"Great Britain" and "Northern Ireland" do not exist as canonical entries', () => {
+    expect(findCountryByNormalized('GREATBRITAIN')).toBeUndefined()
+    expect(findCountryByNormalized('NORTHERNIRELAND')).toBeUndefined()
+    expect(findCountryById('great-britain')).toBeUndefined()
+    expect(findCountryById('northern-ireland')).toBeUndefined()
   })
   it('every answer-pool entry is within 4–10 letters', () => {
     for (const c of ANSWER_POOL) {

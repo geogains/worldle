@@ -27,8 +27,8 @@ export interface StatsModalProps {
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-[2rem] leading-none font-medium tabular-nums">{value}</span>
-      <span className="mt-1 text-center text-[0.72rem] leading-tight">{label}</span>
+      <span className="font-display text-[2rem] leading-none font-semibold tabular-nums text-ink">{value}</span>
+      <span className="mt-1 text-center text-[0.72rem] leading-tight text-secondary">{label}</span>
     </div>
   )
 }

@@ -17,6 +17,7 @@ export const KEYS = {
   prefs: 'prefs',
   practice: 'practice',
   archive: 'archive',
+  lastResult: 'lastResult',
 } as const
 
 /* ------------------------------ shared ------------------------------ */
@@ -118,6 +119,43 @@ export function saveArchiveGame(puzzleNumber: number, game: SavedGame): void {
   const archive = loadArchive()
   archive[String(puzzleNumber)] = game
   writeJSON(KEYS.archive, archive)
+}
+
+/* ------------------------------ last result ------------------------------ */
+
+export type ResultSource = 'daily' | 'practice' | 'archive'
+
+const RESULT_SOURCES: readonly ResultSource[] = ['daily', 'practice', 'archive']
+
+/**
+ * Pointer to the completed game the player most recently carried into a
+ * `/results/:slug` page. Not a copy of the game — the practice/daily/archive
+ * stores stay the single source of truth for guesses — just enough to know
+ * *which* of them to show when the same country was completed in more than
+ * one mode, and to survive a refresh of the results URL.
+ */
+export interface SavedResultPointer {
+  source: ResultSource
+  countryId: string
+  puzzleNumber: number | null
+  at: number
+}
+
+export function parseResultPointer(raw: unknown): SavedResultPointer | null {
+  if (!isRecord(raw)) return null
+  if (typeof raw.source !== 'string' || !(RESULT_SOURCES as readonly string[]).includes(raw.source)) return null
+  if (typeof raw.countryId !== 'string' || raw.countryId.length === 0) return null
+  const puzzleNumber = isNonNegativeInt(raw.puzzleNumber) && raw.puzzleNumber > 0 ? raw.puzzleNumber : null
+  const at = isNonNegativeInt(raw.at) ? raw.at : 0
+  return { source: raw.source as ResultSource, countryId: raw.countryId, puzzleNumber, at }
+}
+
+export function loadResultPointer(): SavedResultPointer | null {
+  return readJSON(KEYS.lastResult, parseResultPointer)
+}
+
+export function saveResultPointer(value: SavedResultPointer): void {
+  writeJSON(KEYS.lastResult, value)
 }
 
 /* ------------------------------ stats ------------------------------ */

@@ -6,7 +6,7 @@ export function Countdown() {
   const { hours, minutes, seconds } = splitCountdown(ms)
   return (
     <time
-      className="text-[1.9rem] font-medium tabular-nums"
+      className="font-display text-[1.9rem] font-semibold tabular-nums text-ink"
       aria-label={`${hours} hours, ${minutes} minutes and ${seconds} seconds`}
     >
       {formatCountdown(ms)}

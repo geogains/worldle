@@ -24,8 +24,8 @@ export function Distribution({ distribution, highlightAttempt }: DistributionPro
             <span className="w-3 text-right font-semibold tabular-nums">{i + 1}</span>
             <div className="flex-1">
               <div
-                className={`flex h-5 min-w-[1.25rem] items-center justify-end rounded-sm pr-1.5 text-[0.8rem] font-bold text-on-status transition-[width] duration-300 ${
-                  highlighted ? 'bg-correct' : 'bg-absent'
+                className={`flex h-5 min-w-[1.25rem] items-center justify-end rounded-sm pr-1.5 text-[0.8rem] font-bold transition-[width] duration-300 ${
+                  highlighted ? 'bg-correct text-on-correct' : 'bg-absent text-on-absent'
                 }`}
                 style={{ width: `${width}%` }}
               >

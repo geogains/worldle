@@ -19,7 +19,7 @@ export const branding = {
   /** Canonical site URL. Update when the production domain is known. */
   siteUrl: 'https://daily-worldle.vercel.app',
   /** Browser theme colour (light mode). */
-  themeColor: '#f7f6f2',
+  themeColor: '#38bdf8',
   /** localStorage namespace. Changing this abandons all existing player data. */
   storageNamespace: 'daily-worldle',
 } as const

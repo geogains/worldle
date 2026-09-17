@@ -8,10 +8,12 @@ export interface ShareButtonProps {
   answer: string
   won: boolean
   label?: string
+  /** Visual weight: coral primary (default) or white/navy secondary. */
+  variant?: 'primary' | 'secondary'
   className?: string
 }
 
-export function ShareButton({ puzzleNumber, guesses, answer, won, label, className }: ShareButtonProps) {
+export function ShareButton({ puzzleNumber, guesses, answer, won, label, variant = 'primary', className }: ShareButtonProps) {
   const { showToast } = useToast()
   const onShare = async () => {
     const text = buildShareText({ puzzleNumber: puzzleNumber ?? null, guesses, answer, won, label })
@@ -20,7 +22,7 @@ export function ShareButton({ puzzleNumber, guesses, answer, won, label, classNa
     else if (outcome === 'failed') showToast("Couldn't share results")
   }
   return (
-    <button type="button" className={`btn btn--primary ${className ?? ''}`} onClick={onShare}>
+    <button type="button" className={`btn btn--${variant} ${className ?? ''}`} onClick={onShare}>
       Share
       <ShareIcon size={18} />
     </button>

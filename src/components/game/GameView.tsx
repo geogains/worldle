@@ -18,9 +18,9 @@ export interface GameViewProps {
   answer: Country
   initialGuesses?: readonly string[]
   initialCurrent?: string
-  /** Small label above the board, e.g. "Daily Worldle #12 · 26 Sep 2026". */
+  /** Status group of the mode bar above the board, e.g. "Daily Worldle #12 · 26 Sep 2026". */
   label: ReactNode
-  /** Action shown next to the label once the game is complete. */
+  /** Action group shown in the mode bar once the game is complete. */
   completedAction?: ReactNode
   onPersist?: (snapshot: { guesses: string[]; current: string; status: GameStatus }) => void
   onComplete?: (completion: GameCompletion) => void
@@ -119,28 +119,30 @@ export function GameView(props: GameViewProps) {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="mx-auto flex h-9 w-full max-w-[500px] shrink-0 items-center justify-between px-3 text-[0.8rem] text-muted">
-        <span className="truncate">{label}</span>
-        {complete && completedAction}
+      <div className="mode-bar shrink-0">
+        <div className="mode-bar__status">{label}</div>
+        {complete && completedAction && <div className="mode-bar__actions">{completedAction}</div>}
       </div>
 
-      <div className="min-h-0 flex-1 px-2 py-1.5">
-        <Board
-          columns={columns}
-          guesses={state.guesses}
-          evaluations={evaluations}
-          current={state.input}
-          revealingRow={revealingRow}
-          celebratingRow={celebratingRow}
-          shakeToken={state.shakeToken}
-          popIndex={state.popIndex}
-          timing={timing}
-          active={state.phase === 'active'}
-        />
-      </div>
+      <div className="game-surface mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col">
+        <div className="min-h-0 flex-1">
+          <Board
+            columns={columns}
+            guesses={state.guesses}
+            evaluations={evaluations}
+            current={state.input}
+            revealingRow={revealingRow}
+            celebratingRow={celebratingRow}
+            shakeToken={state.shakeToken}
+            popIndex={state.popIndex}
+            timing={timing}
+            active={state.phase === 'active'}
+          />
+        </div>
 
-      <div className="shrink-0 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-        <Keyboard keyStates={keyStates} onKey={onKey} />
+        <div className="shrink-0 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <Keyboard keyStates={keyStates} onKey={onKey} />
+        </div>
       </div>
 
       <div className="sr-only" aria-live="polite" aria-atomic="true">

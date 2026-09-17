@@ -16,9 +16,13 @@ import { getDailyAnswer } from './lib/daily/select'
 import { loadDaily } from './lib/storage/schema'
 import { ArchiveGameScreen } from './screens/ArchiveGameScreen'
 import { ArchiveScreen } from './screens/ArchiveScreen'
+import { CountryResultScreen } from './screens/CountryResultScreen'
 import { DailyScreen } from './screens/DailyScreen'
 import { NotFoundScreen } from './screens/NotFoundScreen'
 import { PracticeScreen } from './screens/PracticeScreen'
+import { QuizPlayScreen } from './screens/QuizPlayScreen'
+import { QuizScreen } from './screens/QuizScreen'
+import { StudyScreen } from './screens/StudyScreen'
 
 function initialDailySnapshot(todayNumber: number): DailySnapshot | null {
   const saved = loadDaily()
@@ -60,7 +64,7 @@ function AppShell() {
   let screen: React.ReactNode
   switch (route.name) {
     case 'daily':
-      screen = <DailyScreen todayNumber={todayNumber} onSnapshot={onSnapshot} onShowResults={openStats} />
+      screen = <DailyScreen todayNumber={todayNumber} onSnapshot={onSnapshot} />
       break
     case 'practice':
       screen = <PracticeScreen />
@@ -71,12 +75,24 @@ function AppShell() {
     case 'archive-game':
       screen = <ArchiveGameScreen puzzleNumber={route.puzzleNumber} todayNumber={todayNumber} />
       break
+    case 'study':
+      screen = <StudyScreen />
+      break
+    case 'quiz':
+      screen = <QuizScreen />
+      break
+    case 'quiz-play':
+      screen = <QuizPlayScreen key={route.mode} mode={route.mode} />
+      break
+    case 'results':
+      screen = <CountryResultScreen key={route.countrySlug} countrySlug={route.countrySlug} onOpenStats={openStats} />
+      break
     default:
       screen = <NotFoundScreen />
   }
 
   return (
-    <div className="app-shell bg-bg text-ink">
+    <div className="app-shell text-secondary">
       <Header onOpenHelp={() => setHelpOpen(true)} onOpenStats={openStats} />
       <main className="relative flex min-h-0 flex-1 flex-col">{screen}</main>
       <ToastStack />

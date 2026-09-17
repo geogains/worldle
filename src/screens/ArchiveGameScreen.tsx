@@ -71,11 +71,7 @@ function ArchiveGame({ puzzleNumber }: { puzzleNumber: number }) {
           </>
         }
         completedAction={
-          <button
-            type="button"
-            className="btn btn--ghost min-h-0 px-2 py-1 text-[0.8rem] font-semibold"
-            onClick={() => setResultsOpen(true)}
-          >
+          <button type="button" className="btn btn--secondary btn--sm" onClick={() => setResultsOpen(true)}>
             Results
           </button>
         }
@@ -96,15 +92,15 @@ function ArchiveGame({ puzzleNumber }: { puzzleNumber: number }) {
           won={restoredCompletion.status === 'won'}
           shareLabel={`${branding.name} Archive`}
           sharePuzzleNumber={puzzleNumber}
-          actions={
-            <>
-              <button type="button" className="btn btn--primary" onClick={() => navigate(PATHS.archive)} data-autofocus>
-                Back to archive
-              </button>
-              <button type="button" className="btn btn--ghost" onClick={() => navigate(PATHS.daily)}>
-                Today's puzzle
-              </button>
-            </>
+          primaryAction={
+            <button type="button" className="btn btn--primary" onClick={() => navigate(PATHS.archive)} data-autofocus>
+              Back to archive
+            </button>
+          }
+          tertiaryAction={
+            <button type="button" className="btn btn--text" onClick={() => navigate(PATHS.daily)}>
+              Today's puzzle
+            </button>
           }
         />
       )}

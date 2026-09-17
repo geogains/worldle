@@ -95,7 +95,7 @@ export function Modal({ open, onClose, title, children, hideTitle, maxWidth = 'm
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-40 flex items-end justify-center bg-[var(--c-backdrop)] p-0 sm:items-center sm:p-4 ${
+      className={`modal-scrim fixed inset-0 z-40 flex items-end justify-center p-0 sm:items-center sm:p-4 ${
         closing ? 'anim-fade-out' : 'anim-fade-in'
       }`}
       onMouseDown={(e) => {
@@ -109,19 +109,12 @@ export function Modal({ open, onClose, title, children, hideTitle, maxWidth = 'm
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={onKeyDown}
-        className={`relative w-full ${maxWidth} max-h-[92dvh] overflow-y-auto rounded-t-2xl bg-surface px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_8px_40px_rgba(0,0,0,0.18)] sm:rounded-2xl sm:px-7 sm:py-7 ${
+        className={`modal-panel relative w-full ${maxWidth} max-h-[92dvh] overflow-y-auto px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7 sm:py-7 ${
           closing ? 'anim-modal-out' : 'anim-modal-in'
         }`}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
-          <h2
-            id={titleId}
-            className={
-              hideTitle
-                ? 'sr-only'
-                : 'text-[0.8rem] font-bold tracking-[0.12em] text-ink uppercase'
-            }
-          >
+          <h2 id={titleId} className={hideTitle ? 'sr-only' : 'eyebrow'}>
             {title}
           </h2>
           <button

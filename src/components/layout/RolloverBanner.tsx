@@ -3,7 +3,7 @@ import { branding } from '../../config/branding'
 export function RolloverBanner({ puzzleNumber, onPlay }: { puzzleNumber: number; onPlay: () => void }) {
   return (
     <div
-      className="anim-fade-in absolute top-2 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-[440px] -translate-x-1/2 items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-[0_6px_24px_rgba(0,0,0,0.12)]"
+      className="anim-fade-in absolute top-2 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-[440px] -translate-x-1/2 items-center justify-between gap-3 rounded-2xl border border-[var(--c-surface-glass-border)] bg-[var(--c-surface-glass-strong)] px-4 py-2.5 shadow-[var(--shadow-lifted)] backdrop-blur-md"
       role="status"
     >
       <span className="text-[0.9rem] font-semibold">

@@ -6,10 +6,11 @@ export interface PostGameSlotProps {
 }
 
 /**
- * Extension point for V2 post-game content (country information card,
- * promotional banner). Rendered inside the results modal once a game is
- * complete, i.e. only after the answer is known. Intentionally renders
- * nothing in V1 so no empty space is reserved.
+ * Extension point for post-game content inside the Statistics and Archive
+ * results modals (e.g. a promotional banner). The country information card
+ * that this slot originally reserved space for now lives on its own route —
+ * see screens/CountryResultScreen.tsx and components/results/ — so this
+ * intentionally still renders nothing.
  */
 export function PostGameSlot(_props: PostGameSlotProps) {
   return null
