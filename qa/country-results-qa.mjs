@@ -74,7 +74,7 @@ const dialog = (p) => p.getByRole('dialog', { name: /tanzania results/i })
   // facts render, not "Coming soon" placeholders.
   check('real facts render, no placeholders', (await d.getByText('Coming soon', { exact: true }).count()) === 0)
   check('capital renders', await d.getByText('Dodoma').isVisible())
-  check('population renders as the plain formatted value only', await d.getByText('68,600,000', { exact: true }).isVisible())
+  check('population renders as the plain formatted value only', await d.getByText('69 million', { exact: true }).isVisible())
   check('population year is never rendered', (await d.getByText(/estimate as of|2026/i).count()) === 0)
   check('continent renders', await d.getByText('Africa', { exact: true }).isVisible())
   check('currency renders name+code+symbol', await d.getByText('Tanzanian Shilling (TZS) · TSh').isVisible())
@@ -189,7 +189,29 @@ for (const theme of ['light', 'dark']) {
     await noHorizontalOverflow(p, `${theme} ${w}`)
     const panel = await d.boundingBox()
     check(`${theme} ${w}: card within viewport width`, panel && panel.x >= 0 && panel.x + panel.width <= w + 0.5, JSON.stringify(panel))
-    if (w >= 1280) check(`${theme} ${w}: desktop card <= 640px`, panel.width <= 640 && panel.width >= 500, `${panel.width}px`)
+    const radius = await d.evaluate((el) => parseFloat(getComputedStyle(el).borderTopLeftRadius))
+    check(`${theme} ${w}: rounded corners visible (radius ${radius}px)`, radius > 0)
+    if (w < 640) {
+      // Near-full-viewport modal CARD, not an edge-to-edge full-screen page:
+      // a small (~8px) backdrop margin stays visible around every side.
+      check(`${theme} ${w}: small visible backdrop margin on all sides (not edge-to-edge)`,
+        panel.x > 2 && panel.x < 14 && panel.y > 2 && panel.y < 14 && (w - (panel.x + panel.width)) > 2 && (h - (panel.y + panel.height)) > 2,
+        JSON.stringify({ panel, w, h }))
+      check(`${theme} ${w}: card occupies nearly the full viewport (width)`, panel.width >= w - 20, `${panel.width}px of ${w}px`)
+      const fits = await d.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)
+      // Section 10: 375x667/390x844/430x932 must fit with no scrolling;
+      // 320x568 is below that documented floor and may need the
+      // overflow-y:auto fallback in .modal-panel--result (index.css).
+      if ([375, 390, 430].includes(w)) check(`${theme} ${w}: full result fits without vertical scrolling`, fits)
+    } else {
+      // Classic centered popup: constrained width, real backdrop margin,
+      // and NOT stretched to near-full viewport height (content-sized).
+      check(`${theme} ${w}: desktop modal is constrained width, not full viewport`, panel.width <= 640 && panel.width >= 400, `${panel.width}px`)
+      check(`${theme} ${w}: desktop modal centered with real backdrop margin`, panel.x > 100 && (w - (panel.x + panel.width)) > 100, JSON.stringify(panel))
+      check(`${theme} ${w}: desktop modal not stretched to near-full viewport height`, panel.height < h - 80, `${panel.height}px of ${h}px`)
+    }
+    check(`${theme} ${w}: "Back to today's puzzle" is gone, no replacement CTA in its place`,
+      (await d.getByText("Back to today's puzzle").count()) === 0 && (await d.locator('.country-result__tertiary').count()) === 0)
     const cta = d.getByRole('button', { name: 'Play again' })
     await cta.scrollIntoViewIfNeeded()
     const cb = await cta.boundingBox()
@@ -364,6 +386,35 @@ for (const theme of ['light', 'dark']) {
   await noHorizontalOverflow(p, 'standalone stress 320')
   await shot(p, 'cr-standalone-stress-320')
   await c.close()
+}
+
+// G. Real long-content countries (not a DOM-injected fixture): Montenegro
+// (10-letter name, near the max playable length; 5 official languages —
+// the longest languages list in the dataset) and Congo (long currency name
+// "Central African CFA Franc"), each completed via Practice.
+const montenegro = { [KEY('practice')]: JSON.stringify({ answerId: 'montenegro', previousAnswerId: null, guesses: ['MONTENEGRO'], current: '', status: 'won', updatedAt: 1 }) }
+const congo = { [KEY('practice')]: JSON.stringify({ answerId: 'congo', previousAnswerId: null, guesses: ['CONGO'], current: '', status: 'won', updatedAt: 1 }) }
+for (const theme of ['light', 'dark']) {
+  for (const [slug, storage, expectLang, expectCurrency] of [
+    ['montenegro', montenegro, 'Montenegrin, Serbian, Bosnian, Albanian, Croatian', null],
+    ['congo', congo, null, 'Central African CFA Franc (XAF) · FCFA'],
+  ]) {
+    const { c, p } = await ctx({ viewport: { width: 390, height: 844 } }, { ...prefs(theme), ...storage })
+    await p.goto(`${BASE}/results/${slug}`); await p.waitForTimeout(500)
+    const d = p.getByRole('dialog', { name: new RegExp(`${slug} results`, 'i') })
+    check(`${theme} ${slug}: results dialog open`, await d.isVisible())
+    if (expectLang) check(`${theme} ${slug}: long languages list renders in full`, await d.getByText(expectLang).isVisible())
+    if (expectCurrency) check(`${theme} ${slug}: long currency name renders, code+symbol preserved`, await d.getByText(expectCurrency).isVisible())
+    await noHorizontalOverflow(p, `${theme} ${slug} 390`)
+    const fits = await d.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)
+    check(`${theme} ${slug} 390: fits without vertical scrolling`, fits)
+    check(`${theme} ${slug}: fact grid stays two columns`, (await d.locator('.country-result__facts').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)) === 2)
+    check(`${theme} ${slug}: Play again visible`, await d.getByRole('button', { name: 'Play again' }).isVisible())
+    check(`${theme} ${slug}: Share visible`, await d.getByRole('button', { name: /share/i }).isVisible())
+    check(`${theme} ${slug}: Close visible`, await d.getByRole('button', { name: 'Close' }).isVisible())
+    await shot(p, `cr-longcontent-${slug}-${theme}-390x844`)
+    await c.close()
+  }
 }
 
 await browser.close()

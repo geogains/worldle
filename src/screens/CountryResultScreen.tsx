@@ -4,6 +4,7 @@ import { ShareButton } from '../components/game/ShareButton'
 import { CountryResultCard } from '../components/results/CountryResultCard'
 import { CountryResultOverlay } from '../components/results/CountryResultOverlay'
 import { branding } from '../config/branding'
+import { adjacentCountries } from '../data/countries'
 import { getCountryDetails, type CountryDetails } from '../data/countryDetails'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useRouter } from '../hooks/useRouter'
@@ -118,11 +119,8 @@ function CompletedGameResults({
           Play again
         </button>
       )
-      tertiaryAction = (
-        <button type="button" className="btn btn--text" onClick={() => navigate(PATHS.daily)}>
-          Back to today's puzzle
-        </button>
-      )
+      // No tertiary action here — see the fullscreen result's compact
+      // hierarchy (flag, name, badge, message, facts, fun fact, actions).
       break
     case 'daily':
       primaryAction = (
@@ -196,6 +194,11 @@ function CompletedGameResults({
 
 function StandaloneCountryPage({ details }: { details: CountryDetails }) {
   const { navigate } = useRouter()
+  // Same canonical, alphabetically-ordered COUNTRIES collection the Study
+  // grid renders from — Previous/Next can never drift out of sync with it.
+  // Null only for a country with no results page (details wouldn't have
+  // resolved either), so this is effectively always present here.
+  const nav = useMemo(() => adjacentCountries(details.slug), [details.slug])
   return (
     <div className="country-result-page">
       <div className="country-result-page__panel modal-panel">
@@ -203,6 +206,16 @@ function StandaloneCountryPage({ details }: { details: CountryDetails }) {
           details={details}
           context={null}
           headingLevel="h1"
+          navigation={
+            nav
+              ? {
+                  previousName: nav.previous.name,
+                  nextName: nav.next.name,
+                  onPrevious: () => navigate(PATHS.results(nav.previous.id)),
+                  onNext: () => navigate(PATHS.results(nav.next.id)),
+                }
+              : undefined
+          }
           primaryAction={
             <button type="button" className="btn btn--primary" onClick={() => navigate(PATHS.quiz)}>
               Quiz

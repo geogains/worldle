@@ -74,7 +74,13 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
 
   return (
     <header className="relative z-30 bg-[var(--c-surface-glass-strong)] shadow-[0_2px_12px_rgba(13,49,90,0.1)] backdrop-blur-md">
-      <div className="mx-auto flex h-[56px] max-w-[1000px] items-center px-2 sm:px-4">
+      {/* Row height grew from the original 56px (60px mobile / 68px desktop)
+          purely to give the logo's own crop window (30px mobile / 42px
+          desktop — see .header-logo) more vertical breathing room; every
+          child is still centered by this same flex row, so the increase
+          benefits all of them equally rather than needing any per-element
+          nudge. */}
+      <div className="mx-auto flex h-[60px] max-w-[1000px] items-center px-2 sm:h-[68px] sm:px-4">
         {/* Left: menu trigger (mobile) / nav (desktop). The trigger opens the
             NavigationDrawer, which owns its own focus trap, Escape handling
             and focus restoration — it isn't reachable by Tab while the
@@ -132,13 +138,19 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
             usePrefs — no separate theme state. */}
         <button
           type="button"
-          className="shrink-0 rounded px-2"
+          // inline-flex + items-center: without its own flex context the
+          // button centered .header-logo using ordinary line-height-driven
+          // inline layout, which left a small (~3.5px) top-biased offset
+          // instead of true vertical centering — most noticeable once the
+          // logo's own clipping window grew taller. A real flex container
+          // centers it exactly, matching the icon buttons beside it.
+          className="inline-flex shrink-0 items-center rounded px-2"
           onClick={() => go(PATHS.daily)}
           aria-label={`${branding.name} home`}
         >
           <span className="header-logo">
             <img
-              src={resolvedTheme === 'dark' ? '/Worldle-white.png' : '/Worldle.png'}
+              src={resolvedTheme === 'dark' ? '/Worldle-white1.png' : '/Worldle-logo.png'}
               alt={branding.name}
               className="header-logo__img"
             />

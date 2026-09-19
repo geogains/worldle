@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import App from '../App'
 import { EPOCH_UTC } from '../lib/daily/date'
 import { storageKey } from '../lib/storage/storage'
@@ -75,6 +75,39 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(rows[3]).not.toHaveTextContent(/[A-Z]/)
     // Nothing was written back to the practice store by merely viewing it.
     expect(JSON.parse(window.localStorage.getItem(storageKey('practice')) ?? '{}')).toEqual(completedPractice)
+  })
+
+  it('result modal redesign: near-full-viewport card on mobile / classic centered popup on desktop, keeps the hierarchy, and drops "Back to today\'s puzzle" with no replacement', () => {
+    set('practice', completedPractice)
+    renderAt('/results/tanzania')
+    const dialog = screen.getByRole('dialog', { name: /tanzania results/i })
+
+    // Uses Modal's `result` variant: near-full-viewport card below 640px
+    // (visible backdrop margin, full rounded corners via .modal-panel--result),
+    // classic centered/constrained popup at/above it (sm:h-auto, sm:max-h-[92dvh]).
+    expect(dialog).toHaveClass('modal-panel--result')
+    expect(dialog).toHaveClass('w-[calc(100vw-16px)]')
+    expect(dialog).toHaveClass('max-w-[600px]')
+    expect(dialog).toHaveClass('sm:h-auto')
+    expect(dialog).toHaveClass('sm:max-h-[92dvh]')
+
+    // Hierarchy intact: flag, name, mode badge, result message, facts,
+    // fun fact, Play again, Share — in that DOM order.
+    const headerEls = Array.from(dialog.querySelectorAll('img, h3, .eyebrow--pill, .country-result__summary'))
+    expect(headerEls.map((el) => el.tagName.toLowerCase())).toEqual(['img', 'h3', 'span', 'p'])
+    expect(within(dialog).getByRole('img', { name: 'Flag of Tanzania' })).toBeInTheDocument()
+    expect(within(dialog).getByRole('heading', { name: 'Tanzania' })).toBeInTheDocument()
+    expect(within(dialog).getByText('Practice')).toBeInTheDocument()
+    expect(within(dialog).getByText('Solved in 3/6')).toBeInTheDocument()
+    expect(dialog.querySelector('.country-result__facts')).toBeInTheDocument()
+    expect(dialog.querySelector('.country-result__fun-fact')).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /play again/i })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /share/i })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /^close$/i })).toBeInTheDocument()
+
+    // The removed CTA, with no replacement in its place.
+    expect(within(dialog).queryByRole('button', { name: /back to today's puzzle/i })).not.toBeInTheDocument()
+    expect(dialog.querySelector('.country-result__tertiary')).not.toBeInTheDocument()
   })
 
   it('closes with Escape without leaving the route, and the Results button reopens the card', () => {
@@ -238,5 +271,85 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /today's puzzle/i }))
     expect(window.location.pathname).toBe('/')
+  })
+
+  describe('Study Previous/Next country navigation', () => {
+    const cardOf = (name: string) => within(screen.getByRole('heading', { level: 1, name }).closest('.country-result') as HTMLElement)
+
+    it('resolves to the immediate alphabetical neighbours for a middle country (Algeria)', () => {
+      renderAt('/results/algeria')
+      const card = cardOf('Algeria')
+      expect(card.getByRole('button', { name: 'Previous country: Albania' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Next country: Andorra' })).toBeInTheDocument()
+    })
+
+    it('resolves Andorra’s neighbours to Algeria and Angola', () => {
+      renderAt('/results/andorra')
+      const card = cardOf('Andorra')
+      expect(card.getByRole('button', { name: 'Previous country: Algeria' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Next country: Angola' })).toBeInTheDocument()
+    })
+
+    it('loops Previous from the first Study country (Afghanistan) to the last (Zimbabwe), Next to the second (Albania)', () => {
+      renderAt('/results/afghanistan')
+      const card = cardOf('Afghanistan')
+      expect(card.getByRole('button', { name: 'Previous country: Zimbabwe' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Next country: Albania' })).toBeInTheDocument()
+    })
+
+    it('loops Next from the last Study country (Zimbabwe) to the first (Afghanistan), Previous to the penultimate (Zambia)', () => {
+      renderAt('/results/zimbabwe')
+      const card = cardOf('Zimbabwe')
+      expect(card.getByRole('button', { name: 'Previous country: Zambia' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Next country: Afghanistan' })).toBeInTheDocument()
+    })
+
+    it('Next performs a real route navigation (URL, content, title, CTAs, neighbour labels all update) and pushes browser history', () => {
+      renderAt('/results/algeria')
+      expect(window.location.pathname).toBe('/results/algeria')
+      const lengthBefore = window.history.length
+
+      fireEvent.click(cardOf('Algeria').getByRole('button', { name: 'Next country: Andorra' }))
+      expect(window.location.pathname).toBe('/results/andorra')
+      expect(document.title).toBe('Daily Worldle — Andorra Results')
+      let card = cardOf('Andorra')
+      expect(card.getByRole('img', { name: 'Flag of Andorra' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: /^quiz$/i })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: /^back to study$/i })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Previous country: Algeria' })).toBeInTheDocument()
+      expect(card.getByRole('button', { name: 'Next country: Angola' })).toBeInTheDocument()
+
+      fireEvent.click(card.getByRole('button', { name: 'Next country: Angola' }))
+      expect(window.location.pathname).toBe('/results/angola')
+      card = cardOf('Angola')
+      expect(card.getByRole('button', { name: 'Previous country: Andorra' })).toBeInTheDocument()
+
+      // Two real forward navigations, each its own history entry (pushState,
+      // not replaceState) — not just the same page's content swapped in place.
+      expect(window.history.length).toBe(lengthBefore + 2)
+    })
+
+    it('Previous performs a real route navigation in the opposite direction', () => {
+      renderAt('/results/andorra')
+      fireEvent.click(cardOf('Andorra').getByRole('button', { name: 'Previous country: Algeria' }))
+      expect(window.location.pathname).toBe('/results/algeria')
+      expect(cardOf('Algeria').getByRole('heading', { level: 1, name: 'Algeria' })).toBeInTheDocument()
+    })
+
+    it('ordinary browser Back/Forward walks each intermediate country, not straight to the start', async () => {
+      vi.useRealTimers()
+      renderAt('/results/algeria')
+      fireEvent.click(cardOf('Algeria').getByRole('button', { name: 'Next country: Andorra' }))
+      fireEvent.click(cardOf('Andorra').getByRole('button', { name: 'Next country: Angola' }))
+      expect(window.location.pathname).toBe('/results/angola')
+
+      act(() => window.history.back())
+      await waitFor(() => expect(window.location.pathname).toBe('/results/andorra'))
+      expect(screen.getByRole('heading', { level: 1, name: 'Andorra' })).toBeInTheDocument()
+
+      act(() => window.history.back())
+      await waitFor(() => expect(window.location.pathname).toBe('/results/algeria'))
+      expect(screen.getByRole('heading', { level: 1, name: 'Algeria' })).toBeInTheDocument()
+    })
   })
 })

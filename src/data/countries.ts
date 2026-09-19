@@ -325,3 +325,18 @@ export function findCountryBySlug(slug: string): Country | undefined {
 export function countriesOfLength(length: number): Country[] {
   return COUNTRIES.filter((c) => c.length === length)
 }
+
+/**
+ * The country immediately before/after `id` in the same canonical `COUNTRIES`
+ * order the Study grid renders (alphabetical) — used for Previous/Next
+ * browsing on the Study result page. Loops continuously: the entry before
+ * the first is the last, and the entry after the last is the first. Returns
+ * null for an id not in COUNTRIES (e.g. no results page exists for it).
+ */
+export function adjacentCountries(id: string): { previous: Country; next: Country } | null {
+  const index = COUNTRIES.findIndex((c) => c.id === id)
+  if (index === -1) return null
+  const previous = COUNTRIES[(index - 1 + COUNTRIES.length) % COUNTRIES.length] as Country
+  const next = COUNTRIES[(index + 1) % COUNTRIES.length] as Country
+  return { previous, next }
+}

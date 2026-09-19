@@ -1,4 +1,4 @@
-// Logo theme-swap QA: light->/Worldle.png, dark->/Worldle-white.png,
+// Logo theme-swap QA: light->/Worldle-logo.png, dark->/Worldle-white1.png,
 // immediate switch update, correct-on-refresh-in-dark, no layout shift,
 // header fit at 320 and desktop.
 import { chromium } from 'playwright'
@@ -30,7 +30,7 @@ function logoInfo(p) {
   })
 }
 
-// 1. Light mode default -> /Worldle.png
+// 1. Light mode default -> /Worldle-logo.png
 {
   const { c, p } = await ctx({ viewport: { width: 1280, height: 200 } }, seed('light'))
   await p.goto('http://localhost:4173/')

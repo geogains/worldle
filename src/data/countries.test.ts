@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  adjacentCountries,
   ANSWER_POOL,
   COUNTRIES,
   countriesOfLength,
@@ -86,5 +87,30 @@ describe('country dataset', () => {
     expect(findCountryByNormalized('SPAIN')?.name).toBe('Spain')
     expect(findCountryByNormalized('NOPE')).toBeUndefined()
     expect(countriesOfLength(4).map((c) => c.name)).toContain('Peru')
+  })
+
+  describe('adjacentCountries (Study Previous/Next, same COUNTRIES order the grid renders)', () => {
+    it('resolves a middle-of-the-list country to its immediate alphabetical neighbours', () => {
+      // Albania, Algeria, Andorra, Angola are consecutive in COUNTRIES.
+      expect(adjacentCountries('algeria')).toEqual({
+        previous: findCountryById('albania'),
+        next: findCountryById('andorra'),
+      })
+      expect(adjacentCountries('andorra')).toEqual({
+        previous: findCountryById('algeria'),
+        next: findCountryById('angola'),
+      })
+    })
+    it('loops from the first country to the last, and vice versa', () => {
+      const first = COUNTRIES[0] as (typeof COUNTRIES)[number]
+      const second = COUNTRIES[1] as (typeof COUNTRIES)[number]
+      const last = COUNTRIES[COUNTRIES.length - 1] as (typeof COUNTRIES)[number]
+      const penultimate = COUNTRIES[COUNTRIES.length - 2] as (typeof COUNTRIES)[number]
+      expect(adjacentCountries(first.id)).toEqual({ previous: last, next: second })
+      expect(adjacentCountries(last.id)).toEqual({ previous: penultimate, next: first })
+    })
+    it('returns null for an id not in COUNTRIES', () => {
+      expect(adjacentCountries('not-a-real-country')).toBeNull()
+    })
   })
 })

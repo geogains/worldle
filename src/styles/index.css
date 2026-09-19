@@ -276,6 +276,18 @@ h4 {
   }
 }
 
+/* Result Modal variant — the post-game results overlay. Below the existing
+   640px (sm:) breakpoint it is a near-full-viewport modal CARD (small
+   visible backdrop margin on every side, full rounded corners, sized via
+   the Tailwind calc(100vw/100dvh - 16px) utilities in Modal.tsx) — not an
+   edge-to-edge full-screen page. At/above 640px it is byte-for-byte the
+   same centered/constrained/rounded popup as every other Modal consumer
+   (sheet variant); only this rule (full radius, overridden below) differs
+   from plain .modal-panel, and only below 640px. */
+.modal-panel--result {
+  border-radius: var(--radius-modal);
+}
+
 /* ------------------------------------------------------------------ */
 /* Mode bar — status + actions strip between the header and the board  */
 /* ------------------------------------------------------------------ */
@@ -684,6 +696,19 @@ h4 {
   transform: scale(0.96);
   box-shadow: none;
 }
+/* Slightly larger label on mobile for the standard A-Z keys only (not
+   ENTER/BACKSPACE) — a plain Tailwind text-size utility on the button
+   itself loses to .key's own font-size above (equal specificity, later
+   source order), so this needs a real modifier class instead, placed after
+   .key here so it wins the same way .key--correct/etc. already do. */
+.key--letter {
+  font-size: 0.92rem;
+}
+@media (min-width: 640px) {
+  .key--letter {
+    font-size: 0.85rem;
+  }
+}
 @media (hover: hover) {
   .key:hover {
     background-color: var(--c-key-hover);
@@ -866,18 +891,24 @@ h4 {
 }
 
 /* Header wordmark image (light mode only — see Header.tsx for the dark-mode
-   text fallback). The source PNG (public/Worldle.png, 1795x590) carries a
-   symmetric transparent margin above/below the artwork (roughly 157px of its
-   590px height on each side, so the mark itself is centred), presumably a
-   fixed frame meant for reuse elsewhere. A fixed-height clipping window
-   crops that margin away instead of shrinking the whole canvas, so the
-   wordmark itself renders at the intended size rather than a fraction of it. */
+   text fallback). The source PNGs (public/Worldle-logo.png /
+   Worldle-white1.png, 1795x590) carry transparent framing above/below the
+   artwork — measured via the actual alpha bounding box, the visible mark
+   spans px 165-451 of the 590px canvas (not symmetric: 28.0% top margin,
+   23.6% bottom margin), i.e. ~48.5% of the canvas height. A fixed-height
+   clipping window crops that framing away instead of shrinking the whole
+   canvas, so the wordmark itself renders at the intended size rather than a
+   fraction of it — the window height below must stay at >= ~58% of the
+   img height (with a little breathing room) or the asymmetric margins mean
+   flex-centering clips into the bottom of the actual artwork. Previously
+   sized for an old, symmetrically-framed asset (~46.8%), which is exactly
+   why the current logo was clipped at the bottom. */
 .header-logo {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  height: 24px;
+  height: 30px;
 }
 .header-logo__img {
   height: 51px;
@@ -887,7 +918,7 @@ h4 {
 }
 @media (min-width: 640px) {
   .header-logo {
-    height: 34px;
+    height: 42px;
   }
   .header-logo__img {
     height: 73px;
@@ -897,10 +928,11 @@ h4 {
 /* ------------------------------------------------------------------ */
 /* Theme toggle — compact animated light/dark switch                   */
 /* ------------------------------------------------------------------ */
-/* Sized for the existing 56px header: a 32px-tall control leaves 12px of
-   breathing room, comparable to the 40px icon buttons it sits beside.
-   Visibility (hidden below the sm nav breakpoint) is set by the utility
-   classes the caller passes in, same pattern as .icon-btn above — the
+/* Sized for the desktop 68px header (only visible at the sm+ breakpoint
+   itself): a 32px-tall control leaves 18px of breathing room, comparable
+   to the 40px icon buttons it sits beside. Visibility (hidden below the sm
+   nav breakpoint) is set by the utility classes the caller passes in,
+   same pattern as .icon-btn above — the
    hamburger menu keeps handling theme switching below that breakpoint. */
 .theme-toggle {
   align-items: center;
@@ -1144,14 +1176,15 @@ h4 {
   padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 0.75rem 0.75rem 1rem;
   border-bottom: 1px solid var(--c-divider);
 }
-/* Same crop technique as the header wordmark (see .header-logo): both PNGs
-   share identical transparent framing, just a smaller visible mark here so
-   it reads as menu branding rather than a second hero logo. */
+/* Same crop technique as the header wordmark (see .header-logo, including
+   the note on why the window must be ~58% of the img height, not ~47%) —
+   both PNGs share identical transparent framing, just a smaller visible
+   mark here so it reads as menu branding rather than a second hero logo. */
 .nav-drawer__logo {
   display: inline-flex;
   align-items: center;
   overflow: hidden;
-  height: 22px;
+  height: 27px;
 }
 .nav-drawer__logo-img {
   height: 47px;
@@ -1286,6 +1319,23 @@ h4 {
   border: 1.5px dashed var(--c-border-strong);
   background: var(--c-surface-2);
   color: var(--c-muted);
+}
+/* Previous/Next Study-order browsing arrows flanking the flag. Grid (not
+   flex) so both buttons occupy equal, fixed-width columns and the flag
+   column centers within whatever space remains — the flag/name never
+   shifts sideways between countries regardless of flag aspect ratio, since
+   the arrows are always the same size (loops continuously, so both are
+   always present/active; nothing here ever needs a disabled/hidden state). */
+.country-result__nav-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.country-result__nav-btn {
+  flex-shrink: 0;
 }
 .country-result__name {
   margin-top: 0.75rem;
@@ -1428,6 +1478,42 @@ h4 {
   margin-top: 0.5rem;
 }
 
+/* Result modal (see .modal-panel--result): tighter vertical rhythm so the
+   whole card — flag through Share — fits the near-full-viewport mobile
+   card without scrolling. Scoped to this ancestor AND to below the 640px
+   modal breakpoint only: at sm: and up the result modal reverts to the
+   classic centered popup, which keeps the roomier base .country-result__*
+   spacing above (same as the standalone /results/:slug reference page). */
+@media (max-width: 639px) {
+  .modal-panel--result .country-result__name {
+    margin-top: 0.5rem;
+  }
+  .modal-panel--result .country-result__result {
+    margin-top: 0.4rem;
+    gap: 0.3rem;
+  }
+  .modal-panel--result .country-result__facts {
+    margin: 0.7rem 0 0;
+    padding-top: 0.65rem;
+    gap: 0.6rem 1rem;
+  }
+  .modal-panel--result .country-result__fun-fact {
+    margin-top: 0.6rem;
+    padding: 0.6rem 1rem 0.7rem;
+  }
+  .modal-panel--result .country-result__fun-fact-text {
+    margin-top: 0.3rem;
+    line-height: 1.4;
+  }
+  .modal-panel--result .country-result__actions {
+    margin-top: 0.7rem;
+    gap: 0.6rem;
+  }
+  .modal-panel--result .country-result__tertiary {
+    margin-top: 0.4rem;
+  }
+}
+
 /* Standalone page (direct visit with no completed game): the card is the
    page, scrolling within main since body never scrolls. */
 .country-result-page {
@@ -1443,6 +1529,27 @@ h4 {
   margin: 0 auto;
   padding: 1.5rem 1.25rem;
   border-radius: var(--radius-modal);
+  /* Mobile: the card nearly fills the viewport beneath the header instead of
+     ending high up with a lot of empty gradient visible below it — 60px is
+     the mobile header's own height (Header.tsx's h-[60px]), and the
+     subtracted rem/safe-area values are .country-result-page's own
+     top/bottom padding above. This is min-height (not height), so it never
+     clips or adds an internal scrollbar: content taller than this still
+     grows the card and the page normally, and .country-result-page keeps
+     owning the scroll exactly as before. Reset back to intrinsic sizing at
+     sm: and up — desktop stays naturally sized. */
+  min-height: calc(100dvh - 60px - 1rem - max(1.5rem, env(safe-area-inset-bottom)));
+}
+@media (max-width: 639px) {
+  .country-result-page__panel .country-result__facts {
+    margin-top: 1.75rem;
+  }
+  .country-result-page__panel .country-result__fun-fact {
+    margin-top: 1.5rem;
+  }
+  .country-result-page__panel .country-result__actions {
+    margin-top: 1.75rem;
+  }
 }
 @media (min-width: 640px) {
   .country-result-page {
@@ -1450,6 +1557,7 @@ h4 {
   }
   .country-result-page__panel {
     padding: 2rem 1.75rem;
+    min-height: 0;
   }
 }
 

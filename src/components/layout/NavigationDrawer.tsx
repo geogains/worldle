@@ -137,7 +137,7 @@ export function NavigationDrawer({ id, open, onClose, items, onNavigate }: Navig
         <div className="nav-drawer__header">
           <span className="nav-drawer__logo">
             <img
-              src={resolvedTheme === 'dark' ? '/Worldle-white.png' : '/Worldle.png'}
+              src={resolvedTheme === 'dark' ? '/Worldle-white1.png' : '/Worldle-logo.png'}
               alt={branding.name}
               className="nav-drawer__logo-img"
             />

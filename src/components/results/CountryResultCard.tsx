@@ -2,7 +2,16 @@ import type { ReactNode } from 'react'
 import { PLACEHOLDER, type CountryDetails } from '../../data/countryDetails'
 import type { ResultContext } from '../../lib/results/context'
 import { resultSourceLabel, resultSummary } from '../../lib/results/format'
-import { GlobeIcon } from '../ui/icons'
+import { ChevronLeftIcon, ChevronRightIcon, GlobeIcon } from '../ui/icons'
+
+export interface CountryResultCardNav {
+  /** Display name of the previous country in Study order, for the accessible label. */
+  previousName: string
+  /** Display name of the next country in Study order, for the accessible label. */
+  nextName: string
+  onPrevious: () => void
+  onNext: () => void
+}
 
 export interface CountryResultCardProps {
   details: CountryDetails
@@ -16,6 +25,8 @@ export interface CountryResultCardProps {
   tertiaryAction?: ReactNode
   /** Heading level for the country name (the overlay already announces a dialog title). */
   headingLevel?: 'h1' | 'h2' | 'h3'
+  /** Previous/Next Study-order browsing arrows flanking the flag. Omitted outside the Study flow. */
+  navigation?: CountryResultCardNav
 }
 
 interface Fact {
@@ -43,24 +54,47 @@ function facts(details: CountryDetails): Fact[] {
  * the post-game overlay and a standalone country page.
  */
 export function CountryResultCard(props: CountryResultCardProps) {
-  const { details, context, primaryAction, secondaryAction, tertiaryAction, headingLevel = 'h3' } = props
+  const { details, context, primaryAction, secondaryAction, tertiaryAction, headingLevel = 'h3', navigation } = props
   const Heading = headingLevel
+  const flag = details.flagUrl ? (
+    <img
+      className="country-result__flag"
+      src={details.flagUrl}
+      alt={`Flag of ${details.name}`}
+      width={512}
+      height={512}
+      decoding="async"
+    />
+  ) : (
+    <div className="country-result__flag-placeholder" aria-hidden="true">
+      <GlobeIcon size={28} />
+    </div>
+  )
   return (
     <div className="country-result" data-country-result={details.slug}>
       <div className="country-result__header">
-        {details.flagUrl ? (
-          <img
-            className="country-result__flag"
-            src={details.flagUrl}
-            alt={`Flag of ${details.name}`}
-            width={512}
-            height={512}
-            decoding="async"
-          />
-        ) : (
-          <div className="country-result__flag-placeholder" aria-hidden="true">
-            <GlobeIcon size={28} />
+        {navigation ? (
+          <div className="country-result__nav-row">
+            <button
+              type="button"
+              className="icon-btn country-result__nav-btn"
+              onClick={navigation.onPrevious}
+              aria-label={`Previous country: ${navigation.previousName}`}
+            >
+              <ChevronLeftIcon size={24} aria-hidden="true" />
+            </button>
+            {flag}
+            <button
+              type="button"
+              className="icon-btn country-result__nav-btn"
+              onClick={navigation.onNext}
+              aria-label={`Next country: ${navigation.nextName}`}
+            >
+              <ChevronRightIcon size={24} aria-hidden="true" />
+            </button>
           </div>
+        ) : (
+          flag
         )}
         <Heading className="country-result__name">{details.name}</Heading>
         {context && (

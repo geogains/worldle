@@ -187,3 +187,19 @@ export function CheckIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  )
+}
