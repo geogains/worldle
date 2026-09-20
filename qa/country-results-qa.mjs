@@ -164,13 +164,13 @@ const dialog = (p) => p.getByRole('dialog', { name: /tanzania results/i })
   check('daily card shows Daily Worldle #1', await d.getByText('Daily Worldle #1').first().isVisible())
   check('daily card summary', await d.getByText('Solved in 2/6').isVisible())
   check('daily: statistics not opened', (await p.getByRole('dialog', { name: 'Statistics' }).count()) === 0)
+  check('daily: "View statistics" is no longer on the result card', (await d.getByRole('button', { name: /view statistics/i }).count()) === 0)
   await shot(p, '77-daily-results-card')
-  await d.getByRole('button', { name: 'View statistics' }).click(); await p.waitForTimeout(350)
-  check('daily: View statistics opens Statistics', await p.getByRole('dialog', { name: 'Statistics' }).isVisible())
-  await p.keyboard.press('Escape'); await p.waitForTimeout(300)
-  check('daily: closing Statistics returns to the country card', await dialog(p).isVisible())
-  await p.keyboard.press('Escape'); await p.waitForTimeout(300)
-  // Header stats control still works independently.
+  // Header stats control still works independently — the feature itself is
+  // untouched, only the post-game result-card shortcut to it was removed.
+  // Close the result card first: it's a near-full-viewport modal and would
+  // otherwise intercept the click on the header control behind it.
+  await d.getByRole('button', { name: 'Close' }).click(); await p.waitForTimeout(300)
   await p.getByRole('button', { name: 'Statistics', exact: true }).click(); await p.waitForTimeout(350)
   check('header Statistics control opens Statistics', await p.getByRole('dialog', { name: 'Statistics' }).isVisible())
   await c.close()

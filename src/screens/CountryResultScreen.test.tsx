@@ -211,7 +211,7 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(within(dialog).queryByRole('button', { name: /back to study/i })).not.toBeInTheDocument()
   })
 
-  it('completed Daily result regression: preserves its own CTAs exactly, never Back to Study', () => {
+  it('completed Daily result regression: preserves its own CTAs exactly, never Back to Study or View statistics', () => {
     set('daily', { puzzleNumber: 1, guesses: ['ZIMBABWE', 'TANZANIA'], current: '', status: 'won', updatedAt: 1 })
     set('lastResult', { source: 'daily', countryId: 'tanzania', puzzleNumber: 1, at: 1 })
     renderAt('/results/tanzania')
@@ -219,6 +219,21 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(within(dialog).getByRole('button', { name: /play practice/i })).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /back to study/i })).not.toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /^practice$/i })).not.toBeInTheDocument()
+    expect(within(dialog).queryByRole('button', { name: /view statistics/i })).not.toBeInTheDocument()
+    // No tertiary row at all for a completed Daily result now that its only
+    // occupant (View statistics) is gone.
+    expect(dialog.querySelector('.country-result__tertiary')).not.toBeInTheDocument()
+  })
+
+  it('View statistics is removed from the post-game result page; the header Statistics control still opens it independently', () => {
+    set('daily', { puzzleNumber: 1, guesses: ['ZIMBABWE', 'TANZANIA'], current: '', status: 'won', updatedAt: 1 })
+    set('lastResult', { source: 'daily', countryId: 'tanzania', puzzleNumber: 1, at: 1 })
+    renderAt('/results/tanzania')
+    expect(screen.queryByRole('button', { name: /view statistics/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Statistics' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Statistics' }))
+    expect(screen.getByRole('dialog', { name: 'Statistics' })).toBeInTheDocument()
   })
 
   it('does not show a completed game for a different country as Tanzania context', () => {

@@ -17,8 +17,6 @@ import { NotFoundScreen } from './NotFoundScreen'
 
 export interface CountryResultScreenProps {
   countrySlug: string
-  /** Opens the app-level Statistics modal (offered as a quiet action after a daily game). */
-  onOpenStats?: () => void
 }
 
 /**
@@ -33,7 +31,7 @@ export interface CountryResultScreenProps {
  * page: an educational country page with no performance data and nothing
  * fabricated.
  */
-export function CountryResultScreen({ countrySlug, onOpenStats }: CountryResultScreenProps) {
+export function CountryResultScreen({ countrySlug }: CountryResultScreenProps) {
   const details = useMemo(() => getCountryDetails(countrySlug), [countrySlug])
   const context = useMemo(() => (details ? resolveResultContext(countrySlug) : null), [countrySlug, details])
   useDocumentTitle(details ? countryResultsMeta(details).title : null)
@@ -47,7 +45,7 @@ export function CountryResultScreen({ countrySlug, onOpenStats }: CountryResultS
     )
   }
   if (!context) return <StandaloneCountryPage details={details} />
-  return <CompletedGameResults details={details} context={context} onOpenStats={onOpenStats} />
+  return <CompletedGameResults details={details} context={context} />
 }
 
 /* ------------------------------------------------------------------ */
@@ -93,11 +91,9 @@ function shareLabel(context: ResultContext): string | undefined {
 function CompletedGameResults({
   details,
   context,
-  onOpenStats,
 }: {
   details: CountryDetails
   context: ResultContext
-  onOpenStats?: () => void
 }) {
   const { navigate } = useRouter()
   const [cardOpen, setCardOpen] = useState(true)
@@ -128,11 +124,8 @@ function CompletedGameResults({
           Play practice
         </button>
       )
-      tertiaryAction = onOpenStats ? (
-        <button type="button" className="btn btn--text" onClick={onOpenStats}>
-          View statistics
-        </button>
-      ) : null
+      // No tertiary action here — Statistics remains reachable via the
+      // header's own Statistics control.
       break
     case 'archive':
       primaryAction = (

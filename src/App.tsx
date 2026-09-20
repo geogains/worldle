@@ -85,7 +85,7 @@ function AppShell() {
       screen = <QuizPlayScreen key={route.mode} mode={route.mode} />
       break
     case 'results':
-      screen = <CountryResultScreen key={route.countrySlug} countrySlug={route.countrySlug} onOpenStats={openStats} />
+      screen = <CountryResultScreen key={route.countrySlug} countrySlug={route.countrySlug} />
       break
     default:
       screen = <NotFoundScreen />
