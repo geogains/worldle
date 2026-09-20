@@ -168,14 +168,20 @@ function CompletedGameResults({
         context={context}
         primaryAction={primaryAction}
         secondaryAction={
-          <ShareButton
-            guesses={context.guesses}
-            answer={context.country.normalized}
-            won={context.status === 'won'}
-            label={shareLabel(context)}
-            puzzleNumber={context.puzzleNumber}
-            variant="secondary"
-          />
+          context.source === 'practice' ? (
+            <button type="button" className="btn btn--secondary" onClick={() => navigate(PATHS.quiz)}>
+              Quiz
+            </button>
+          ) : (
+            <ShareButton
+              guesses={context.guesses}
+              answer={context.country.normalized}
+              won={context.status === 'won'}
+              label={shareLabel(context)}
+              puzzleNumber={context.puzzleNumber}
+              variant="secondary"
+            />
+          )
         }
         tertiaryAction={tertiaryAction}
       />

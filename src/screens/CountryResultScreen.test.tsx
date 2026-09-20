@@ -63,7 +63,7 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(dialog).toHaveTextContent('Did you know?')
     expect(dialog).toHaveTextContent('Mount Kilimanjaro')
     expect(within(dialog).getByRole('button', { name: /play again/i })).toBeInTheDocument()
-    expect(within(dialog).getByRole('button', { name: /share/i })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /^quiz$/i })).toBeInTheDocument()
     expect(document.title).toBe('Daily Worldle — Tanzania Results')
 
     // The actual completed board: three submitted rows, keyboard locked.
@@ -92,7 +92,7 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(dialog).toHaveClass('sm:max-h-[92dvh]')
 
     // Hierarchy intact: flag, name, mode badge, result message, facts,
-    // fun fact, Play again, Share — in that DOM order.
+    // fun fact, Play again, Quiz — in that DOM order.
     const headerEls = Array.from(dialog.querySelectorAll('img, h3, .eyebrow--pill, .country-result__summary'))
     expect(headerEls.map((el) => el.tagName.toLowerCase())).toEqual(['img', 'h3', 'span', 'p'])
     expect(within(dialog).getByRole('img', { name: 'Flag of Tanzania' })).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(dialog.querySelector('.country-result__facts')).toBeInTheDocument()
     expect(dialog.querySelector('.country-result__fun-fact')).toBeInTheDocument()
     expect(within(dialog).getByRole('button', { name: /play again/i })).toBeInTheDocument()
-    expect(within(dialog).getByRole('button', { name: /share/i })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /^quiz$/i })).toBeInTheDocument()
     expect(within(dialog).getByRole('button', { name: /^close$/i })).toBeInTheDocument()
 
     // The removed CTA, with no replacement in its place.
@@ -206,13 +206,26 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(window.location.pathname).toBe('/study')
   })
 
-  it('completed Practice result regression: still shows Play again + Share, never Back to Study', () => {
+  it('completed Practice result regression: still shows Play again + Quiz, never Back to Study', () => {
     set('practice', completedPractice)
     renderAt('/results/tanzania')
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByRole('button', { name: /play again/i })).toBeInTheDocument()
-    expect(within(dialog).getByRole('button', { name: /share/i })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /^quiz$/i })).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /back to study/i })).not.toBeInTheDocument()
+  })
+
+  it('completed Practice result: Share is no longer rendered, and clicking Quiz navigates to /quiz', () => {
+    set('practice', completedPractice)
+    renderAt('/results/tanzania')
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
+    const quizButton = within(dialog).getByRole('button', { name: /^quiz$/i })
+    expect(quizButton).toHaveClass('btn--secondary')
+    expect(quizButton).not.toHaveClass('btn--primary')
+
+    fireEvent.click(quizButton)
+    expect(window.location.pathname).toBe('/quiz')
   })
 
   it('completed Daily result regression: preserves its own CTAs exactly, never Back to Study or View statistics', () => {

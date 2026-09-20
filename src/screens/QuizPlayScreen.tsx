@@ -5,6 +5,7 @@ import type { QuizConfig, QuizMode } from '../lib/quiz/types'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useRouter } from '../hooks/useRouter'
 import { PATHS } from '../lib/router/routes'
+import { CapitalsQuizScreen } from './CapitalsQuizScreen'
 import { FlagsQuizScreen } from './FlagsQuizScreen'
 
 export interface QuizPlayScreenProps {
@@ -12,9 +13,12 @@ export interface QuizPlayScreenProps {
 }
 
 /**
- * `/quiz/:mode`. Flags is the first real gameplay mode (Phase 2) — every
- * other mode still renders the Phase 1 placeholder shell, unchanged, until
- * its own phase builds on the same shared engine FlagsQuizScreen now uses.
+ * `/quiz/:mode`. Flags (Phase 2) and Capitals (Phase 3) are real gameplay
+ * modes now — every other mode still renders the Phase 1 placeholder shell,
+ * unchanged, until its own phase builds on the same shared engine these two
+ * already use. Adding a new mode here is a one-line addition: a new
+ * `if (mode === '<mode>') return <...QuizScreen config={config} />` above
+ * the placeholder fallback, same shape as the two below.
  *
  * The persisted QuizConfig is captured exactly once here (not re-read by
  * the gameplay screen itself), with the route's own `mode` authoritative
@@ -26,6 +30,7 @@ export function QuizPlayScreen({ mode }: QuizPlayScreenProps) {
   const [config] = useState<QuizConfig>(() => ({ ...loadQuizConfig(), mode }))
 
   if (mode === 'flags') return <FlagsQuizScreen config={config} />
+  if (mode === 'capitals') return <CapitalsQuizScreen config={config} />
   return <QuizComingSoon mode={mode} config={config} />
 }
 

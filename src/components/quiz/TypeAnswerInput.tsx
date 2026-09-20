@@ -10,6 +10,8 @@ export interface TypeAnswerInputProps {
   correctLabel: string
   onSubmit: (text: string) => void
   inputLabel: string
+  /** Defaults to the original Flags copy so every existing call site is unaffected. */
+  placeholder?: string
 }
 
 const EMPTY_KEY_STATES = Object.freeze({})
@@ -38,7 +40,7 @@ const EMPTY_KEY_STATES = Object.freeze({})
  * too, since those are remounts as well) without ever re-stealing focus
  * from a question the player is still actively answering.
  */
-export function TypeAnswerInput({ phase, lastSubmission, correctLabel, onSubmit, inputLabel }: TypeAnswerInputProps) {
+export function TypeAnswerInput({ phase, lastSubmission, correctLabel, onSubmit, inputLabel, placeholder = 'Type a country…' }: TypeAnswerInputProps) {
   const [value, setValue] = useState('')
   const locked = phase !== 'answering'
   const inputRef = useRef<HTMLInputElement>(null)
@@ -93,7 +95,7 @@ export function TypeAnswerInput({ phase, lastSubmission, correctLabel, onSubmit,
           disabled={locked}
           autoComplete="off"
           autoCapitalize="words"
-          placeholder="Type a country…"
+          placeholder={placeholder}
         />
         <button type="button" className="btn btn--primary quiz-type-answer__submit" onClick={submit} disabled={locked}>
           Submit

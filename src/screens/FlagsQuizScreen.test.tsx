@@ -406,9 +406,9 @@ describe('Regression: other quiz routes and existing flows still work', () => {
     window.history.replaceState(null, '', '/')
   })
 
-  it('/quiz/capitals still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags gameplay', () => {
-    setConfig({ mode: 'capitals' })
-    renderAt('/quiz/capitals')
+  it('/quiz/currencies still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags/Capitals gameplay', () => {
+    setConfig({ mode: 'currencies' })
+    renderAt('/quiz/currencies')
     expect(screen.getByText('Coming soon')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Change Quiz' })).toBeInTheDocument()
   })

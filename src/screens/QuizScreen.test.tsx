@@ -223,11 +223,11 @@ describe('QuizScreen (/quiz)', () => {
 
   it('Start Quiz navigates to /quiz/:mode using the currently selected configuration', () => {
     renderAt('/quiz')
-    fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /capitals/i }))
+    fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /languages/i }))
     fireEvent.click(within(group('Question count')).getByRole('radio', { name: '5' }))
     fireEvent.click(screen.getByRole('button', { name: 'Start Quiz' }))
-    expect(window.location.pathname).toBe('/quiz/capitals')
-    expect(screen.getByText('Capitals · Easy · Multiple Choice · 5 Questions')).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/quiz/languages')
+    expect(screen.getByText('Languages · Easy · Multiple Choice · 5 Questions')).toBeInTheDocument()
   })
 
   it('selections made on /quiz persist and are still selected after navigating away and back (Change Quiz retains the previous configuration)', () => {

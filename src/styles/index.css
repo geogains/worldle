@@ -2174,6 +2174,57 @@ h4 {
   background: var(--c-surface-2);
 }
 
+/* Capitals' central question presentation: a medium flag (smaller than
+   .quiz-play__flag's large Flags-quiz image — it supports the capital
+   question rather than being the thing to identify, closer in scale to
+   .country-result__flag) sits above the country name. Same transparent-
+   square asset convention as those: margin-block trims the PNG's
+   transparent band so layout hugs the visible flag, margin-top adds real
+   spacing below "What is the capital of:". */
+.quiz-play__capital-flag {
+  --flag-w: clamp(110px, 32vw, 150px);
+  width: var(--flag-w);
+  height: var(--flag-w);
+  object-fit: contain;
+  margin-block: calc(var(--flag-w) * -0.17);
+  margin-top: calc(0.9rem + var(--flag-w) * -0.17);
+  filter: drop-shadow(0 6px 16px rgba(13, 49, 90, 0.22));
+}
+[data-theme='dark'] .quiz-play__capital-flag {
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
+}
+.quiz-play__capital-flag-placeholder {
+  width: clamp(110px, 32vw, 150px);
+  aspect-ratio: 3 / 2;
+  margin-top: 0.9rem;
+  border-radius: 12px;
+  border: 1.5px dashed var(--c-border-strong);
+  background: var(--c-surface-2);
+}
+
+/* The country name — .quiz-play__question (unchanged) is the "What is the
+   capital of:" line, .quiz-play__capital-flag (above) is the new flag. The
+   negative bottom margin plays the same role as .quiz-play__flag's own
+   negative block-margin: .quiz-answers (shared with Flags) has a fixed top
+   margin tuned to sit right below a flag image, so this trims that gap
+   back down to something proportionate here too. */
+.quiz-play__capital-name {
+  margin-top: 0.6rem;
+  margin-bottom: -2.25rem;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  line-height: 1.15;
+  text-align: center;
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+}
+@media (min-width: 640px) {
+  .quiz-play__capital-name {
+    margin-bottom: -1.5rem;
+  }
+}
+
 .quiz-answers {
   display: grid;
   grid-template-columns: 1fr;
