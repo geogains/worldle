@@ -283,6 +283,17 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     expect(screen.getByText('100%')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Play Again' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Change Quiz' })).toBeInTheDocument()
+
+    // The entire results experience — heading, score, percent, meta pills,
+    // and both actions — is grouped inside the one rounded results card,
+    // not scattered loose on the page background.
+    const card = document.querySelector('.quiz-results') as HTMLElement
+    expect(card).not.toBeNull()
+    expect(within(card).getByText('Flags Quiz Complete')).toBeInTheDocument()
+    expect(within(card).getByText('5 / 5')).toBeInTheDocument()
+    expect(within(card).getByText('100%')).toBeInTheDocument()
+    expect(within(card).getByRole('button', { name: 'Play Again' })).toBeInTheDocument()
+    expect(within(card).getByRole('button', { name: 'Change Quiz' })).toBeInTheDocument()
   })
 
   it('Play Again restarts with the exact same configuration, fresh questions, and a reset score', () => {

@@ -1,4 +1,3 @@
-import { branding } from '../../config/branding'
 import { getHelpExamples } from '../../lib/game/helpExamples'
 import { Modal } from '../ui/Modal'
 import { Tile } from '../game/Tile'
@@ -57,11 +56,6 @@ export function HelpModal({ open, onClose, excludeAnswer }: HelpModalProps) {
           </div>
         ))}
       </div>
-
-      <p className="mt-5 border-t border-divider pt-3 text-[0.95rem] text-muted">
-        A new {branding.name} is available every day. Try Practice for unlimited games, or replay
-        past puzzles from the Archive.
-      </p>
     </Modal>
   )
 }

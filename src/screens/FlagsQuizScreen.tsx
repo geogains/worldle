@@ -82,7 +82,9 @@ function FlagsQuizRun({
   if (state.phase === 'complete') {
     return (
       <div className="quiz-play-page">
-        <QuizResults config={config} correct={state.correctCount} total={state.totalAnswered} onPlayAgain={onPlayAgain} onChangeQuiz={onChangeQuiz} />
+        <div className="quiz-play-wrap mx-auto flex w-full max-w-[560px] flex-1 items-center justify-center px-3 py-4">
+          <QuizResults config={config} correct={state.correctCount} total={state.totalAnswered} onPlayAgain={onPlayAgain} onChangeQuiz={onChangeQuiz} />
+        </div>
       </div>
     )
   }

@@ -438,18 +438,22 @@ h4 {
    game board (useBoardMetrics) — these are always 9 tiles regardless of
    today's answer length, so on narrow phones they need to shrink below the
    board's own minimum to fit the modal without horizontal scrolling. The
-   clamp scales smoothly with viewport width and settles back at the
-   original 2.5rem on anything wider than a phone, so desktop is unchanged. */
+   clamp scales smoothly with viewport width; the floor (1.7rem) is tuned so
+   a full 9-tile row still fits at 320px with the tightened mobile gap
+   below, and the ceiling (2.75rem, up from 2.5rem) is a modest bump over
+   the previous desktop size — .tile's own font-size is a fraction of
+   --tile, so the letters scale with it automatically. */
 .tile--example {
-  --tile: clamp(1.65rem, 7vw, 2.5rem);
+  --tile: clamp(1.7rem, 7.5vw, 2.75rem);
 }
 
-/* Row of How to Play example tiles: a tighter gap on narrow phones (the 9
-   tiles are noticeably wider than the previous 5-tile examples) restores to
-   the original spacing from the sm breakpoint up, where there's room. */
+/* Row of How to Play example tiles: a tighter gap on mobile (3px, down from
+   4px — the larger tiles above need the extra room to keep a 9-tile row on
+   one line at 320px) restores to the original spacing from the sm
+   breakpoint up, where there's room. */
 .help-tile-row {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 @media (min-width: 640px) {
   .help-tile-row {
@@ -2147,18 +2151,31 @@ h4 {
   color: var(--c-status-bad-text);
 }
 
+/* Rounded results surface — same glass/card language as .quiz-play__card
+   and .quiz-setup-card (translucent white in light mode, navy glass in
+   dark), not a new design system. Content-sized (no flex: 1 stretch): the
+   surrounding wrapper in FlagsQuizScreen centers this card both
+   horizontally and vertically within the page instead. */
 .quiz-results {
   display: flex;
-  flex: 1;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding: 2rem 1.25rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
   text-align: center;
+}
+@media (min-width: 640px) {
+  .quiz-results {
+    padding: 2.5rem 2.25rem;
+  }
 }
 .quiz-results__score {
   margin-top: 0.5rem;
