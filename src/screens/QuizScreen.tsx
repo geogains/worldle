@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
+import { DifficultyCarousel } from '../components/quiz/DifficultyCarousel'
 import { QuizOptionCard } from '../components/quiz/QuizOptionCard'
 import { QuizOptionGroup } from '../components/quiz/QuizOptionGroup'
 import {
@@ -9,19 +10,21 @@ import {
   formatQuizSummary,
 } from '../lib/quiz/config'
 import { loadQuizConfig, saveQuizConfig } from '../lib/quiz/storage'
-import type { AnswerStyle, CountryPool, QuestionCount, QuizConfig, QuizMode } from '../lib/quiz/types'
+import type { AnswerStyle, QuestionCount, QuizConfig, QuizMode } from '../lib/quiz/types'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useRouter } from '../hooks/useRouter'
 import { PATHS } from '../lib/router/routes'
-import { ChatIcon, CoinIcon, FlagIcon, LandmarkIcon, LightbulbIcon, ShuffleIcon } from '../components/ui/icons'
 
-const MODE_ICONS: Record<QuizMode, ReactNode> = {
-  flags: <FlagIcon size={22} />,
-  capitals: <LandmarkIcon size={22} />,
-  currencies: <CoinIcon size={22} />,
-  languages: <ChatIcon size={22} />,
-  facts: <LightbulbIcon size={22} />,
-  mixed: <ShuffleIcon size={22} />,
+// Decorative only — the visible label beside each one already names the
+// quiz type, so these are marked aria-hidden by QuizOptionCard's own icon
+// wrapper rather than announced individually.
+const MODE_ICONS: Record<QuizMode, string> = {
+  flags: '🏳️',
+  capitals: '🏛️',
+  currencies: '💰',
+  languages: '🗣️',
+  facts: '💡',
+  mixed: '🔀',
 }
 
 /**
@@ -56,7 +59,7 @@ export function QuizScreen() {
     <div className="w-full min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-[720px] px-4 py-5">
         <h1 className="text-[1.5rem] font-extrabold tracking-[-0.01em]">Quiz</h1>
-        <p className="mt-1 text-[0.9rem] text-muted">Choose a quiz type, country pool, answer style and length, then start.</p>
+        <p className="mt-1 text-[0.9rem] text-muted">Choose a quiz type, difficulty, answer style and length, then start.</p>
 
         <div className="quiz-setup-card">
           <QuizOptionGroup title="Quiz Type" groupLabel="Quiz type" layout="grid-3">
@@ -72,18 +75,14 @@ export function QuizScreen() {
             ))}
           </QuizOptionGroup>
 
-          <QuizOptionGroup title="Country Pool" groupLabel="Country pool" layout="pool">
-            {COUNTRY_POOL_OPTIONS.map((option) => (
-              <QuizOptionCard
-                key={option.id}
-                variant="card"
-                label={option.label}
-                description={option.description}
-                selected={config.countryPool === option.id}
-                onSelect={() => update({ countryPool: option.id as CountryPool })}
-              />
-            ))}
-          </QuizOptionGroup>
+          <section className="quiz-section">
+            <h2 className="quiz-section__title">Difficulty</h2>
+            <DifficultyCarousel
+              options={COUNTRY_POOL_OPTIONS}
+              selected={config.countryPool}
+              onChange={(id) => update({ countryPool: id })}
+            />
+          </section>
 
           <QuizOptionGroup title="Answer Style" groupLabel="Answer style" layout="row">
             {ANSWER_STYLE_OPTIONS.map((option) => (

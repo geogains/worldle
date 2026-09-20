@@ -39,14 +39,26 @@ export const QUIZ_MODE_OPTIONS: readonly QuizModeOption[] = [
 
 export interface CountryPoolOption {
   id: CountryPool
+  /**
+   * Plain display name — "Easy"/"Medium"/"Expert". Used everywhere a
+   * label needs to stand alone with no decoration: the config summary
+   * (formatQuizSummary below), the Difficulty carousel's accessible status
+   * text, and as the base of the card's visible title (see `emoji`).
+   */
   label: string
+  /**
+   * Decorative difficulty-dot glyphs shown next to `label` on the
+   * Difficulty carousel's card only (e.g. "Easy 🔵⚪️⚪️") — never appended
+   * to `label` itself, so the summary/accessible-status text stays plain.
+   */
+  emoji: string
   description: string
 }
 
 export const COUNTRY_POOL_OPTIONS: readonly CountryPoolOption[] = [
-  { id: 'familiar', label: 'Familiar', description: 'The most recognisable, widely known countries.' },
-  { id: 'explorer', label: 'Explorer', description: 'A balanced mix of familiar and less obvious countries.' },
-  { id: 'world-expert', label: 'World Expert', description: 'The full supported country pool.' },
+  { id: 'familiar', label: 'Easy', emoji: '🔵⚪️⚪️', description: 'The most recognisable, widely known countries.' },
+  { id: 'explorer', label: 'Medium', emoji: '🟠🟠⚪️', description: 'A balanced mix of familiar and less obvious countries.' },
+  { id: 'world-expert', label: 'Expert', emoji: '🔴🔴🔴', description: 'The full supported country pool.' },
 ]
 
 export interface AnswerStyleOption {

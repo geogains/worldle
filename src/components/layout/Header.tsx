@@ -5,7 +5,7 @@ import { useRouter } from '../../hooks/useRouter'
 import { PATHS } from '../../lib/router/routes'
 import { NavigationDrawer } from './NavigationDrawer'
 import { ThemeToggle } from './ThemeToggle'
-import { BookIcon, CalendarIcon, GlobeIcon, MenuIcon, ShuffleIcon } from '../ui/icons'
+import { BookIcon, CalendarIcon, GlobeIcon, HelpIcon, MenuIcon, ShuffleIcon } from '../ui/icons'
 
 export interface HeaderProps {
   onOpenHelp: () => void
@@ -44,6 +44,12 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
       icon: <CalendarIcon size={20} />,
     },
     { label: 'Study', path: PATHS.study, active: route.name === 'study', icon: <BookIcon size={20} /> },
+    {
+      label: 'Quiz',
+      path: PATHS.quiz,
+      active: route.name === 'quiz' || route.name === 'quiz-play',
+      icon: <HelpIcon size={20} />,
+    },
   ]
   const activeNavPath = items.find((item) => item.active)?.path ?? null
 

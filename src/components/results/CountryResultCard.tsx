@@ -17,8 +17,8 @@ export interface CountryResultCardProps {
   details: CountryDetails
   /** How the player got here; null renders the card as a standalone country page (no performance data). */
   context: ResultContext | null
-  /** Coral primary CTA, e.g. "Play again". */
-  primaryAction: ReactNode
+  /** Coral primary CTA, e.g. "Play again". Omitted when there is only a single action (e.g. the standalone Study result's "Back to Study"). */
+  primaryAction?: ReactNode
   /** e.g. the Share button. */
   secondaryAction?: ReactNode
   /** Quiet text action rendered last. */

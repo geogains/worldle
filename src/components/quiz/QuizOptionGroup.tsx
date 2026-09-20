@@ -3,19 +3,14 @@ import type { ReactNode } from 'react'
 export interface QuizOptionGroupProps {
   title: string
   groupLabel: string
-  /**
-   * 'pool' is its own layout (not just 'grid-3') because Country Pool's
-   * mobile behaviour — 3rd option (World Expert) spanning the full row
-   * beneath the first two — must never leak into Quiz Type's unrelated
-   * 6-option 'grid-3' grid, which shares the same column counts otherwise.
-   */
-  layout: 'grid-2' | 'grid-3' | 'pool' | 'row'
+  /** 'stack': one full-width option per row at every width (Difficulty). */
+  layout: 'grid-2' | 'grid-3' | 'stack' | 'row'
   children: ReactNode
 }
 
 /**
  * A titled, labelled single-select group wrapping QuizOptionCard options.
- * Shared across all four `/quiz` sections (Quiz Type, Country Pool, Answer
+ * Shared across all four `/quiz` sections (Quiz Type, Difficulty, Answer
  * Style, Question Count) so the radiogroup semantics and section heading
  * pattern is written once, not four times.
  */

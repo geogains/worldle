@@ -306,7 +306,7 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
       act(() => vi.advanceTimersByTime(900))
     }
     expect(screen.getByText('5 / 5')).toBeInTheDocument()
-    expect(screen.getByText('Explorer')).toBeInTheDocument()
+    expect(screen.getByText('Medium')).toBeInTheDocument()
     expect(screen.getByText('Type Answer')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Play Again' }))
@@ -418,12 +418,5 @@ describe('Regression: other quiz routes and existing flows still work', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Start Quiz' }))
     expect(window.location.pathname).toBe('/quiz/flags')
     expect(screen.getByRole('heading', { level: 1, name: /which country does this flag belong to/i })).toBeInTheDocument()
-  })
-
-  it('Study -> Quiz CTA still routes to /quiz', () => {
-    renderAt('/results/china')
-    const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    fireEvent.click(card.getByRole('button', { name: /^quiz$/i }))
-    expect(window.location.pathname).toBe('/quiz')
   })
 })

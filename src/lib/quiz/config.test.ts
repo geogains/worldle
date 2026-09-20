@@ -11,7 +11,7 @@ import {
 import { MIXED_CATEGORIES, type QuizConfig } from './types'
 
 describe('DEFAULT_QUIZ_CONFIG', () => {
-  it('is Flags / Familiar / Multiple Choice / 10, so Start Quiz works with zero configuration', () => {
+  it('is Flags / familiar (displayed as "Easy") / Multiple Choice / 10, so Start Quiz works with zero configuration', () => {
     expect(DEFAULT_QUIZ_CONFIG).toEqual({
       mode: 'flags',
       countryPool: 'familiar',
@@ -32,21 +32,27 @@ describe('option metadata', () => {
     const facts = QUIZ_MODE_OPTIONS.find((o) => o.id === 'facts')!
     expect(facts.description.toLowerCase()).toContain('country')
   })
+  it('Difficulty options display as Easy/Medium/Expert, with their difficulty-dot emoji kept separate from the plain label', () => {
+    const [easy, medium, expert] = COUNTRY_POOL_OPTIONS
+    expect(easy).toMatchObject({ id: 'familiar', label: 'Easy', emoji: '🔵⚪️⚪️' })
+    expect(medium).toMatchObject({ id: 'explorer', label: 'Medium', emoji: '🟠🟠⚪️' })
+    expect(expert).toMatchObject({ id: 'world-expert', label: 'Expert', emoji: '🔴🔴🔴' })
+  })
 })
 
 describe('formatQuizSummary', () => {
-  it('formats a finite question count with the "Questions" suffix', () => {
+  it('formats a finite question count with the "Questions" suffix, using the plain Easy/Medium/Expert label (no emoji)', () => {
     const config: QuizConfig = { mode: 'flags', countryPool: 'familiar', answerStyle: 'multiple-choice', questionCount: 10 }
-    expect(formatQuizSummary(config)).toBe('Flags · Familiar · Multiple Choice · 10 Questions')
+    expect(formatQuizSummary(config)).toBe('Flags · Easy · Multiple Choice · 10 Questions')
   })
   it('formats "unlimited" as just "Unlimited", no "Questions" suffix', () => {
     const config: QuizConfig = { mode: 'mixed', countryPool: 'world-expert', answerStyle: 'type-answer', questionCount: 'unlimited' }
-    expect(formatQuizSummary(config)).toBe('Mixed · World Expert · Type Answer · Unlimited')
+    expect(formatQuizSummary(config)).toBe('Mixed · Expert · Type Answer · Unlimited')
   })
   it('updates independently for every axis', () => {
     const base: QuizConfig = { mode: 'capitals', countryPool: 'explorer', answerStyle: 'multiple-choice', questionCount: 5 }
-    expect(formatQuizSummary(base)).toBe('Capitals · Explorer · Multiple Choice · 5 Questions')
-    expect(formatQuizSummary({ ...base, answerStyle: 'type-answer' })).toBe('Capitals · Explorer · Type Answer · 5 Questions')
+    expect(formatQuizSummary(base)).toBe('Capitals · Medium · Multiple Choice · 5 Questions')
+    expect(formatQuizSummary({ ...base, answerStyle: 'type-answer' })).toBe('Capitals · Medium · Type Answer · 5 Questions')
   })
 })
 

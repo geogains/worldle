@@ -436,24 +436,40 @@ h4 {
 
 /* Small tiles for the How to Play examples. Sized independently of the real
    game board (useBoardMetrics) — these are always 9 tiles regardless of
-   today's answer length, so on narrow phones they need to shrink below the
-   board's own minimum to fit the modal without horizontal scrolling. The
-   clamp scales smoothly with viewport width; the floor (1.7rem) is tuned so
-   a full 9-tile row still fits at 320px with the tightened mobile gap
-   below, and the ceiling (2.75rem, up from 2.5rem) is a modest bump over
-   the previous desktop size — .tile's own font-size is a fraction of
-   --tile, so the letters scale with it automatically. */
+   today's answer length, so mobile needs to actively compute a size that
+   keeps a full 9-tile row (COSTARICA, ARGENTINA) on one line rather than
+   guessing a viewport-fraction that may overflow or waste space.
+   .tile's own font-size is a fraction of --tile, so the letters scale with
+   it automatically — no separate font-size rule needed. */
 .tile--example {
-  --tile: clamp(1.7rem, 7.5vw, 2.75rem);
+  /* Mobile only: derived directly from the How to Play content width
+     (see .modal-panel--result in index.css — panel is 100vw-16px, with
+     16px of its own horizontal padding per side, i.e. content = 100vw-48px)
+     divided across 9 tiles and 8 gaps (.help-tile-row's 2px below), minus a
+     small (~6px total) rounding buffer so sub-pixel layout can never tip a
+     row into wrapping/overflowing. Clamped to the same 2.75rem desktop
+     uses so a wide phone just under the 640px breakpoint never renders
+     tiles bigger than desktop's own. */
+  --tile: clamp(1.7rem, calc((100vw - 70px) / 9), 2.75rem);
+}
+@media (min-width: 640px) {
+  .tile--example {
+    /* Desktop unchanged: a fixed value equal to what the old viewport-based
+       clamp already settled on for every viewport >= 640px (7.5vw exceeds
+       2.75rem well before 640px, so this was already its effective value —
+       fixing it here just makes that explicit and immune to any future
+       mobile-only tuning above). */
+    --tile: 2.75rem;
+  }
 }
 
-/* Row of How to Play example tiles: a tighter gap on mobile (3px, down from
-   4px — the larger tiles above need the extra room to keep a 9-tile row on
-   one line at 320px) restores to the original spacing from the sm
-   breakpoint up, where there's room. */
+/* Row of How to Play example tiles: a tighter gap on mobile (2px, down from
+   3px — the larger tiles above need the extra room to keep a 9-tile row on
+   one line) restores to the original spacing from the sm breakpoint up,
+   where there's room and desktop must stay unchanged. */
 .help-tile-row {
   display: flex;
-  gap: 3px;
+  gap: 2px;
 }
 @media (min-width: 640px) {
   .help-tile-row {
@@ -1048,7 +1064,11 @@ h4 {
    pill per link. Padding stays generous purely for tap-target size — it is
    never painted as a background, so it's invisible until you tap/hover. */
 .nav-link {
-  padding: 0.35rem 0.75rem;
+  /* Horizontal padding trimmed slightly (0.75rem -> 0.6rem) when Quiz
+     became the fifth desktop nav item, to keep the nav+icons fitting
+     without overlap across a wider range of widths — still comfortable for
+     the mouse/hover interaction this desktop-only nav is built for. */
+  padding: 0.35rem 0.6rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--c-muted);
@@ -1475,6 +1495,13 @@ h4 {
   .country-result__actions {
     grid-template-columns: 1fr 1fr;
   }
+  /* A lone action (e.g. the standalone Study result's "Back to Study", now
+     that Quiz is gone) spans both columns instead of sitting half-width
+     with an empty gap beside it. Two-action results (Play again + Share,
+     etc.) are unaffected — neither of their buttons is an only-child. */
+  .country-result__actions > *:only-child {
+    grid-column: 1 / -1;
+  }
 }
 .country-result__tertiary {
   display: flex;
@@ -1544,15 +1571,37 @@ h4 {
      sm: and up — desktop stays naturally sized. */
   min-height: calc(100dvh - 60px - 1rem - max(1.5rem, env(safe-area-inset-bottom)));
 }
+/* Mobile only: with the Quiz CTA removed (Back to Study is now the sole
+   action), reclaim that freed space plus a bit more, rather than leaving
+   the section gaps tuned for two stacked buttons. Trims the page's own
+   outer padding, the card's own padding, and each section's top spacing —
+   giving the best chance the whole card (flag through Back to Study) fits
+   one mobile viewport without scrolling across the Study catalogue.
+   Untouched at sm: and up (desktop keeps its own separate padding rule
+   below), and none of this reaches the shared .country-result__* rules
+   used by the post-game overlay (every selector here is scoped under
+   .country-result-page__panel, the standalone-page-only wrapper). */
 @media (max-width: 639px) {
+  .country-result-page {
+    padding: 0.75rem 1rem max(1.1rem, env(safe-area-inset-bottom));
+  }
+  .country-result-page__panel {
+    padding: 1.1rem 1.25rem;
+    min-height: calc(100dvh - 60px - 0.75rem - max(1.1rem, env(safe-area-inset-bottom)));
+  }
+  .country-result-page__panel .country-result__name {
+    margin-top: 0.4rem;
+  }
   .country-result-page__panel .country-result__facts {
-    margin-top: 1.75rem;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
   }
   .country-result-page__panel .country-result__fun-fact {
-    margin-top: 1.5rem;
+    margin-top: 0.8rem;
+    padding: 0.75rem 1rem 0.8rem;
   }
   .country-result-page__panel .country-result__actions {
-    margin-top: 1.75rem;
+    margin-top: 1rem;
   }
 }
 @media (min-width: 640px) {
@@ -1775,24 +1824,10 @@ h4 {
   grid-auto-flow: column;
 }
 
-/* Country Pool only: Familiar + Explorer stay side by side on mobile, with
-   World Expert (the 3rd option) spanning the full row beneath them, rather
-   than sitting alone in a single column. Kept separate from
-   --grid-3 (Quiz Type's 6-option grid) so this span rule can never leak
-   into an unrelated section that happens to share the same column count. */
-.quiz-option-group--pool {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.quiz-option-group--pool > *:nth-child(3) {
-  grid-column: 1 / -1;
-}
-@media (min-width: 480px) {
-  .quiz-option-group--pool {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .quiz-option-group--pool > *:nth-child(3) {
-    grid-column: auto;
-  }
+/* Difficulty: one full-width option per row, at every width — never a
+   multi-column grid, on mobile or desktop. */
+.quiz-option-group--stack {
+  grid-template-columns: 1fr;
 }
 
 .quiz-option {
@@ -1824,13 +1859,31 @@ h4 {
 .quiz-option:active {
   transform: translateY(0) scale(0.98);
 }
+/* Light mode: navy border + a near-white fill with just a whisper of icy-blue
+   tint (opaque --c-surface base, not the translucent glass token, so the
+   card reads clearly against the pale blue setup-container background) +
+   a subtle cool navy glow (reusing --shadow-lifted, the same soft navy
+   shadow already used elsewhere, rather than inventing a new one) — feels
+   integrated with the navy/cyan palette, leaving coral reserved for
+   stronger action emphasis (primary buttons). Dark mode keeps the original
+   coral treatment untouched, restored explicitly below. Applies to every
+   .quiz-option consumer (Quiz Type, Difficulty carousel card, Answer
+   Style, Questions) since they all share this one class. */
 .quiz-option--selected {
+  border-color: var(--brand-navy);
+  background: color-mix(in srgb, var(--brand-sky) 4%, var(--c-surface));
+  box-shadow: var(--shadow-lifted);
+}
+[data-theme='dark'] .quiz-option--selected {
   border-color: var(--brand-coral-end);
   background: color-mix(in srgb, var(--brand-coral-end) 12%, var(--c-surface-glass));
   box-shadow: var(--shadow-coral);
 }
 
-/* tile: icon-on-top, centered (Quiz Type) */
+/* tile: emoji-on-top, centered (Quiz Type). The emoji renders as its own
+   full-colour glyph (no `color`/filter applied — emoji ignore `color`
+   anyway), so selection is communicated by the card's border/tint/glow
+   alone, same as every other option variant. */
 .quiz-option--tile {
   flex-direction: column;
   justify-content: center;
@@ -1841,16 +1894,14 @@ h4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--c-ink);
-}
-.quiz-option--tile.quiz-option--selected .quiz-option__icon {
-  color: var(--brand-coral-end);
+  font-size: 1.6rem;
+  line-height: 1;
 }
 .quiz-option--tile .quiz-option__text {
   align-items: center;
 }
 
-/* card: label + description, left-aligned (Country Pool) */
+/* card: label + description, left-aligned (Difficulty) */
 .quiz-option--card {
   align-items: flex-start;
 }
@@ -1881,6 +1932,139 @@ h4 {
   line-height: 1.35;
   color: var(--c-muted);
 }
+
+/* Difficulty: single-card looping carousel. Same 40px-arrow grid Study's
+   Previous/Next country navigation already uses (.country-result__nav-row)
+   — reusing that proven pattern both for visual consistency and because it
+   guarantees symmetry for free: the card column is always exactly
+   "container width - 2*40px - gaps", however wide the setup card is. */
+.difficulty-carousel {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.difficulty-carousel__arrow {
+  flex-shrink: 0;
+}
+/* Fixed min-height (tuned for the longest description at the narrowest
+   supported width, 375px) so the outgoing+incoming cards — both
+   position: absolute during a transition, so neither contributes to the
+   viewport's intrinsic height — never collapse the row or clip content. */
+.difficulty-carousel__viewport {
+  position: relative;
+  overflow: hidden;
+  min-height: 92px;
+  border-radius: var(--radius-card);
+}
+.difficulty-carousel__card {
+  position: absolute;
+  inset: 0;
+  cursor: default;
+  /* Centered title/description, scoped to this carousel's card only (not
+     the shared .quiz-option--card rule, which stays left-aligned for any
+     other future consumer). Vertical placement (.quiz-option--card's own
+     align-items: flex-start) is untouched. */
+  text-align: center;
+  animation-duration: 220ms;
+  animation-timing-function: var(--ease-out-quad);
+  animation-fill-mode: both;
+}
+/* Root cause of the desktop-only left shift: .quiz-option__text is a flex
+   item with no explicit width, so it shrink-wraps to its own content's
+   natural size (flex-basis: auto) rather than filling the row. On mobile
+   the description wraps across multiple lines, which happens to push that
+   shrink-wrapped width close to the full card width, masking the bug — on
+   desktop's wider card the (shorter, unwrapped) description fits on one
+   line, so the box shrinks well below the card width and sits at the
+   row's default flex-start position, making the (correctly self-centered)
+   text look shifted left overall. Forcing it to the full row width makes
+   text-align: center above measure against the real card width instead of
+   the content's shrink-wrapped width, at every viewport. */
+.difficulty-carousel__card .quiz-option__text {
+  width: 100%;
+}
+/* Not a button any more (only the arrows navigate), so suppress the
+   hover-lift .quiz-option normally gets — the selected border/tint/glow
+   stays, just without implying the card itself is clickable. */
+@media (hover: hover) {
+  .difficulty-carousel__card:hover {
+    transform: none;
+    box-shadow: var(--shadow-coral);
+  }
+}
+@keyframes difficulty-out-left {
+  to {
+    transform: translateX(-16%);
+    opacity: 0;
+  }
+}
+@keyframes difficulty-out-right {
+  to {
+    transform: translateX(16%);
+    opacity: 0;
+  }
+}
+@keyframes difficulty-in-from-right {
+  from {
+    transform: translateX(16%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes difficulty-in-from-left {
+  from {
+    transform: translateX(-16%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.difficulty-carousel__card--out-left {
+  animation-name: difficulty-out-left;
+}
+.difficulty-carousel__card--out-right {
+  animation-name: difficulty-out-right;
+}
+.difficulty-carousel__card--in-right {
+  animation-name: difficulty-in-from-right;
+}
+.difficulty-carousel__card--in-left {
+  animation-name: difficulty-in-from-left;
+}
+@media (prefers-reduced-motion: reduce) {
+  .difficulty-carousel__card {
+    animation-duration: 1ms;
+  }
+}
+
+.difficulty-carousel__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+.difficulty-carousel__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--c-border-strong);
+  transition:
+    background-color 0.2s var(--ease-standard),
+    transform 0.2s var(--ease-standard);
+}
+.difficulty-carousel__dot--active {
+  background: var(--brand-coral-end);
+  transform: scale(1.3);
+}
+
 .quiz-summary {
   margin-top: 1.75rem;
   padding: 0.75rem 1rem;

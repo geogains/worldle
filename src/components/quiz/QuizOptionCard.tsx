@@ -8,7 +8,7 @@ export interface QuizOptionCardProps {
   onSelect: () => void
   /**
    * 'tile': icon-on-top, centered (Quiz Type).
-   * 'card': label + description, left-aligned (Country Pool).
+   * 'card': label + description, left-aligned, full-width (Difficulty).
    * 'pill': compact, label-only, one row (Answer Style, Question Count).
    */
   variant: 'tile' | 'card' | 'pill'
@@ -33,7 +33,14 @@ export function QuizOptionCard({ label, description, icon, selected, onSelect, v
       className={`quiz-option quiz-option--${variant}${selected ? ' quiz-option--selected' : ''}`}
       onClick={onSelect}
     >
-      {icon && <span className="quiz-option__icon">{icon}</span>}
+      {/* Decorative (whether a vector icon or an emoji): the visible label
+          beside it already names the option, so this is hidden from
+          assistive tech rather than announced redundantly. */}
+      {icon && (
+        <span className="quiz-option__icon" aria-hidden="true">
+          {icon}
+        </span>
+      )}
       <span className="quiz-option__text">
         <span className="quiz-option__label">{label}</span>
         {description && <span className="quiz-option__description">{description}</span>}

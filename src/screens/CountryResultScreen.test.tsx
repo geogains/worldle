@@ -161,40 +161,44 @@ describe('CountryResultScreen (/results/:slug)', () => {
     expect(screen.queryByText(/better luck/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
     const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    fireEvent.click(card.getByRole('button', { name: /^quiz$/i }))
-    expect(window.location.pathname).toBe('/quiz')
+    fireEvent.click(card.getByRole('button', { name: /^back to study$/i }))
+    expect(window.location.pathname).toBe('/study')
   })
 
-  it('standalone/reference result (no completed-game context, e.g. opened from Study): shows Quiz as primary and Back to Study as secondary, never "Today\'s puzzle" or bare "Practice"', () => {
+  it('standalone/reference result (no completed-game context, e.g. opened from Study): shows only Back to Study (secondary), no Quiz, no "Today\'s puzzle" or bare "Practice"', () => {
     renderAt('/results/tanzania')
-    const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    const quizBtn = card.getByRole('button', { name: /^quiz$/i })
+    const cardEl = screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement
+    const card = within(cardEl)
     const backToStudyBtn = card.getByRole('button', { name: /^back to study$/i })
-    expect(quizBtn).toHaveClass('btn--primary')
     expect(backToStudyBtn).toHaveClass('btn--secondary')
+    expect(backToStudyBtn).not.toHaveClass('btn--primary')
+    expect(card.queryByRole('button', { name: /^quiz$/i })).not.toBeInTheDocument()
     expect(card.queryByRole('button', { name: /today's puzzle/i })).not.toBeInTheDocument()
     expect(card.queryByRole('button', { name: /^practice$/i })).not.toBeInTheDocument()
+    // Exactly one action renders (no primary CTA slot at all any more).
+    const actionsEl = cardEl.querySelector('.country-result__actions') as HTMLElement
+    expect(within(actionsEl).getAllByRole('button')).toHaveLength(1)
 
     fireEvent.click(backToStudyBtn)
     expect(window.location.pathname).toBe('/study')
     expect(screen.getByRole('heading', { level: 1, name: 'Study' })).toBeInTheDocument()
   })
 
-  it('standalone/reference result for a playable country (China) shows the same Quiz + Back to Study pair, proving the CTA is not eligibility-based', () => {
+  it('standalone/reference result for a playable country (China) shows only Back to Study, no Quiz, proving the CTA is not eligibility-based', () => {
     renderAt('/results/china')
     const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    expect(card.getByRole('button', { name: /^quiz$/i })).toHaveClass('btn--primary')
+    expect(card.queryByRole('button', { name: /^quiz$/i })).not.toBeInTheDocument()
     expect(card.getByRole('button', { name: /^back to study$/i })).toHaveClass('btn--secondary')
     expect(card.queryByRole('button', { name: /today's puzzle/i })).not.toBeInTheDocument()
 
-    fireEvent.click(card.getByRole('button', { name: /^quiz$/i }))
-    expect(window.location.pathname).toBe('/quiz')
+    fireEvent.click(card.getByRole('button', { name: /^back to study$/i }))
+    expect(window.location.pathname).toBe('/study')
   })
 
-  it('standalone/reference result for a non-playable country (United Kingdom) shows the same Quiz + Back to Study pair', () => {
+  it('standalone/reference result for a non-playable country (United Kingdom) shows only Back to Study, no Quiz', () => {
     renderAt('/results/united-kingdom')
     const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    expect(card.getByRole('button', { name: /^quiz$/i })).toHaveClass('btn--primary')
+    expect(card.queryByRole('button', { name: /^quiz$/i })).not.toBeInTheDocument()
     expect(card.getByRole('button', { name: /^back to study$/i })).toHaveClass('btn--secondary')
     expect(card.queryByRole('button', { name: /today's puzzle/i })).not.toBeInTheDocument()
 
@@ -329,7 +333,7 @@ describe('CountryResultScreen (/results/:slug)', () => {
       expect(document.title).toBe('Daily Worldle — Andorra Results')
       let card = cardOf('Andorra')
       expect(card.getByRole('img', { name: 'Flag of Andorra' })).toBeInTheDocument()
-      expect(card.getByRole('button', { name: /^quiz$/i })).toBeInTheDocument()
+      expect(card.queryByRole('button', { name: /^quiz$/i })).not.toBeInTheDocument()
       expect(card.getByRole('button', { name: /^back to study$/i })).toBeInTheDocument()
       expect(card.getByRole('button', { name: 'Previous country: Algeria' })).toBeInTheDocument()
       expect(card.getByRole('button', { name: 'Next country: Angola' })).toBeInTheDocument()

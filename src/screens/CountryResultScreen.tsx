@@ -209,11 +209,6 @@ function StandaloneCountryPage({ details }: { details: CountryDetails }) {
                 }
               : undefined
           }
-          primaryAction={
-            <button type="button" className="btn btn--primary" onClick={() => navigate(PATHS.quiz)}>
-              Quiz
-            </button>
-          }
           secondaryAction={
             <button type="button" className="btn btn--secondary" onClick={() => navigate(PATHS.study)}>
               Back to Study

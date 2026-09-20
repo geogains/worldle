@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import App from '../App'
 import { EPOCH_UTC } from '../lib/daily/date'
 import { storageKey } from '../lib/storage/storage'
@@ -15,6 +15,41 @@ function renderAt(path: string) {
 
 function group(label: string): HTMLElement {
   return screen.getByRole('radiogroup', { name: label })
+}
+
+// --- Difficulty carousel helpers -------------------------------------
+const prevDifficultyBtn = () => screen.getByRole('button', { name: 'Previous difficulty' })
+const nextDifficultyBtn = () => screen.getByRole('button', { name: 'Next difficulty' })
+/**
+ * Clicks an arrow AND clears the transition lock (advances past the
+ * ~220ms animation window) before returning, so a test can chain multiple
+ * steps the way it would assert them — one settled step at a time. A test
+ * that specifically wants to exercise the lock itself (rapid presses
+ * before it clears) fires fireEvent.click directly instead.
+ */
+function clickNextDifficulty() {
+  fireEvent.click(nextDifficultyBtn())
+  act(() => vi.advanceTimersByTime(300))
+}
+function clickPrevDifficulty() {
+  fireEvent.click(prevDifficultyBtn())
+  act(() => vi.advanceTimersByTime(300))
+}
+function difficultyCard(): HTMLElement {
+  // Not just `.difficulty-carousel__card` — mid-transition, an exiting card
+  // briefly coexists with the current one, so this targets the current
+  // selection unambiguously regardless of animation state or DOM order.
+  return document.querySelector('[data-difficulty-card="current"]') as HTMLElement
+}
+function difficultyStatus(): HTMLElement {
+  return document.querySelector('.difficulty-carousel__status') as HTMLElement
+}
+function currentDifficultyLabel(): string | null | undefined {
+  return difficultyCard()?.querySelector('.quiz-option__label')?.textContent
+}
+function activeDifficultyDotIndex(): number {
+  const dots = [...document.querySelectorAll('.difficulty-carousel__dot')]
+  return dots.findIndex((d) => d.classList.contains('difficulty-carousel__dot--active'))
 }
 
 describe('QuizScreen (/quiz)', () => {
@@ -37,22 +72,32 @@ describe('QuizScreen (/quiz)', () => {
     window.history.replaceState(null, '', '/')
   })
 
-  it('renders the Quiz heading and all four selection groups', () => {
+  it('renders the Quiz heading, the Difficulty carousel, and the other three selection groups', () => {
     renderAt('/quiz')
     expect(screen.getByRole('heading', { level: 1, name: 'Quiz' })).toBeInTheDocument()
     expect(group('Quiz type')).toBeInTheDocument()
-    expect(group('Country pool')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Difficulty' })).toBeInTheDocument()
+    expect(prevDifficultyBtn()).toBeInTheDocument()
+    expect(nextDifficultyBtn()).toBeInTheDocument()
     expect(group('Answer style')).toBeInTheDocument()
     expect(group('Question count')).toBeInTheDocument()
   })
 
-  it('defaults to Flags / Familiar / Multiple Choice / 10, with a correct initial summary and Start Quiz ready to press immediately', () => {
+  it('"Country Pool" is no longer the visible heading or accessible group name — it is "Difficulty" now', () => {
+    renderAt('/quiz')
+    expect(screen.queryByText('Country Pool')).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: 'Country pool' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: 'Difficulty' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Difficulty' })).toBeInTheDocument()
+  })
+
+  it('defaults to Flags / Easy / Multiple Choice / 10, with a correct initial summary and Start Quiz ready to press immediately', () => {
     renderAt('/quiz')
     expect(within(group('Quiz type')).getByRole('radio', { name: /flags/i })).toHaveAttribute('aria-checked', 'true')
-    expect(within(group('Country pool')).getByRole('radio', { name: /^familiar/i })).toHaveAttribute('aria-checked', 'true')
+    expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
     expect(within(group('Answer style')).getByRole('radio', { name: /multiple choice/i })).toHaveAttribute('aria-checked', 'true')
     expect(within(group('Question count')).getByRole('radio', { name: '10' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByText('Flags · Familiar · Multiple Choice · 10 Questions')).toBeInTheDocument()
+    expect(screen.getByText('Flags · Easy · Multiple Choice · 10 Questions')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Start Quiz' })).toBeInTheDocument()
   })
 
@@ -69,28 +114,84 @@ describe('QuizScreen (/quiz)', () => {
     }
   })
 
-  it('every Country Pool option can be selected, exclusively', () => {
+  it('Next loops Easy -> Medium -> Expert -> Easy', () => {
     renderAt('/quiz')
-    const g = group('Country pool')
-    for (const name of ['Familiar', 'Explorer', 'World Expert']) {
-      fireEvent.click(within(g).getByRole('radio', { name: new RegExp(`^${name}`) }))
-      expect(within(g).getByRole('radio', { name: new RegExp(`^${name}`) }), name).toHaveAttribute('aria-checked', 'true')
-      const others = within(g)
-        .getAllByRole('radio')
-        .filter((el) => el.getAttribute('aria-checked') === 'true')
-      expect(others).toHaveLength(1)
+    expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
+    clickNextDifficulty()
+    expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+    clickNextDifficulty()
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
+    clickNextDifficulty()
+    expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
+  })
+
+  it('Previous loops Easy -> Expert -> Medium -> Easy', () => {
+    renderAt('/quiz')
+    expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
+    clickPrevDifficulty()
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
+    clickPrevDifficulty()
+    expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+    clickPrevDifficulty()
+    expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
+  })
+
+  it('changing the carousel position selects immediately — no second click needed, and updates persisted config (internal "explorer" value) the same as any other selector', () => {
+    renderAt('/quiz')
+    fireEvent.click(nextDifficultyBtn())
+    expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+    const saved = JSON.parse(window.localStorage.getItem(storageKey('quizConfig')) ?? '{}')
+    expect(saved.countryPool).toBe('explorer')
+  })
+
+  it('the displayed difficulty always matches the persisted QuizConfig.countryPool, at every step (visible label vs. unchanged internal value)', () => {
+    renderAt('/quiz')
+    const stepsAndExpected: Array<['next' | 'prev', string, string]> = [
+      ['next', 'Medium 🟠🟠⚪️', 'explorer'],
+      ['next', 'Expert 🔴🔴🔴', 'world-expert'],
+      ['prev', 'Medium 🟠🟠⚪️', 'explorer'],
+      ['prev', 'Easy 🔵⚪️⚪️', 'familiar'],
+      ['prev', 'Expert 🔴🔴🔴', 'world-expert'],
+    ]
+    for (const [dir, label, poolId] of stepsAndExpected) {
+      if (dir === 'next') clickNextDifficulty()
+      else clickPrevDifficulty()
+      expect(currentDifficultyLabel()).toBe(label)
+      const saved = JSON.parse(window.localStorage.getItem(storageKey('quizConfig')) ?? '{}')
+      expect(saved.countryPool).toBe(poolId)
     }
   })
 
-  it('both Answer Style options can be selected, exclusively and independently of Country Pool', () => {
+  it('pagination dots: exactly one active dot, matching the current difficulty (index 0/1/2 for Easy/Medium/Expert)', () => {
     renderAt('/quiz')
-    fireEvent.click(within(group('Country pool')).getByRole('radio', { name: /^world expert/i }))
+    expect(document.querySelectorAll('.difficulty-carousel__dot')).toHaveLength(3)
+    expect(activeDifficultyDotIndex()).toBe(0) // Easy
+    clickNextDifficulty()
+    expect(activeDifficultyDotIndex()).toBe(1) // Medium
+    clickNextDifficulty()
+    expect(activeDifficultyDotIndex()).toBe(2) // Expert
+    clickNextDifficulty()
+    expect(activeDifficultyDotIndex()).toBe(0) // looped back to Easy
+  })
+
+  it('if a previous difficulty selection is already saved, the carousel opens showing it — not forced back to Easy', () => {
+    set('quizConfig', { mode: 'flags', countryPool: 'world-expert', answerStyle: 'multiple-choice', questionCount: 10 })
+    renderAt('/quiz')
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
+    expect(activeDifficultyDotIndex()).toBe(2)
+  })
+
+  it('both Answer Style options can be selected, exclusively and independently of Difficulty', () => {
+    renderAt('/quiz')
+    clickNextDifficulty()
+    clickNextDifficulty()
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
     const g = group('Answer style')
     fireEvent.click(within(g).getByRole('radio', { name: 'Type Answer' }))
     expect(within(g).getByRole('radio', { name: 'Type Answer' })).toHaveAttribute('aria-checked', 'true')
     expect(within(g).getByRole('radio', { name: 'Multiple Choice' })).toHaveAttribute('aria-checked', 'false')
-    // Country Pool selection is untouched by the Answer Style change.
-    expect(within(group('Country pool')).getByRole('radio', { name: /^world expert/i })).toHaveAttribute('aria-checked', 'true')
+    // Difficulty selection is untouched by the Answer Style change.
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
 
     fireEvent.click(within(g).getByRole('radio', { name: 'Multiple Choice' }))
     expect(within(g).getByRole('radio', { name: 'Multiple Choice' })).toHaveAttribute('aria-checked', 'true')
@@ -110,13 +211,14 @@ describe('QuizScreen (/quiz)', () => {
     }
   })
 
-  it('the configuration summary updates immediately as any selection changes', () => {
+  it('the configuration summary updates immediately as any selection changes, including the Difficulty carousel — using the plain "Medium" label, not the emoji-decorated card text', () => {
     renderAt('/quiz')
     fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /mixed/i }))
-    fireEvent.click(within(group('Country pool')).getByRole('radio', { name: /^explorer/i }))
+    fireEvent.click(nextDifficultyBtn()) // Easy -> Medium
     fireEvent.click(within(group('Answer style')).getByRole('radio', { name: 'Type Answer' }))
     fireEvent.click(within(group('Question count')).getByRole('radio', { name: 'Unlimited' }))
-    expect(screen.getByText('Mixed · Explorer · Type Answer · Unlimited')).toBeInTheDocument()
+    expect(screen.getByText('Mixed · Medium · Type Answer · Unlimited')).toBeInTheDocument()
+    expect(screen.queryByText(/Mixed · Medium 🟠/)).not.toBeInTheDocument()
   })
 
   it('Start Quiz navigates to /quiz/:mode using the currently selected configuration', () => {
@@ -125,17 +227,17 @@ describe('QuizScreen (/quiz)', () => {
     fireEvent.click(within(group('Question count')).getByRole('radio', { name: '5' }))
     fireEvent.click(screen.getByRole('button', { name: 'Start Quiz' }))
     expect(window.location.pathname).toBe('/quiz/capitals')
-    expect(screen.getByText('Capitals · Familiar · Multiple Choice · 5 Questions')).toBeInTheDocument()
+    expect(screen.getByText('Capitals · Easy · Multiple Choice · 5 Questions')).toBeInTheDocument()
   })
 
   it('selections made on /quiz persist and are still selected after navigating away and back (Change Quiz retains the previous configuration)', () => {
     renderAt('/quiz')
     fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /languages/i }))
-    fireEvent.click(within(group('Country pool')).getByRole('radio', { name: /^world expert/i }))
+    fireEvent.click(prevDifficultyBtn()) // Easy -> Expert
     renderAt('/study')
     renderAt('/quiz')
     expect(within(group('Quiz type')).getByRole('radio', { name: /languages/i })).toHaveAttribute('aria-checked', 'true')
-    expect(within(group('Country pool')).getByRole('radio', { name: /^world expert/i })).toHaveAttribute('aria-checked', 'true')
+    expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
   })
 
   it('light/dark mode both render the setup page without errors', () => {
@@ -145,12 +247,14 @@ describe('QuizScreen (/quiz)', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
   })
 
-  it('the setup controls (all four groups, the summary and Start Quiz) sit inside one rounded card, with the heading/intro outside it', () => {
+  it('the setup controls (Quiz Type, the Difficulty carousel, Answer Style, Question Count, the summary and Start Quiz) sit inside one rounded card, with the heading/intro outside it', () => {
     renderAt('/quiz')
     const card = document.querySelector('.quiz-setup-card') as HTMLElement
     expect(card).toBeInTheDocument()
     expect(within(card).getByRole('radiogroup', { name: 'Quiz type' })).toBeInTheDocument()
-    expect(within(card).getByRole('radiogroup', { name: 'Country pool' })).toBeInTheDocument()
+    expect(within(card).getByRole('heading', { level: 2, name: 'Difficulty' })).toBeInTheDocument()
+    expect(within(card).getByRole('button', { name: 'Previous difficulty' })).toBeInTheDocument()
+    expect(within(card).getByRole('button', { name: 'Next difficulty' })).toBeInTheDocument()
     expect(within(card).getByRole('radiogroup', { name: 'Answer style' })).toBeInTheDocument()
     expect(within(card).getByRole('radiogroup', { name: 'Question count' })).toBeInTheDocument()
     expect(within(card).getByRole('button', { name: 'Start Quiz' })).toBeInTheDocument()
@@ -167,56 +271,117 @@ describe('QuizScreen (/quiz)', () => {
     // No leftover check-icon element, on the default-selected options or after changing selection.
     expect(document.querySelector('.quiz-option__check')).toBeNull()
 
-    fireEvent.click(within(group('Country pool')).getByRole('radio', { name: /^explorer/i }))
-    expect(within(group('Country pool')).getByRole('radio', { name: /^explorer/i })).toHaveClass('quiz-option--selected')
+    // The Difficulty carousel's visible card is always the selected card
+    // (there's only one shown), and it never gets a checkmark either.
+    expect(difficultyCard()).toHaveClass('quiz-option--selected')
+    fireEvent.click(nextDifficultyBtn())
+    expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+    expect(difficultyCard()).toHaveClass('quiz-option--selected')
     expect(document.querySelector('.quiz-option__check')).toBeNull()
   })
 
-  it('Country Pool uses the dedicated "pool" grid layout, with World Expert as the 3rd option (for the mobile full-width span rule to target)', () => {
-    renderAt('/quiz')
-    const g = group('Country pool')
-    expect(g).toHaveClass('quiz-option-group--pool')
-    const options = within(g).getAllByRole('radio')
-    expect(options).toHaveLength(3)
-    expect(options[0]).toHaveAccessibleName(/^familiar/i)
-    expect(options[1]).toHaveAccessibleName(/^explorer/i)
-    expect(options[2]).toHaveAccessibleName(/^world expert/i)
-  })
-
-  it('Quiz Type keeps the unrelated grid-3 layout (not "pool"), so the Country Pool span rule cannot leak into it', () => {
+  it('Quiz Type keeps its unrelated grid-3 layout, unaffected by the Difficulty carousel change', () => {
     renderAt('/quiz')
     expect(group('Quiz type')).toHaveClass('quiz-option-group--grid-3')
-    expect(group('Quiz type')).not.toHaveClass('quiz-option-group--pool')
-  })
-})
-
-describe('Study result CTA -> /quiz', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(EPOCH_UTC + 3600_000)
-    set('prefs', { theme: 'light', hasSeenHelp: true })
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        observe() {}
-        disconnect() {}
-        unobserve() {}
-      },
-    )
-  })
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.unstubAllGlobals()
-    window.history.replaceState(null, '', '/')
   })
 
-  it('a standalone country result page shows "Quiz" (not "Practice") and it routes to /quiz', () => {
-    renderAt('/results/china')
-    const card = within(screen.getByRole('heading', { level: 1 }).closest('.country-result') as HTMLElement)
-    expect(card.queryByRole('button', { name: /^practice$/i })).not.toBeInTheDocument()
-    fireEvent.click(card.getByRole('button', { name: /^quiz$/i }))
-    expect(window.location.pathname).toBe('/quiz')
-    expect(screen.getByRole('heading', { level: 1, name: 'Quiz' })).toBeInTheDocument()
+  it('Quiz Type options show the exact requested emoji, decorative to assistive tech (visible label still carries the accessible name)', () => {
+    renderAt('/quiz')
+    const g = group('Quiz type')
+    const expected: Record<string, string> = {
+      Flags: '🏳️',
+      Capitals: '🏛️',
+      Currencies: '💰',
+      Languages: '🗣️',
+      Facts: '💡',
+      Mixed: '🔀',
+    }
+    for (const [name, emoji] of Object.entries(expected)) {
+      const option = within(g).getByRole('radio', { name })
+      const iconEl = option.querySelector('.quiz-option__icon') as HTMLElement
+      expect(iconEl).not.toBeNull()
+      expect(iconEl).toHaveTextContent(emoji)
+      expect(iconEl).toHaveAttribute('aria-hidden', 'true')
+      // The visible text label (not the emoji) is what the accessible name
+      // is built from — getByRole above already proves this by matching on
+      // the label text alone.
+      expect(within(option).getByText(name)).toBeInTheDocument()
+    }
+  })
+
+  describe('Difficulty carousel', () => {
+    it('preserves the existing descriptions for each difficulty (unchanged wording)', () => {
+      renderAt('/quiz')
+      expect(screen.getByText('The most recognisable, widely known countries.')).toBeInTheDocument()
+      clickNextDifficulty()
+      expect(screen.getByText('A balanced mix of familiar and less obvious countries.')).toBeInTheDocument()
+      clickNextDifficulty()
+      expect(screen.getByText('The full supported country pool.')).toBeInTheDocument()
+    })
+
+    it('shows the exact new visible labels — Easy 🔵⚪️⚪️, Medium 🟠🟠⚪️, Expert 🔴🔴🔴', () => {
+      renderAt('/quiz')
+      expect(currentDifficultyLabel()).toBe('Easy 🔵⚪️⚪️')
+      clickNextDifficulty()
+      expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+      clickNextDifficulty()
+      expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
+    })
+
+    it('the old visible labels (Familiar / Explorer / World Expert) no longer render anywhere in the Difficulty carousel', () => {
+      renderAt('/quiz')
+      const carousel = document.querySelector('.difficulty-carousel')?.parentElement as HTMLElement
+      for (let i = 0; i < 3; i++) {
+        expect(within(carousel).queryByText('Familiar')).not.toBeInTheDocument()
+        expect(within(carousel).queryByText('Explorer')).not.toBeInTheDocument()
+        expect(within(carousel).queryByText('World Expert')).not.toBeInTheDocument()
+        clickNextDifficulty()
+      }
+    })
+
+    it("the emoji sits alongside the label but doesn't leak into the accessible name/status — internal countryPool values stay 'familiar'/'explorer'/'world-expert'. Actual centered rendering is verified in browser QA, not here (jsdom doesn't load the real stylesheet).", () => {
+      renderAt('/quiz')
+      const card = difficultyCard()
+      expect(card).toHaveClass('difficulty-carousel__card')
+      const emojiEl = card.querySelector('.quiz-option__label span[aria-hidden="true"]')
+      expect(emojiEl).toHaveTextContent('🔵⚪️⚪️')
+      expect(difficultyStatus()).toHaveTextContent('Difficulty 1 of 3: Easy')
+      expect(difficultyStatus()).not.toHaveTextContent('🔵')
+      // Internal value for this initial ("Easy") state — persistence and
+      // value-sync across every step is covered thoroughly elsewhere.
+      clickNextDifficulty()
+      const saved = JSON.parse(window.localStorage.getItem(storageKey('quizConfig')) ?? '{}')
+      expect(saved.countryPool).toBe('explorer')
+    })
+
+    it('only one difficulty card is present in the DOM at rest (not three)', () => {
+      renderAt('/quiz')
+      expect(document.querySelectorAll('.difficulty-carousel__card')).toHaveLength(1)
+      expect(screen.queryByText('A balanced mix of familiar and less obvious countries.')).not.toBeInTheDocument()
+      expect(screen.queryByText('The full supported country pool.')).not.toBeInTheDocument()
+    })
+
+    it('exposes an accessible status announcing the current position and difficulty, using the plain label (no emoji)', () => {
+      renderAt('/quiz')
+      expect(difficultyStatus()).toHaveAttribute('role', 'status')
+      expect(difficultyStatus()).toHaveTextContent('Difficulty 1 of 3: Easy')
+      fireEvent.click(nextDifficultyBtn())
+      expect(difficultyStatus()).toHaveTextContent('Difficulty 2 of 3: Medium')
+    })
+
+    it('rapid repeated presses do not skip state or desync from a single, deterministic step per press once settled', () => {
+      renderAt('/quiz')
+      // Fire five rapid Next presses with no time advance between them —
+      // the transition lock should swallow all but the first.
+      for (let i = 0; i < 5; i++) fireEvent.click(nextDifficultyBtn())
+      expect(currentDifficultyLabel()).toBe('Medium 🟠🟠⚪️')
+      // Let the lock's timeout elapse, then advance one more step cleanly.
+      act(() => vi.advanceTimersByTime(300))
+      fireEvent.click(nextDifficultyBtn())
+      expect(currentDifficultyLabel()).toBe('Expert 🔴🔴🔴')
+      const saved = JSON.parse(window.localStorage.getItem(storageKey('quizConfig')) ?? '{}')
+      expect(saved.countryPool).toBe('world-expert')
+    })
   })
 })
 

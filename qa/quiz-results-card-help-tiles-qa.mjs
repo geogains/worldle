@@ -64,7 +64,7 @@ async function runQuizResults(viewport, theme) {
   check(`${tag}: heading inside card`, await card.getByText('Flags Quiz Complete').isVisible())
   check(`${tag}: score inside card`, await card.getByText('5 / 5').isVisible())
   check(`${tag}: percent inside card`, await card.getByText('100%').isVisible())
-  check(`${tag}: pool/style pills inside card`, await card.getByText('Familiar').isVisible() && await card.getByText('Multiple Choice').isVisible())
+  check(`${tag}: pool/style pills inside card`, await card.getByText('Easy').isVisible() && await card.getByText('Multiple Choice').isVisible())
   const playAgain = card.getByRole('button', { name: 'Play Again' })
   const changeQuiz = card.getByRole('button', { name: 'Change Quiz' })
   check(`${tag}: Play Again inside card, comfortably tappable`, await playAgain.isVisible() && (await playAgain.boundingBox()).height >= 40)
@@ -113,7 +113,22 @@ async function runHelpModal(viewport, theme) {
   }
   check(`${tag}: no example row wraps onto two lines`, !anyWrap)
   check(`${tag}: no example row overflows its container`, !anyOverflow)
-  check(`${tag}: tiles are larger than the pre-change baseline (>26.4px)`, Math.min(...tileSizes) > 26.4, `min tile ${Math.min(...tileSizes).toFixed(1)}px`)
+  // Baseline from the prior pass (mobile-only follow-up): 320->27.2px,
+  // 375->28.1px, 390->29.3px, 430->32.3px, desktop(>=640)->44px unchanged.
+  // Mobile widths must now be noticeably larger again; desktop must be
+  // byte-identical to the old ceiling.
+  const baselineByWidth = { 320: 27.2, 375: 28.1, 390: 29.3, 430: 32.3 }
+  const requiredNoticeablyLargerWidths = [375, 390, 430]
+  const baseline = baselineByWidth[viewport.width]
+  const minTile = Math.min(...tileSizes)
+  if (requiredNoticeablyLargerWidths.includes(viewport.width)) {
+    check(`${tag}: mobile tiles are noticeably larger than the previous pass's baseline (${baseline}px)`, minTile > baseline * 1.15, `min tile ${minTile.toFixed(1)}px`)
+  } else if (baseline) {
+    // 320px isn't a required width for this pass — just guard against a regression.
+    check(`${tag}: tile size at least matches the previous pass's baseline (${baseline}px)`, minTile >= baseline, `min tile ${minTile.toFixed(1)}px`)
+  } else {
+    check(`${tag}: desktop tile size unchanged (44px)`, Math.abs(minTile - 44) < 0.5, `${minTile.toFixed(1)}px`)
+  }
   await noHorizontalOverflow(p, tag)
   await p.screenshot({ path: `${OUT}/help-modal-${theme}-${viewport.width}x${viewport.height}.png` })
   await context.close()

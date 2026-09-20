@@ -1,8 +1,9 @@
 // Verifies the standalone/reference result-page CTA:
-// Study -> /results/:slug (no completed-game context) shows
-// "Quiz" (primary, -> /quiz) + "Back to Study" (secondary), never
-// "Today's puzzle" or bare "Practice" — while completed Practice/Daily
-// results keep their existing, unrelated CTAs untouched.
+// Study -> /results/:slug (no completed-game context) shows only
+// "Back to Study" (secondary) — Quiz was removed (now reachable via the
+// main nav instead), and it never shows "Today's puzzle" or bare
+// "Practice" — while completed Practice/Daily results keep their
+// existing, unrelated CTAs untouched.
 import { chromium } from 'playwright'
 
 const BASE = 'http://localhost:4173'
@@ -36,31 +37,24 @@ async function runStudyFlow(viewport, label) {
   await p.waitForTimeout(300)
   check(`[${label}] clicking China from Study navigates to /results/china`, p.url().endsWith('/results/china'))
   const chinaCard = p.locator('.country-result')
-  check(`[${label}] China: "Quiz" primary button visible`, await chinaCard.getByRole('button', { name: /^quiz$/i }).isVisible())
+  check(`[${label}] China: "Quiz" is gone (removed from Study results)`, (await chinaCard.getByRole('button', { name: /^quiz$/i }).count()) === 0)
   check(`[${label}] China: "Back to Study" secondary button visible`, await chinaCard.getByRole('button', { name: /^back to study$/i }).isVisible())
   check(`[${label}] China: "Today's puzzle" is absent`, (await chinaCard.getByRole('button', { name: /today's puzzle/i }).count()) === 0)
-  check(`[${label}] China: bare "Practice" is absent (renamed to Quiz)`, (await chinaCard.getByRole('button', { name: /^practice$/i }).count()) === 0)
-  const quizClass = await chinaCard.getByRole('button', { name: /^quiz$/i }).getAttribute('class')
+  check(`[${label}] China: bare "Practice" is absent`, (await chinaCard.getByRole('button', { name: /^practice$/i }).count()) === 0)
   const backClass = await chinaCard.getByRole('button', { name: /^back to study$/i }).getAttribute('class')
-  check(`[${label}] China: Quiz uses primary button styling`, quizClass.includes('btn--primary'))
-  check(`[${label}] China: Back to Study uses secondary button styling`, backClass.includes('btn--secondary'))
-
-  await chinaCard.getByRole('button', { name: /^quiz$/i }).click()
-  await p.waitForTimeout(300)
-  check(`[${label}] "Quiz" navigates to /quiz`, p.url().endsWith('/quiz'))
-  await p.goBack()
-  await p.waitForTimeout(300)
+  check(`[${label}] China: Back to Study uses secondary button styling (not promoted to primary)`, backClass.includes('btn--secondary') && !backClass.includes('btn--primary'))
+  check(`[${label}] China: Back to Study is the only action rendered`, (await chinaCard.locator('.country-result__actions').getByRole('button').count()) === 1)
 
   await chinaCard.getByRole('button', { name: /^back to study$/i }).click()
   await p.waitForTimeout(300)
   check(`[${label}] "Back to Study" returns to /study`, p.url().endsWith('/study'))
 
-  // 2. /study -> click United Kingdom (non-playable) -> same CTA pair
+  // 2. /study -> click United Kingdom (non-playable) -> same single CTA
   await p.locator('[data-study-tile="united-kingdom"]').click()
   await p.waitForTimeout(300)
   check(`[${label}] United Kingdom: navigates to /results/united-kingdom`, p.url().endsWith('/results/united-kingdom'))
   const ukCard = p.locator('.country-result')
-  check(`[${label}] United Kingdom: "Quiz" primary button visible`, await ukCard.getByRole('button', { name: /^quiz$/i }).isVisible())
+  check(`[${label}] United Kingdom: "Quiz" is gone`, (await ukCard.getByRole('button', { name: /^quiz$/i }).count()) === 0)
   check(`[${label}] United Kingdom: "Back to Study" secondary button visible`, await ukCard.getByRole('button', { name: /^back to study$/i }).isVisible())
   check(`[${label}] United Kingdom: "Today's puzzle" is absent`, (await ukCard.getByRole('button', { name: /today's puzzle/i }).count()) === 0)
 
@@ -133,8 +127,8 @@ async function runDarkMode() {
   await p.goto(`${BASE}/results/china`)
   await p.waitForTimeout(300)
   const card = p.locator('.country-result')
-  check('[dark] China standalone result: Quiz + Back to Study visible in dark mode',
-    (await card.getByRole('button', { name: /^quiz$/i }).isVisible()) &&
+  check('[dark] China standalone result: no Quiz, Back to Study visible in dark mode',
+    (await card.getByRole('button', { name: /^quiz$/i }).count()) === 0 &&
     (await card.getByRole('button', { name: /^back to study$/i }).isVisible()))
   await context.close()
 }

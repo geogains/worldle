@@ -5,7 +5,7 @@ import { defaultRandom, shuffle, type RandomSource } from './random'
 import { getSimilarCountryIds } from './similarFlags'
 import type { CountryPool } from './types'
 
-function continentOf(id: string): string | null {
+export function continentOf(id: string): string | null {
   const details = getCountryDetails(id)
   // Every canonical country has a real continent value (Phase 1 data
   // population is complete) — the null case only guards a country that
