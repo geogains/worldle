@@ -61,17 +61,33 @@ export interface CountryRecord {
   continent: string
 
   /**
-   * Principal languages useful to a geography learner — normally the
-   * official/state language(s), and, where no clear statutory official
-   * language exists, the major national/de facto language(s) a normal
-   * geography reference would show (e.g. Mexico -> Spanish, Australia ->
-   * English). This is NOT a strict "statutory official languages only"
-   * field: a country is never left with an empty array merely because it
-   * has no de jure official language, provided a principal language is
-   * genuinely identifiable. (Historical note: earlier batches used a
-   * stricter official-only policy under which Australia, Eritrea, Taiwan,
-   * Mauritius and Mexico had `languages: []`; that policy was revised — see
-   * the semantic audit — and no populated record uses an empty array today.)
+   * PRINCIPAL LANGUAGES POLICY (locked after a semantic-consistency audit
+   * found the earlier "principal languages useful to a geography learner"
+   * wording was being applied inconsistently — see git history for the
+   * full audit trail). This is deliberately NOT a complete list of a
+   * country's legally official, national, recognised, regional, Indigenous
+   * or minority languages. Include a language only if it is:
+   *
+   *  1. an ANCHOR — routinely used by the national government for
+   *     nationwide administration, OR functions as a major nationwide
+   *     lingua franca (>50% combined first+second-language reach or
+   *     equivalent strong evidence); legal "official"/"national" status is
+   *     supporting evidence only and never automatically qualifies a
+   *     language on its own — where formal/procedural government use
+   *     conflicts with evidence a language is no longer routinely used,
+   *     prefer the current functional/usage evidence;
+   *  2. OR spoken as a first/home language by >=10% of the national
+   *     population (never total L1+L2, never an ethnic-population proxy
+   *     unless no better data exists, never absolute speaker count).
+   *
+   * Regional-only official status does not qualify a language unless it
+   * independently clears the 10% national threshold. Sign languages are
+   * judged against the anchor criteria only (nationwide legal recognition
+   * plus institutional function), never the spoken-language population
+   * test, since comparable census data doesn't exist for them. A country
+   * is never left with an empty array — where no official language is
+   * declared, the de facto nationwide administrative language qualifies as
+   * an anchor (e.g. Mexico -> Spanish, Taiwan -> Mandarin).
    */
   languages: string[]
 
@@ -261,13 +277,17 @@ export interface CountryRecord {
  * "dr-congo" (Democratic Republic of the Congo, not yet in this dataset).
  * Do not conflate the two when adding DR Congo in a future batch.
  *
- * Bolivia's languages array is unusually long (37 entries: Spanish plus 36
- * constitutionally recognised Indigenous languages) — deliberately kept in
- * full, not summarised; see its own comment below.
+ * A later Principal Languages policy pass (see the `languages` field doc
+ * comment above) replaced the earlier, inconsistently-applied "principal
+ * languages useful to a geography learner" wording with a precise,
+ * reproducible anchor/threshold rule, and rebuilt every record's
+ * `languages` array against it — see each changed record's own comment
+ * for its source/rationale. Bolivia's array, for example, was reduced from
+ * a full 37-entry constitutional list to the 3 languages that clear the
+ * anchor/10%-threshold bar (Spanish, Quechua, Aymara); see its own comment.
  *
  * No populated record currently uses `languages: []` — see the `languages`
- * field doc comment above for the "principal languages" policy that
- * replaced the earlier strict official-only convention. hasValue() in
+ * field doc comment above for the current policy. hasValue() in
  * index.ts still treats a present empty array as verified (not missing
  * data) should a future record ever need one, but CountryResultCard no
  * longer has a special "no official language" fallback to render it.
@@ -482,7 +502,13 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Euro', code: 'EUR', symbol: '€' }),
     population: Object.freeze({ value: 11_774_642, asOf: 2026 }),
     continent: 'Europe',
-    languages: ['Dutch', 'French', 'German'],
+    // Principal Languages policy: Dutch and French are both nationwide
+    // federal-administrative anchors and each independently clear 10%.
+    // German is one of Belgium's 3 federally-official languages but is
+    // regionally confined to the small German-speaking Community (~1% of
+    // the population) — not a nationwide administrative or lingua-franca
+    // function, so it doesn't qualify under this field's definition.
+    languages: ['Dutch', 'French'],
     areaKm2: 30_528,
     flag: '/flags/BE.png',
     fact: 'Brussels is home to major institutions of the European Union and the headquarters of NATO.',
@@ -510,7 +536,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' }),
     population: Object.freeze({ value: 15_170_419, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor.
+    // Fon is spoken as a first/home language by 20% of the population
+    // (explicitly distinguished in source data from the larger 38.4%
+    // ethnic-Fon figure), clearing the 10% threshold on real language-use
+    // data.
+    languages: ['French', 'Fon'],
     areaKm2: 114_763,
     flag: '/flags/BJ.png',
     fact: 'Benin is historically associated with the Kingdom of Dahomey and is one of the traditional heartlands of the Vodun religion.',
@@ -538,17 +569,14 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Bolivian Boliviano', code: 'BOB', symbol: 'Bs.' }),
     population: Object.freeze({ value: 12_749_291, asOf: 2026 }),
     continent: 'South America',
-    // Bolivia's constitution recognises 37 official languages (Spanish plus
-    // 36 Indigenous languages) — the full list is preserved, not shortened.
-    languages: [
-      'Spanish', 'Aymara', 'Araona', 'Baure', 'Bésiro', 'Canichana',
-      'Cavineño', 'Cayubaba', 'Chácobo', 'Chimán', 'Ese Ejja', 'Guaraní',
-      "Guarasu'we", 'Guarayu', 'Itonama', 'Leco', 'Machajuyai-Kallawaya', 'Machineri',
-      'Maropa', 'Mojeño-Trinitario', 'Mojeño-Ignaciano', 'Moré', 'Mosetén', 'Movima',
-      'Pacawara', 'Puquina', 'Quechua', 'Sirionó', 'Tacana', 'Tapiete',
-      'Toromona', 'Uru-Chipaya', 'Weenhayek', 'Yaminawa', 'Yuki', 'Yuracaré',
-      'Zamuco',
-    ],
+    // Principal Languages policy (see the `languages` field doc comment):
+    // Bolivia's constitution recognises 37 official languages, but only
+    // Spanish (nationwide administrative anchor) and Quechua/Aymara (each
+    // ≥10% first-language share, 2012 census, INE Bolivia) clear the
+    // concise geography-learning bar. The other 34 are each native to a
+    // small fraction of a percent and are legally official but not
+    // principal languages under this field's definition.
+    languages: ['Spanish', 'Quechua', 'Aymara'],
     areaKm2: 1_098_581,
     flag: '/flags/BO.png',
     fact: "Sucre is Bolivia's constitutional capital, while La Paz is the seat of the national government.",
@@ -774,7 +802,15 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Central African CFA Franc', code: 'XAF', symbol: 'FCFA' }),
     population: Object.freeze({ value: 6_637_785, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor
+    // (spoken by only ~30% of the population, 2006 study, but still the
+    // sole official/administrative language regardless of speaker share).
+    // Kituba is spoken by over 50% of the population — clears both the
+    // 10% threshold and the nationwide-lingua-franca bar outright. Lingala
+    // is also a national language and a major lingua franca in the
+    // north/east, but no confirmed population-share figure was found —
+    // flagged for follow-up, not guessed in.
+    languages: ['French', 'Kituba'],
     areaKm2: 342_000,
     flag: '/flags/CG.png',
     fact: 'Brazzaville sits directly across the Congo River from Kinshasa, the capital of the Democratic Republic of the Congo.',
@@ -830,7 +866,17 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Euro', code: 'EUR', symbol: '€' }),
     population: Object.freeze({ value: 1_382_334, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Greek', 'Turkish'],
+    // Principal Languages policy: Greek is the administrative anchor for
+    // the Republic of Cyprus, the internationally-recognised state this
+    // record represents. Turkish is still nominally co-official under the
+    // 1960 constitution, and the often-cited "~20% Turkish speakers"
+    // figure describes the whole island (including the Turkish-Cypriot-
+    // administered north, de facto separate since 1974) — but within the
+    // area the Republic of Cyprus actually administers, Turkish speakers
+    // are close to 0% (one source cites 0.2%), clearing neither the
+    // nationwide-administrative-anchor test nor the 10% threshold for the
+    // entity this record represents.
+    languages: ['Greek'],
     areaKm2: 9_251,
     flag: '/flags/CY.png',
     fact: 'Nicosia is the capital of Cyprus and remains divided by a United Nations buffer zone.',
@@ -872,7 +918,13 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Djiboutian Franc', code: 'DJF', symbol: 'Fdj' }),
     population: Object.freeze({ value: 1_199_459, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['Arabic', 'French'],
+    // Principal Languages policy: Arabic and French are both official/
+    // administrative anchors. Somali (~524,000 speakers) and Afar
+    // (~306,000 speakers) are each spoken as a first language by well over
+    // 10% of Djibouti's ~1.1-1.2 million population (~47% and ~28%
+    // respectively) — both clear the threshold independently of their
+    // "national language" (2017) status.
+    languages: ['Arabic', 'French', 'Somali', 'Afar'],
     areaKm2: 23_200,
     flag: '/flags/DJ.png',
     fact: "Djibouti sits beside the Bab el-Mandeb Strait, one of the world's most important maritime shipping routes.",
@@ -1008,7 +1060,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Ethiopian Birr', code: 'ETB', symbol: 'Br' }),
     population: Object.freeze({ value: 138_902_185, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['Amharic'],
+    // Principal Languages policy: since the Council of Ministers' 29 Feb
+    // 2020 decision, Amharic, Afaan Oromo, Tigrinya, Somali and Afar all
+    // hold equal, current federal working-language status — genuine
+    // administrative function, not just symbolic recognition — so all 5
+    // qualify as anchors regardless of individual population share.
+    languages: ['Amharic', 'Oromo', 'Somali', 'Tigrinya', 'Afar'],
     areaKm2: 1_104_300,
     flag: '/flags/ET.png',
     fact: 'Ethiopia uses its own calendar, which contains thirteen months and differs from the Gregorian calendar.',
@@ -1064,7 +1121,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Central African CFA Franc', code: 'XAF', symbol: 'FCFA' }),
     population: Object.freeze({ value: 2_647_399, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor.
+    // Fang is Gabon's largest ethnic/language group and is widely
+    // reported (secondary sources, not a primary census) as spoken at
+    // home by ~32% of the population, clearing the 10% threshold; also
+    // commonly described as Gabon's de facto national language.
+    languages: ['French', 'Fang'],
     areaKm2: 267_668,
     flag: '/flags/GA.png',
     fact: 'Much of Gabon is covered by tropical rainforest, and the country has created extensive national parks to protect its wildlife.',
@@ -1179,7 +1241,11 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Guinean Franc', code: 'GNF', symbol: 'FG' }),
     population: Object.freeze({ value: 15_441_993, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor
+    // (used almost exclusively as a second language). 2014 census-derived
+    // figures: Pular/Fula 35%, Maninka 25%, Susu 18% — all three clear the
+    // 10% threshold by a wide margin.
+    languages: ['French', 'Pular', 'Maninka', 'Susu'],
     areaKm2: 245_857,
     flag: '/flags/GN.png',
     fact: "Guinea's highlands contain the sources of several major West African rivers, including the Niger, Senegal and Gambia.",
@@ -1283,7 +1349,13 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Indonesian Rupiah', code: 'IDR', symbol: 'Rp' }),
     population: Object.freeze({ value: 287_886_782, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Indonesian'],
+    // Principal Languages policy: Indonesian is the sole official/national
+    // administrative anchor. 2010 BPS (Statistics Indonesia) census data:
+    // Javanese is spoken at home by 31.8% of the national population, and
+    // Sundanese by ~15.5% (41.4 million speakers) — both independently
+    // clear the 10% threshold on real language-use data, not an ethnic-
+    // group proxy.
+    languages: ['Indonesian', 'Javanese', 'Sundanese'],
     areaKm2: 1_904_569,
     flag: '/flags/ID.png',
     fact: "Indonesia is the world's largest archipelagic country, with thousands of islands stretching across Southeast Asia.",
@@ -1375,7 +1447,14 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' }),
     population: Object.freeze({ value: 33_494_346, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor.
+    // Baoulé (Akan) is Ivory Coast's largest single language group —
+    // independent sources put its native-speaker count at ~5.3 million
+    // (2021) against a total population of ~28 million (~19%), clearing
+    // the 10% threshold. Dioula functions as the country's main trade
+    // lingua franca but no confirmed population-share figure was found —
+    // flagged for follow-up, not guessed in.
+    languages: ['French', 'Baoulé'],
     areaKm2: 322_463,
     flag: '/flags/CI.png',
     fact: "Côte d'Ivoire is one of the world's largest producers of cocoa beans.",
@@ -1450,7 +1529,11 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Kenyan Shilling', code: 'KES', symbol: 'KSh' }),
     population: Object.freeze({ value: 58_636_412, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['Kiswahili', 'English'],
+    // Principal Languages policy: Swahili and English are both official
+    // and administrative anchors. Kikuyu is Kenya's largest single
+    // mother-tongue at ~12.7% (Afrobarometer household-language survey),
+    // independently clearing the 10% first-language threshold.
+    languages: ['Swahili', 'English', 'Kikuyu'],
     areaKm2: 580_367,
     flag: '/flags/KE.png',
     fact: 'Kenya is crossed by the equator and contains landscapes ranging from the Great Rift Valley to the Indian Ocean coast.',
@@ -1699,10 +1782,15 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     fact: "The Maldives is the world's lowest-lying country, with an average natural ground level only a few metres above sea level.",
   },
   mali: {
-    // Under Mali's 2023 constitution, its national languages became
-    // official languages and French became a working language only — not
-    // co-official. French is deliberately excluded from this array; the
-    // 13 languages below are preserved in full, not shortened.
+    // Principal Languages policy: Mali's 2023 constitution made 13
+    // national languages official and demoted French to a working
+    // language (excluded here on that basis alone either way). Home-
+    // language shares (2022 census-cited figures, cross-checked against an
+    // independent 2009 estimate) put Bambara at 46-50% and every other
+    // named language at 9.4% or below (Fula is the next-largest at
+    // 8.2-9.4%) — only Bambara clears the 10% threshold or functions as a
+    // nationwide lingua franca (~80% combined L1+L2 reach); the other 12
+    // are confirmed, not merely assumed, to fall short.
     name: 'Mali',
     officialName: 'Republic of Mali',
     iso2: 'ML',
@@ -1711,10 +1799,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' }),
     population: Object.freeze({ value: 25_932_275, asOf: 2026 }),
     continent: 'Africa',
-    languages: [
-      'Bambara', 'Bobo', 'Bozo', 'Dogon', 'Fula', 'Hassaniya Arabic', 'Kassonke',
-      'Maninka', 'Minyanka', 'Senufo', 'Songhay', 'Soninke', 'Tamasheq',
-    ],
+    languages: ['Bambara'],
     areaKm2: 1_240_192,
     flag: '/flags/ML.png',
     fact: 'The historic city of Timbuktu became a major centre of trade and Islamic scholarship during the height of the Mali and Songhai empires.',
@@ -1852,7 +1937,14 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Nigerian Naira', code: 'NGN', symbol: '₦' }),
     population: Object.freeze({ value: 242_431_832, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['English'],
+    // Principal Languages policy: English is the sole official/administrative
+    // anchor. Nigeria has never held a national language census, but the
+    // best available household-language survey (Statista/NOI Polls, 2022)
+    // puts Hausa at 32%, Yoruba at 17% and Igbo at 13% as the main language
+    // spoken at home — all three independently clear the 10% threshold, and
+    // are cross-corroborated by independent ethnic-group-size estimates in
+    // the same range. No stronger (census-tier) source exists for Nigeria.
+    languages: ['English', 'Hausa', 'Yoruba', 'Igbo'],
     areaKm2: 923_768,
     flag: '/flags/NG.png',
     fact: "Nigeria is Africa's most populous country and is home to hundreds of ethnic groups and languages.",
@@ -2083,9 +2175,17 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Rwandan Franc', code: 'RWF', symbol: 'FRw' }),
     population: Object.freeze({ value: 14_889_693, asOf: 2026 }),
     continent: 'Africa',
-    // Rwanda's 2023 constitutional official-language provision lists
-    // exactly these three; Kiswahili/Swahili is deliberately not added.
-    languages: ['Kinyarwanda', 'English', 'French'],
+    // Principal Languages policy: Kinyarwanda (99.7% speak it, NISR 2022
+    // census) and English (medium of instruction Primary 1 through
+    // university since MINEDUC's 2019 policy) are confirmed anchors.
+    // French is legally official but only 1.9% are literate in
+    // Kinyarwanda+French (2022 NISR census) and government policy has
+    // moved administration/education to English since 2008 — not a
+    // routine current administrative function. Kiswahili is legally
+    // official (2017) but national literacy is under 2% and Rwanda's own
+    // Official Gazette does not publish in it — no confirmed anchor or
+    // threshold basis for either.
+    languages: ['Kinyarwanda', 'English'],
     areaKm2: 26_338,
     flag: '/flags/RW.png',
     fact: 'Rwanda is often called the Land of a Thousand Hills because of its mountainous and rolling landscape.',
@@ -2143,7 +2243,14 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' }),
     population: Object.freeze({ value: 19_366_548, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['French'],
+    // Principal Languages policy: French is the administrative anchor.
+    // ANSD (Senegal's national statistics office) census-derived home-
+    // language shares: Wolof 53.5%, Pulaar 26.3%, Serer 9.6%, Jola 2.8%,
+    // Mandinka 2.8%. Wolof and Pulaar both clear the 10% threshold; Serer
+    // (9.6%) does not, despite also holding "national language" status —
+    // legal status alone does not qualify it. Jola/Mandinka/Soninke are
+    // also national languages but fall well short of 10%.
+    languages: ['French', 'Wolof', 'Pulaar'],
     areaKm2: 196_722,
     flag: '/flags/SN.png',
     fact: "Senegal's Cap-Vert Peninsula contains the westernmost point of mainland Africa.",
@@ -2180,8 +2287,15 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     fact: "Seychelles includes the Aldabra Atoll, home to one of the world's largest populations of giant tortoises.",
   },
   singapore: {
-    // Malay is additionally the national language, but all four official
-    // languages are preserved in the supplied order, undifferentiated.
+    // Principal Languages policy: English and Mandarin are each spoken at
+    // home by roughly half of residents (Census of Population 2020,
+    // SingStat) and English is the working administrative language.
+    // Malay is constitutionally the national language (Art. 153A) but
+    // functions today more symbolically (anthem, ceremonial) than as a
+    // routine administrative/lingua-franca anchor, and its home-language
+    // share (~9%) doesn't clear 10%; Tamil's home-language share (~2.5%,
+    // SingStat 2020) doesn't either. Both remain constitutionally official
+    // — see a future `languageNote` for that context, not this field.
     name: 'Singapore',
     officialName: 'Republic of Singapore',
     iso2: 'SG',
@@ -2190,7 +2304,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Singapore Dollar', code: 'SGD', symbol: '$' }),
     population: Object.freeze({ value: 5_905_748, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Malay', 'Mandarin', 'Tamil', 'English'],
+    languages: ['English', 'Mandarin'],
     areaKm2: 735,
     flag: '/flags/SG.png',
     fact: 'Singapore is a city-state made up of its main island and dozens of smaller surrounding islands.',
@@ -2372,11 +2486,18 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     fact: "Damascus is one of the world's oldest continuously inhabited cities.",
   },
   taiwan: {
-    // Taiwan's National Languages Development Act gives equal legal status
-    // to the natural and sign languages used by its ethnic groups rather
-    // than designating one single statutory official language. Mandarin
-    // is shown here as the principal language useful to a geography
-    // learner (see module comment), not as a claim of sole official status.
+    // Principal Languages policy: Taiwan has no statutory single official
+    // language (the 2019 National Languages Development Act instead gives
+    // equal legal status to an open category of "national languages"), so
+    // Mandarin is included via the no-official-language fallback (the de
+    // facto administrative language). Hoklo/Taiwanese independently clears
+    // the 10% first-language threshold on actual home-language use (29.7%,
+    // Taiwan Normal University survey) — note this is the preferred Tier-1
+    // metric; Hakka's *home-language* share (1.4%, same survey) does not
+    // clear 10%, even though its *ethnic-heritage* share (11.2%) would —
+    // heritage affiliation is a last-resort metric under this field's
+    // speaker-metric hierarchy and is not used here since better data
+    // exists.
     name: 'Taiwan',
     officialName: 'Republic of China (Taiwan)',
     iso2: 'TW',
@@ -2385,7 +2506,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'New Taiwan Dollar', code: 'TWD', symbol: 'NT$' }),
     population: Object.freeze({ value: 23_011_292, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Mandarin'],
+    languages: ['Mandarin', 'Hoklo/Taiwanese'],
     areaKm2: 36_197,
     flag: '/flags/TW.png',
     fact: 'Taiwan is an island in East Asia separated from the Asian mainland by the Taiwan Strait.',
@@ -2630,9 +2751,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Euro', code: 'EUR', symbol: '€' }),
     population: Object.freeze({ value: 627_859, asOf: 2026 }),
     continent: 'Europe',
-    // All five official languages preserved in full, not collapsed to
-    // Montenegrin only.
-    languages: ['Montenegrin', 'Serbian', 'Bosnian', 'Albanian', 'Croatian'],
+    // Principal Languages policy: Montenegro's constitution names only
+    // Montenegrin "the official language"; Serbian/Bosnian/Albanian/
+    // Croatian are textually "in official use" — a distinct, lesser legal
+    // tier, and none independently clears the 10% first-language
+    // threshold or a nationwide administrative/lingua-franca role.
+    languages: ['Montenegrin'],
     areaKm2: 13_812,
     flag: '/flags/ME.png',
     fact: 'Montenegro combines a rugged Adriatic coastline with dramatic mountain ranges and the deep Tara River Canyon.',
@@ -2674,8 +2798,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Ugandan Shilling', code: 'UGX', symbol: 'USh' }),
     population: Object.freeze({ value: 52_761_469, asOf: 2026 }),
     continent: 'Africa',
-    // Swahili is constitutionally Uganda's second official language.
-    languages: ['English', 'Swahili'],
+    // Principal Languages policy: English and Swahili are both official/
+    // administrative anchors (Swahili constitutionally so). Uganda's 2014
+    // National Population and Housing Census recorded 5.6 million Luganda
+    // first-language speakers against a total population of ~34.6
+    // million (~16%), clearing the 10% threshold.
+    languages: ['English', 'Swahili', 'Luganda'],
     areaKm2: 241_550,
     flag: '/flags/UG.png',
     fact: 'Uganda contains part of Lake Victoria and is one of the countries through which the Nile flows.',
@@ -2803,8 +2931,13 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     // rest of this project for a contradictory older-dataset assumption
     // (e.g. the pre-2024 Zimbabwe dollar, ZWL); none exists anywhere in
     // the codebase, so the supplied record is used as-is, not substituted.
-    // All 16 official languages are preserved in full, in the supplied
-    // order, not shortened.
+    // Principal Languages policy: of Zimbabwe's 16 constitutionally
+    // official languages, only English (administrative anchor) and
+    // Shona/Ndebele (each well over the 10% first-language threshold)
+    // clear the concise geography-learning bar; Zimbabwe's constitutional
+    // Sign Language is retained under the sign-language rule (genuine
+    // nationwide institutional function, not a spoken-language population
+    // test) — see the `languages` field doc comment.
     name: 'Zimbabwe',
     officialName: 'Republic of Zimbabwe',
     iso2: 'ZW',
@@ -2813,10 +2946,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Zimbabwe Gold', code: 'ZWG', symbol: 'ZiG' }),
     population: Object.freeze({ value: 17_273_580, asOf: 2026 }),
     continent: 'Africa',
-    languages: [
-      'Chewa', 'Chibarwe', 'English', 'Kalanga', 'Koisan', 'Nambya', 'Ndau', 'Ndebele',
-      'Shangani', 'Shona', 'Sign Language', 'Sotho', 'Tonga', 'Tswana', 'Venda', 'Xhosa',
-    ],
+    languages: ['English', 'Shona', 'Ndebele', 'Sign Language'],
     areaKm2: 390_757,
     flag: '/flags/ZW.png',
     fact: 'Zimbabwe takes its name from Great Zimbabwe, the ruins of a major medieval stone-built city in southern Africa.',
@@ -2853,8 +2983,15 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     // (published 14 July 2026): mid-2025 (30 June 2025) population.
     population: Object.freeze({ value: 5_545_500, asOf: 2025 }),
     continent: 'Europe',
-    // English, Scots and Scottish Gaelic — do not add Welsh here.
-    languages: ['English', 'Scots', 'Scottish Gaelic'],
+    // Principal Languages policy: the Gaelic Language (Scotland) Act 2005
+    // only sought to *secure* official status for Gaelic — it did not
+    // grant it (unlike Welsh's unambiguous 2011 de jure official status
+    // for Wales) — and Gaelic's home-language share is a small fraction
+    // of a percent. Scots has only European Charter for Regional or
+    // Minority Languages recognition, a protection/recognition tier this
+    // field's definition explicitly excludes. Neither clears an anchor or
+    // the 10% threshold; do not add Welsh here (see "wales").
+    languages: ['English'],
     areaKm2: 77_933,
     flag: '/flags/GB-SCT.png',
     fact: 'Scotland makes up the northern third of Great Britain and includes hundreds of islands.',
@@ -2938,7 +3075,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' }),
     population: Object.freeze({ value: 24_601_700, asOf: 2026 }),
     continent: 'Africa',
-    languages: ['Mooré', 'Dioula', 'Fulfulde', 'French'],
+    // Principal Languages policy: Burkina Faso's Dec 2023/Jan 2024
+    // constitutional amendment made national languages official and
+    // demoted French (and English) to working-language status — French
+    // is excluded here on that basis. Mooré, Dioula and Fulfulde are
+    // Burkina Faso's largest indigenous/lingua-franca languages.
+    languages: ['Mooré', 'Dioula', 'Fulfulde'],
     areaKm2: 274_200,
     flag: '/flags/BF.png',
     fact: "The name Burkina Faso is commonly translated as 'Land of Upright People'.",
@@ -3087,7 +3229,16 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Papua New Guinean Kina', code: 'PGK', symbol: 'K' }),
     population: Object.freeze({ value: 10_947_848, asOf: 2026 }),
     continent: 'Oceania',
-    languages: ['English', 'Tok Pisin', 'Hiri Motu'],
+    // Principal Languages policy: English (administrative anchor) and Tok
+    // Pisin (genuine nationwide lingua franca) are confirmed. Hiri Motu is
+    // legally one of PNG's 4 official languages but its actual nationwide
+    // reach has declined sharply since independence and is now largely
+    // regional (Papuan region) — excluded on current function, not legal
+    // status. Papua New Guinean Sign Language (official since May 2015) is
+    // retained under the sign-language rule: national-level legal
+    // recognition plus confirmed pre-existing nationwide use as the
+    // language of instruction in deaf schools/units.
+    languages: ['English', 'Tok Pisin', 'Papua New Guinean Sign Language'],
     areaKm2: 462_840,
     flag: '/flags/PG.png',
     fact: "Papua New Guinea is one of the world's most linguistically diverse countries, with more than 800 Indigenous languages.",
@@ -3103,7 +3254,14 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Philippine Peso', code: 'PHP', symbol: '₱' }),
     population: Object.freeze({ value: 117_724_471, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Filipino', 'English'],
+    // Principal Languages policy: Filipino and English are both official
+    // (1987 Constitution Art. XIV) and administrative anchors. PSA (2020
+    // Census of Population and Housing) home-language data: Tagalog (the
+    // basis of Filipino) 39.9%, Bisaya/Binisaya 16.0% — both clear 10%;
+    // Hiligaynon/Ilonggo (7.3%), Ilocano (7.1%) and Cebuano specifically
+    // (6.5%, a narrower PSA category than the broader "Bisaya/Binisaya")
+    // do not.
+    languages: ['Filipino', 'English', 'Bisaya/Binisaya'],
     areaKm2: 300_000,
     flag: '/flags/PH.png',
     fact: 'The Philippines is an archipelago of more than 7,000 islands in Southeast Asia.',
@@ -3218,10 +3376,13 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     // single capital value is preserved per the same convention already
     // used for Bolivia/Sri Lanka/Eswatini/Nauru/Netherlands, with the
     // nuance documented in the fact text rather than a schema change.
-    // Languages preserve all 12 constitutionally recognised official
-    // languages in the exact supplied order — note "itsonga" is supplied
-    // in lowercase (the language is more commonly spelled "Xitsonga");
-    // preserved exactly as given rather than silently corrected.
+    // Principal Languages policy: of South Africa's 12 constitutionally
+    // official languages, only English (administrative anchor) and
+    // Zulu/Xhosa/Afrikaans (each ≥10% home-language share, 2011 census)
+    // clear the concise geography-learning bar; South African Sign
+    // Language is retained under the sign-language rule (genuine
+    // nationwide institutional function since the 2023 Eighteenth
+    // Amendment) — see the `languages` field doc comment.
     name: 'South Africa',
     officialName: 'Republic of South Africa',
     iso2: 'ZA',
@@ -3230,10 +3391,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'South African Rand', code: 'ZAR', symbol: 'R' }),
     population: Object.freeze({ value: 65_453_084, asOf: 2026 }),
     continent: 'Africa',
-    languages: [
-      'Sepedi', 'Sesotho', 'Setswana', 'siSwati', 'Tshivenda', 'itsonga',
-      'Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'South African Sign Language',
-    ],
+    languages: ['English', 'isiZulu', 'isiXhosa', 'Afrikaans', 'South African Sign Language'],
     areaKm2: 1_221_037,
     flag: '/flags/ZA.png',
     fact: 'South Africa divides its national capital functions between Pretoria, Cape Town and Bloemfontein.',
@@ -3252,7 +3410,12 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' }),
     population: Object.freeze({ value: 9_007_798, asOf: 2026 }),
     continent: 'Europe',
-    languages: ['German', 'French', 'Italian', 'Romansh'],
+    // Principal Languages policy: German/French/Italian are fully
+    // co-equal federal administrative anchors; Romansh's 1996 official
+    // status is narrower (correspondence with Romansh speakers only, not
+    // general federal administration) and its ~0.5% speaker share doesn't
+    // independently clear the 10% threshold.
+    languages: ['German', 'French', 'Italian'],
     areaKm2: 41_285,
     flag: '/flags/CH.png',
     fact: "Bern serves as Switzerland's federal city, although the country has no constitutionally designated capital.",
@@ -3284,7 +3447,16 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Turkmenistani Manat', code: 'TMT', symbol: 'm' }),
     population: Object.freeze({ value: 7_736_632, asOf: 2026 }),
     continent: 'Asia',
-    languages: ['Turkmen', 'Russian'],
+    // Principal Languages policy: Turkmen is the sole confirmed anchor.
+    // Russian's current status is genuinely contested — sources disagree
+    // sharply on its present speaker share (estimates range 2.7%-12%,
+    // with no census-tier source available), and government policy since
+    // independence has actively reduced Russian's public/administrative
+    // role (unlike Kazakhstan/Kyrgyzstan, which have explicit
+    // constitutional provisions for Russian). Given the disagreement and
+    // the documented decline, Russian is not confirmed to clear the 10%
+    // threshold or function as a current administrative anchor.
+    languages: ['Turkmen'],
     areaKm2: 488_100,
     flag: '/flags/TM.png',
     fact: 'Much of Turkmenistan is covered by the Karakum Desert, one of the largest deserts in Central Asia.',
@@ -3309,12 +3481,15 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     // Not a playable answer (UNITEDKINGDOM is 13 letters) but a canonical
     // country — Study-data Batch C. Remains fully distinct from its own
     // constituent countries "england"/"scotland"/"wales" (separate slugs,
-    // separate records, separate GB/GB-ENG/GB-SCT/GB-WLS flags) — this
-    // record's own languages array spans the whole union (English, Welsh,
-    // Scottish Gaelic, Irish, Scots), which is deliberately broader than
-    // any single constituent country's own languages array. Population is
-    // the latest available UK-wide provisional estimate (mid-2025, asOf
-    // 2025, ~69.5 million) — not forced to 2026.
+    // separate records, separate GB/GB-ENG/GB-SCT/GB-WLS flags). Principal
+    // Languages policy: no UK-wide statute declares any language
+    // officially "the official language of the United Kingdom" — Welsh's
+    // 2011 de jure official status is Wales-specific, not UK-wide — so
+    // this falls to the no-official-language fallback (the de facto
+    // nationwide administrative language, English) rather than the
+    // broader per-constituent-country list this record showed previously.
+    // Population is the latest available UK-wide provisional estimate
+    // (mid-2025, asOf 2025, ~69.5 million) — not forced to 2026.
     name: 'United Kingdom',
     officialName: 'United Kingdom of Great Britain and Northern Ireland',
     iso2: 'GB',
@@ -3323,7 +3498,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     currency: Object.freeze({ name: 'Pound Sterling', code: 'GBP', symbol: '£' }),
     population: Object.freeze({ value: 69_487_000, asOf: 2025 }),
     continent: 'Europe',
-    languages: ['English', 'Welsh', 'Scottish Gaelic', 'Irish', 'Scots'],
+    languages: ['English'],
     areaKm2: 243_610,
     flag: '/flags/GB.png',
     fact: 'The United Kingdom consists of England, Scotland, Wales and Northern Ireland.',

@@ -128,10 +128,10 @@ describe('Batch 2 country records, resolved end-to-end through getCountryDetails
     expect(screen.getByText('Bahraini Dinar (BHD) · د.ب')).toBeInTheDocument()
   })
 
-  it('Belgium: a multi-language official list renders as a comma-separated string', () => {
+  it('Belgium: a multi-language list renders as a comma-separated string', () => {
     const details = getCountryDetails('belgium')!
     render(<CountryResultCard details={details} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('Dutch, French, German')).toBeInTheDocument()
+    expect(screen.getByText('Dutch, French')).toBeInTheDocument()
   })
 
   it('all ten Batch 2 countries resolve through getCountryDetails() with a real flag and no placeholders', () => {
@@ -169,19 +169,14 @@ describe('Batch 3 country records, resolved end-to-end through getCountryDetails
     expect(screen.getByText('Cambodian Riel (KHR) · ៛')).toBeInTheDocument()
   })
 
-  it("Bolivia: all 37 official languages survive the raw-data → derived-data → rendered-UI flow intact", () => {
+  it("Bolivia: its Principal Languages (Spanish, Quechua, Aymara) survive the raw-data → derived-data → rendered-UI flow intact", () => {
     const details = getCountryDetails('bolivia')!
-    expect(details.languages).toHaveLength(37)
+    expect(details.languages).toEqual(['Spanish', 'Quechua', 'Aymara'])
     const { container } = render(
       <CountryResultCard details={details} context={null} primaryAction={<button>Go</button>} />,
     )
     const languagesValue = container.querySelector('.country-result__fact:last-child .country-result__fact-value')
-    // Every language present in the rendered text, comma-separated, nothing dropped.
-    expect(languagesValue?.textContent).toBe(details.languages.join(', '))
-    expect(languagesValue?.textContent).toContain('Spanish')
-    expect(languagesValue?.textContent).toContain("Guarasu'we")
-    expect(languagesValue?.textContent).toContain('Zamuco')
-    expect(languagesValue?.textContent?.split(', ')).toHaveLength(37)
+    expect(languagesValue?.textContent).toBe('Spanish, Quechua, Aymara')
     expect(languagesValue).not.toHaveClass('country-result__fact-value--placeholder')
   })
 
@@ -552,7 +547,7 @@ describe('Batch 8 country records, resolved end-to-end through getCountryDetails
     expect(screen.getByRole('heading', { level: 1, name: 'Ivory Coast' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Flag of Ivory Coast' })).toHaveAttribute('src', '/flags/CI.png')
     expect(screen.getByText('Yamoussoukro')).toBeInTheDocument()
-    expect(screen.getByText('French')).toBeInTheDocument()
+    expect(screen.getByText('French, Baoulé')).toBeInTheDocument()
   })
 
   it('Jamaica renders English only', () => {
@@ -638,11 +633,11 @@ describe('Batch 9 country records, resolved end-to-end through getCountryDetails
     expect(screen.getByText('Kazakh, Russian')).toBeInTheDocument()
   })
 
-  it('Kenya renders exactly Kiswahili, English', () => {
+  it('Kenya renders exactly Swahili, English, Kikuyu', () => {
     const kenya = getCountryDetails('kenya')!
-    expect(kenya.languages).toEqual(['Kiswahili', 'English'])
+    expect(kenya.languages).toEqual(['Swahili', 'English', 'Kikuyu'])
     render(<CountryResultCard details={kenya} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('Kiswahili, English')).toBeInTheDocument()
+    expect(screen.getByText('Swahili, English, Kikuyu')).toBeInTheDocument()
   })
 
   it('Kiribati renders exactly Gilbertese, English', () => {
@@ -781,16 +776,11 @@ describe('Batch 10 country records, resolved end-to-end through getCountryDetail
     expect(screen.getByText('Dhivehi')).toBeInTheDocument()
   })
 
-  it("Mali's full 13-language array survives raw -> derived -> getCountryDetails() -> DOM with no truncation, and never renders French", () => {
+  it("Mali's Principal Language (Bambara, its confirmed nationwide lingua franca) survives raw -> derived -> getCountryDetails() -> DOM, and never renders French", () => {
     const mali = getCountryDetails('mali')!
-    const expected = [
-      'Bambara', 'Bobo', 'Bozo', 'Dogon', 'Fula', 'Hassaniya Arabic', 'Kassonke',
-      'Maninka', 'Minyanka', 'Senufo', 'Songhay', 'Soninke', 'Tamasheq',
-    ]
-    expect(mali.languages).toEqual(expected)
-    expect(mali.languages).toHaveLength(13)
+    expect(mali.languages).toEqual(['Bambara'])
     render(<CountryResultCard details={mali} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText(expected.join(', '))).toBeInTheDocument()
+    expect(screen.getByText('Bambara')).toBeInTheDocument()
     expect(screen.queryByText(/\bFrench\b/)).not.toBeInTheDocument()
   })
 
@@ -896,11 +886,11 @@ describe('Batch 11 country records, resolved end-to-end through getCountryDetail
     expect(screen.queryByText(/French|English/)).not.toBeInTheDocument()
   })
 
-  it('Nigeria renders English only', () => {
+  it('Nigeria renders English, Hausa, Yoruba, Igbo', () => {
     const nigeria = getCountryDetails('nigeria')!
-    expect(nigeria.languages).toEqual(['English'])
+    expect(nigeria.languages).toEqual(['English', 'Hausa', 'Yoruba', 'Igbo'])
     render(<CountryResultCard details={nigeria} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('English')).toBeInTheDocument()
+    expect(screen.getByText('English, Hausa, Yoruba, Igbo')).toBeInTheDocument()
   })
 
   it('North Korea renders Korean only', () => {
@@ -1102,11 +1092,12 @@ describe('Batch 13 country records, resolved end-to-end through getCountryDetail
     expect(screen.getByText('Seychellois Rupee (SCR) · ₨')).toBeInTheDocument()
   })
 
-  it('Rwanda renders exactly Kinyarwanda, English, French and never Kiswahili/Swahili', () => {
+  it('Rwanda renders exactly Kinyarwanda, English and never French/Kiswahili/Swahili', () => {
     const rwanda = getCountryDetails('rwanda')!
-    expect(rwanda.languages).toEqual(['Kinyarwanda', 'English', 'French'])
+    expect(rwanda.languages).toEqual(['Kinyarwanda', 'English'])
     render(<CountryResultCard details={rwanda} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('Kinyarwanda, English, French')).toBeInTheDocument()
+    expect(screen.getByText('Kinyarwanda, English')).toBeInTheDocument()
+    expect(screen.queryByText(/\bFrench\b/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Kiswahili|Swahili/)).not.toBeInTheDocument()
   })
 
@@ -1147,11 +1138,11 @@ describe('Batch 13 country records, resolved end-to-end through getCountryDetail
     expect(screen.getByText('Seychellois Creole, English, French')).toBeInTheDocument()
   })
 
-  it('Singapore renders exactly Malay, Mandarin, Tamil, English', () => {
+  it('Singapore renders exactly English, Mandarin', () => {
     const singapore = getCountryDetails('singapore')!
-    expect(singapore.languages).toEqual(['Malay', 'Mandarin', 'Tamil', 'English'])
+    expect(singapore.languages).toEqual(['English', 'Mandarin'])
     render(<CountryResultCard details={singapore} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('Malay, Mandarin, Tamil, English')).toBeInTheDocument()
+    expect(screen.getByText('English, Mandarin')).toBeInTheDocument()
   })
 
   it('no country outside the supplied Batch 13 was accidentally populated (neighbouring alphabetical entries)', () => {
@@ -1332,13 +1323,13 @@ describe('Batch 15 country records, resolved end-to-end through getCountryDetail
 
   it('Taiwan renders Mandarin as its principal language (post language-policy revision), not "No official language"', () => {
     const taiwan = getCountryDetails('taiwan')!
-    expect(taiwan.languages).toEqual(['Mandarin'])
+    expect(taiwan.languages).toEqual(['Mandarin', 'Hoklo/Taiwanese'])
     expect(taiwan.verified.languages).toBe(true)
     const { container } = render(
       <CountryResultCard details={taiwan} context={null} primaryAction={<button>Go</button>} />,
     )
     const languagesValue = container.querySelector('.country-result__fact:last-child .country-result__fact-value')
-    expect(languagesValue).toHaveTextContent('Mandarin')
+    expect(languagesValue).toHaveTextContent('Mandarin, Hoklo/Taiwanese')
     expect(languagesValue).not.toHaveClass('country-result__fact-value--placeholder')
     expect(screen.queryByText('No official language')).not.toBeInTheDocument()
   })
@@ -1499,9 +1490,9 @@ describe('Batch 16 country records, resolved end-to-end through getCountryDetail
     expect(capitalValue).toHaveTextContent('Monaco')
   })
 
-  it('Montenegro: exact five-language array survives raw -> derived -> DOM with no truncation', () => {
+  it('Montenegro: only Montenegrin qualifies as a Principal Language — the other four are "in official use," not "official"', () => {
     const montenegro = getCountryDetails('montenegro')!
-    const expected = ['Montenegrin', 'Serbian', 'Bosnian', 'Albanian', 'Croatian']
+    const expected = ['Montenegrin']
     expect(montenegro.languages).toEqual(expected)
     render(<CountryResultCard details={montenegro} context={null} primaryAction={<button>Go</button>} />)
     expect(screen.getByText(expected.join(', '))).toBeInTheDocument()
@@ -1577,11 +1568,11 @@ describe('Batch 17 country records (the final normal batch), resolved end-to-end
     expect(screen.getByText('Zimbabwe Gold (ZWG) · ZiG')).toBeInTheDocument()
   })
 
-  it('Uganda renders exactly English, Swahili', () => {
+  it('Uganda renders exactly English, Swahili, Luganda', () => {
     const uganda = getCountryDetails('uganda')!
-    expect(uganda.languages).toEqual(['English', 'Swahili'])
+    expect(uganda.languages).toEqual(['English', 'Swahili', 'Luganda'])
     render(<CountryResultCard details={uganda} context={null} primaryAction={<button>Go</button>} />)
-    expect(screen.getByText('English, Swahili')).toBeInTheDocument()
+    expect(screen.getByText('English, Swahili, Luganda')).toBeInTheDocument()
   })
 
   it('Ukraine renders Ukrainian only and never Russian', () => {
@@ -1636,14 +1627,10 @@ describe('Batch 17 country records (the final normal batch), resolved end-to-end
     expect(screen.getByText('English')).toBeInTheDocument()
   })
 
-  it('Zimbabwe: all 16 official languages survive COUNTRY_RECORDS -> COUNTRY_FACTS -> getCountryDetails() -> rendered DOM with no truncation or reordering', () => {
+  it('Zimbabwe: its Principal Languages (English, Shona, Ndebele, Sign Language) survive COUNTRY_RECORDS -> COUNTRY_FACTS -> getCountryDetails() -> rendered DOM', () => {
     const zimbabwe = getCountryDetails('zimbabwe')!
-    const expected = [
-      'Chewa', 'Chibarwe', 'English', 'Kalanga', 'Koisan', 'Nambya', 'Ndau', 'Ndebele',
-      'Shangani', 'Shona', 'Sign Language', 'Sotho', 'Tonga', 'Tswana', 'Venda', 'Xhosa',
-    ]
+    const expected = ['English', 'Shona', 'Ndebele', 'Sign Language']
     expect(zimbabwe.languages).toEqual(expected)
-    expect(zimbabwe.languages).toHaveLength(16)
     render(<CountryResultCard details={zimbabwe} context={null} primaryAction={<button>Go</button>} />)
     expect(screen.getByText(expected.join(', '))).toBeInTheDocument()
   })
@@ -1707,7 +1694,7 @@ describe('Language usability cleanup (semantic-audit follow-up): "languages" now
   const LANGUAGE_POLICY_CASES = [
     ['australia', ['English']],
     ['mexico', ['Spanish']],
-    ['taiwan', ['Mandarin']],
+    ['taiwan', ['Mandarin', 'Hoklo/Taiwanese']],
     ['eritrea', ['Tigrinya', 'Arabic', 'English']],
     ['mauritius', ['Mauritian Creole', 'English', 'French']],
     ['botswana', ['English', 'Setswana']],
@@ -1780,16 +1767,16 @@ describe('England, Scotland and Wales (this task): constituent-country completio
     expect(screen.getByText('English', { exact: true })).toBeInTheDocument()
   })
 
-  it('Scotland renders Edinburgh, GBP · £, English/Scots/Scottish Gaelic, and its own GB-SCT flag', () => {
+  it('Scotland renders Edinburgh, GBP · £, English only (Gaelic/Scots do not clear the anchor or threshold bar), and its own GB-SCT flag', () => {
     const scotland = getCountryDetails('scotland')!
     expect(scotland.flagUrl).toBe('/flags/GB-SCT.png')
-    expect(scotland.languages).toEqual(['English', 'Scots', 'Scottish Gaelic'])
+    expect(scotland.languages).toEqual(['English'])
     render(<CountryResultCard details={scotland} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'Scotland' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Flag of Scotland' })).toHaveAttribute('src', '/flags/GB-SCT.png')
     expect(screen.getByText('Edinburgh')).toBeInTheDocument()
     expect(screen.getByText('Pound Sterling (GBP) · £')).toBeInTheDocument()
-    expect(screen.getByText('English, Scots, Scottish Gaelic')).toBeInTheDocument()
+    expect(screen.getByText('English', { exact: true })).toBeInTheDocument()
     expect(screen.queryByText(/\bWelsh\b/)).not.toBeInTheDocument()
   })
 
@@ -1876,14 +1863,14 @@ describe('Study-data Batch A (this task): non-playable canonical countries get f
     expect(screen.getByText('Bosnian, Croatian, Serbian')).toBeInTheDocument()
   })
 
-  it('Burkina Faso renders Ouagadougou, XOF · CFA, Mooré/Dioula/Fulfulde/French, preserving Unicode é', () => {
+  it('Burkina Faso renders Ouagadougou, XOF · CFA, Mooré/Dioula/Fulfulde (French excluded), preserving Unicode é', () => {
     const d = getCountryDetails('burkina-faso')!
-    expect(d.languages).toEqual(['Mooré', 'Dioula', 'Fulfulde', 'French'])
+    expect(d.languages).toEqual(['Mooré', 'Dioula', 'Fulfulde'])
     render(<CountryResultCard details={d} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'Burkina Faso' })).toBeInTheDocument()
     expect(screen.getByText('Ouagadougou')).toBeInTheDocument()
     expect(screen.getByText('West African CFA Franc (XOF) · CFA')).toBeInTheDocument()
-    expect(screen.getByText('Mooré, Dioula, Fulfulde, French')).toBeInTheDocument()
+    expect(screen.getByText('Mooré, Dioula, Fulfulde')).toBeInTheDocument()
   })
 
   it('Central African Republic renders Bangui, XAF · FCFA, Sango/French', () => {
@@ -2004,25 +1991,26 @@ describe('Study-data Batch B (this task): 10 more non-playable canonical countri
     expect(screen.getByText('Macedonian, Albanian')).toBeInTheDocument()
   })
 
-  it('Papua New Guinea renders Port Moresby, PGK · K, English/Tok Pisin/Hiri Motu, and its fact mentions 800+ languages', () => {
+  it('Papua New Guinea renders Port Moresby, PGK · K, English/Tok Pisin/PNG Sign Language (Hiri Motu excluded), and its fact mentions 800+ languages', () => {
     const d = getCountryDetails('papua-new-guinea')!
-    expect(d.languages).toEqual(['English', 'Tok Pisin', 'Hiri Motu'])
+    expect(d.languages).toEqual(['English', 'Tok Pisin', 'Papua New Guinean Sign Language'])
     render(<CountryResultCard details={d} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'Papua New Guinea' })).toBeInTheDocument()
     expect(screen.getByText('Port Moresby')).toBeInTheDocument()
     expect(screen.getByText('Papua New Guinean Kina (PGK) · K')).toBeInTheDocument()
-    expect(screen.getByText('English, Tok Pisin, Hiri Motu')).toBeInTheDocument()
+    expect(screen.getByText('English, Tok Pisin, Papua New Guinean Sign Language')).toBeInTheDocument()
+    expect(screen.queryByText(/Hiri Motu/)).not.toBeInTheDocument()
     expect(screen.getByText(/800/)).toBeInTheDocument()
   })
 
-  it('Philippines renders Manila, PHP · ₱, Filipino/English', () => {
+  it('Philippines renders Manila, PHP · ₱, Filipino/English/Bisaya-Binisaya', () => {
     const d = getCountryDetails('philippines')!
-    expect(d.languages).toEqual(['Filipino', 'English'])
+    expect(d.languages).toEqual(['Filipino', 'English', 'Bisaya/Binisaya'])
     render(<CountryResultCard details={d} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'Philippines' })).toBeInTheDocument()
     expect(screen.getByText('Manila')).toBeInTheDocument()
     expect(screen.getByText('Philippine Peso (PHP) · ₱')).toBeInTheDocument()
-    expect(screen.getByText('Filipino, English')).toBeInTheDocument()
+    expect(screen.getByText('Filipino, English, Bisaya/Binisaya')).toBeInTheDocument()
   })
 
   it('Saint Kitts and Nevis renders Basseterre, XCD, English only', () => {
@@ -2126,22 +2114,23 @@ describe('Study-data Batch C (this task): the final 8 non-playable canonical cou
     expect(screen.queryByText('Coming soon')).not.toBeInTheDocument()
   })
 
-  it('Switzerland renders Bern, Swiss Franc · CHF, German/French/Italian/Romansh', () => {
+  it('Switzerland renders Bern, Swiss Franc · CHF, German/French/Italian (Romansh excluded)', () => {
     const d = getCountryDetails('switzerland')!
     render(<CountryResultCard details={d} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'Switzerland' })).toBeInTheDocument()
     expect(screen.getByText('Bern')).toBeInTheDocument()
     expect(screen.getByText('Swiss Franc (CHF) · CHF')).toBeInTheDocument()
-    expect(screen.getByText('German, French, Italian, Romansh')).toBeInTheDocument()
+    expect(screen.getByText('German, French, Italian')).toBeInTheDocument()
+    expect(screen.queryByText(/Romansh/)).not.toBeInTheDocument()
   })
 
-  it('United Kingdom renders London, GBP · £, and its own union-wide languages list, distinct from England/Scotland/Wales', () => {
+  it('United Kingdom renders London, GBP · £, English only (no UK-wide official language exists), distinct from England/Scotland/Wales', () => {
     const d = getCountryDetails('united-kingdom')!
     render(<CountryResultCard details={d} context={null} primaryAction={<button>Go</button>} headingLevel="h1" />)
     expect(screen.getByRole('heading', { level: 1, name: 'United Kingdom' })).toBeInTheDocument()
     expect(screen.getByText('London')).toBeInTheDocument()
     expect(screen.getByText('Pound Sterling (GBP) · £')).toBeInTheDocument()
-    expect(screen.getByText('English, Welsh, Scottish Gaelic, Irish, Scots')).toBeInTheDocument()
+    expect(screen.getByText('English', { exact: true })).toBeInTheDocument()
     expect(d.flagUrl).toBe('/flags/GB.png')
   })
 

@@ -120,10 +120,7 @@ const BATCH_10_SLUGS = [
   'liberia', 'libya', 'lithuania', 'luxembourg', 'madagascar',
   'malawi', 'malaysia', 'maldives', 'mali', 'malta',
 ] as const
-const MALI_LANGUAGES = [
-  'Bambara', 'Bobo', 'Bozo', 'Dogon', 'Fula', 'Hassaniya Arabic', 'Kassonke',
-  'Maninka', 'Minyanka', 'Senufo', 'Songhay', 'Soninke', 'Tamasheq',
-] as const
+const MALI_LANGUAGES = ['Bambara'] as const
 // Batch 11 (this task): all 10 pre-verified as ANSWER_POOL members before
 // adding. Two current-law edge cases: New Zealand's English became
 // statutorily official under the English Language Act 2026 (in force
@@ -206,10 +203,7 @@ const BATCH_16_SLUGS = [
 // older-dataset assumption (e.g. the pre-2024 Zimbabwe dollar); none
 // exists anywhere in the codebase, so it is used as supplied. Zimbabwe's
 // 16 official languages are preserved in full, in order.
-const ZIMBABWE_LANGUAGES = [
-  'Chewa', 'Chibarwe', 'English', 'Kalanga', 'Koisan', 'Nambya', 'Ndau', 'Ndebele',
-  'Shangani', 'Shona', 'Sign Language', 'Sotho', 'Tonga', 'Tswana', 'Venda', 'Xhosa',
-] as const
+const ZIMBABWE_LANGUAGES = ['English', 'Shona', 'Ndebele', 'Sign Language'] as const
 const BATCH_17_SLUGS = [
   'uganda', 'ukraine', 'uruguay', 'uzbekistan', 'vanuatu',
   'venezuela', 'vietnam', 'yemen', 'zambia', 'zimbabwe',
@@ -431,9 +425,12 @@ describe('getCountryRecord', () => {
     expect(bangladesh.currency.symbol).toBe('৳')
   })
 
-  it('Batch 2 multi-language countries preserve every official language, in order', () => {
+  it('Batch 2 multi-language countries carry their Principal Languages', () => {
     expect(getCountryRecord('belarus')!.languages).toEqual(['Belarusian', 'Russian'])
-    expect(getCountryRecord('belgium')!.languages).toEqual(['Dutch', 'French', 'German'])
+    // German is one of Belgium's 3 federally-official languages but is
+    // regionally confined to the small German-speaking Community — not a
+    // nationwide anchor, and excluded under the Principal Languages policy.
+    expect(getCountryRecord('belgium')!.languages).toEqual(['Dutch', 'French'])
   })
 
   it('every Batch 2 record resolves through getCountryRecord() and every flag matches the verified mapping', () => {
@@ -445,16 +442,9 @@ describe('getCountryRecord', () => {
     }
   })
 
-  it('Bolivia preserves all 37 official languages, in order, with no truncation', () => {
+  it('Bolivia carries exactly its Principal Languages: Spanish (anchor), Quechua and Aymara (each clear the 10% first-language threshold)', () => {
     const record = getCountryRecord('bolivia')!
-    expect(record.languages).toHaveLength(37)
-    expect(record.languages[0]).toBe('Spanish')
-    expect(record.languages).toContain('Aymara')
-    expect(record.languages).toContain('Quechua')
-    expect(record.languages).toContain("Guarasu'we") // apostrophe preserved
-    expect(record.languages[record.languages.length - 1]).toBe('Zamuco')
-    // Every entry present, nothing collapsed or deduplicated away.
-    expect(new Set(record.languages).size).toBe(37)
+    expect(record.languages).toEqual(['Spanish', 'Quechua', 'Aymara'])
   })
 
   it('Bulgaria intentionally uses EUR/Euro/€ in this 2026 dataset', () => {
@@ -655,7 +645,7 @@ describe('getCountryRecord', () => {
     expect(record.iso2).toBe('CI')
     expect(record.iso3).toBe('CIV')
     expect(record.capital).toBe('Yamoussoukro')
-    expect(record.languages).toEqual(['French'])
+    expect(record.languages).toEqual(['French', 'Baoulé'])
     expect(record.currency).toEqual({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' })
   })
 
@@ -694,8 +684,8 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('kazakhstan')!.languages).toEqual(['Kazakh', 'Russian'])
   })
 
-  it('Kenya carries exactly two languages, in order: Kiswahili, English', () => {
-    expect(getCountryRecord('kenya')!.languages).toEqual(['Kiswahili', 'English'])
+  it('Kenya carries exactly three Principal Languages, in order: Swahili, English (anchors), Kikuyu (clears the 10% threshold)', () => {
+    expect(getCountryRecord('kenya')!.languages).toEqual(['Swahili', 'English', 'Kikuyu'])
   })
 
   it('Kiribati carries exactly two languages, in order: Gilbertese, English', () => {
@@ -775,10 +765,10 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('maldives')!.languages).toEqual(['Dhivehi'])
   })
 
-  it('Mali carries its full 13 national official languages and deliberately excludes French (2023 constitution: French is a working language only)', () => {
+  it('Mali carries Bambara — its confirmed nationwide lingua franca — and deliberately excludes French (2023 constitution: French is a working language only); the other 12 national languages remain unconfirmed pending data', () => {
     const record = getCountryRecord('mali')!
     expect(record.languages).toEqual([...MALI_LANGUAGES])
-    expect(record.languages).toHaveLength(13)
+    expect(record.languages).toHaveLength(1)
     expect(record.languages).not.toContain('French')
   })
 
@@ -805,12 +795,15 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('norway')!.currency).toEqual({ name: 'Norwegian Krone', code: 'NOK', symbol: 'kr' })
   })
 
-  it('Myanmar, Namibia, Nigeria, North Korea and Norway each list a single official language', () => {
+  it('Myanmar, Namibia, North Korea and Norway each list a single official language', () => {
     expect(getCountryRecord('myanmar')!.languages).toEqual(['Burmese'])
     expect(getCountryRecord('namibia')!.languages).toEqual(['English'])
-    expect(getCountryRecord('nigeria')!.languages).toEqual(['English'])
     expect(getCountryRecord('north-korea')!.languages).toEqual(['Korean'])
     expect(getCountryRecord('norway')!.languages).toEqual(['Norwegian'])
+  })
+
+  it('Nigeria carries English (anchor) plus Hausa/Yoruba/Igbo (each clears the 10% home-language threshold, 2022 household survey)', () => {
+    expect(getCountryRecord('nigeria')!.languages).toEqual(['English', 'Hausa', 'Yoruba', 'Igbo'])
   })
 
   it('Nauru preserves "Yaren" as its capital (no officially designated capital, not converted to a placeholder) and lists exactly Nauruan, English', () => {
@@ -923,16 +916,20 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('seychelles')!.currency).toEqual({ name: 'Seychellois Rupee', code: 'SCR', symbol: '₨' })
   })
 
-  it('Romania, Russia, San Marino and Senegal each list a single official language', () => {
+  it('Romania, Russia and San Marino each list a single official/administrative language', () => {
     expect(getCountryRecord('romania')!.languages).toEqual(['Romanian'])
     expect(getCountryRecord('russia')!.languages).toEqual(['Russian'])
     expect(getCountryRecord('san-marino')!.languages).toEqual(['Italian'])
-    expect(getCountryRecord('senegal')!.languages).toEqual(['French'])
   })
 
-  it('Rwanda carries exactly three languages, in order: Kinyarwanda, English, French, and never Kiswahili/Swahili (2023 constitution)', () => {
+  it('Senegal carries French (administrative anchor), Wolof (53.5% home language, ANSD) and Pulaar (26.3%) — Serer (9.6%) falls just short', () => {
+    expect(getCountryRecord('senegal')!.languages).toEqual(['French', 'Wolof', 'Pulaar'])
+  })
+
+  it('Rwanda carries exactly two Principal Languages: Kinyarwanda, English — French and Kiswahili are legally official but not current administrative anchors', () => {
     const record = getCountryRecord('rwanda')!
-    expect(record.languages).toEqual(['Kinyarwanda', 'English', 'French'])
+    expect(record.languages).toEqual(['Kinyarwanda', 'English'])
+    expect(record.languages).not.toContain('French')
     expect(record.languages).not.toContain('Kiswahili')
     expect(record.languages).not.toContain('Swahili')
   })
@@ -969,8 +966,8 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('seychelles')!.languages).toEqual(['Seychellois Creole', 'English', 'French'])
   })
 
-  it('Singapore carries exactly four languages, in order: Malay, Mandarin, Tamil, English', () => {
-    expect(getCountryRecord('singapore')!.languages).toEqual(['Malay', 'Mandarin', 'Tamil', 'English'])
+  it('Singapore carries exactly its two anchors, English and Mandarin — Malay (national language, but symbolic today) and Tamil (2.5% home language) do not clear the anchor or threshold bar', () => {
+    expect(getCountryRecord('singapore')!.languages).toEqual(['English', 'Mandarin'])
   })
 
   it('every Batch 13 record resolves through getCountryRecord() and every flag matches the verified mapping', () => {
@@ -1061,13 +1058,13 @@ describe('getCountryRecord', () => {
     expect(record.currency.symbol).toBe('£S')
   })
 
-  it('Taiwan resolves TW/TWN/Taipei/TWD·NT$ and shows Mandarin as the principal language (post language-policy revision)', () => {
+  it('Taiwan resolves TW/TWN/Taipei/TWD·NT$ and carries Mandarin (no-official-language fallback) and Hoklo/Taiwanese (clears the 10% home-language threshold)', () => {
     const record = getCountryRecord('taiwan')!
     expect(record.iso2).toBe('TW')
     expect(record.iso3).toBe('TWN')
     expect(record.capital).toBe('Taipei')
     expect(record.currency).toEqual({ name: 'New Taiwan Dollar', code: 'TWD', symbol: 'NT$' })
-    expect(record.languages).toEqual(['Mandarin'])
+    expect(record.languages).toEqual(['Mandarin', 'Hoklo/Taiwanese'])
   })
 
   it('Tajikistan lists Tajik only and never Russian', () => {
@@ -1156,10 +1153,9 @@ describe('getCountryRecord', () => {
     expect(record.capital).toBe('Monaco')
   })
 
-  it('Montenegro carries all five official languages in full, not collapsed to Montenegrin only', () => {
+  it('Montenegro carries only Montenegrin — the other four are constitutionally "in official use," a distinct, lesser tier that does not qualify as a Principal Language', () => {
     const record = getCountryRecord('montenegro')!
-    expect(record.languages).toEqual(['Montenegrin', 'Serbian', 'Bosnian', 'Albanian', 'Croatian'])
-    expect(record.languages).toHaveLength(5)
+    expect(record.languages).toEqual(['Montenegrin'])
   })
 
   it('Morocco carries exactly two languages, in order: Arabic, Amazigh', () => {
@@ -1187,8 +1183,8 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('zimbabwe')!.currency).toEqual({ name: 'Zimbabwe Gold', code: 'ZWG', symbol: 'ZiG' })
   })
 
-  it('Uganda carries exactly two languages, in order: English, Swahili', () => {
-    expect(getCountryRecord('uganda')!.languages).toEqual(['English', 'Swahili'])
+  it('Uganda carries English/Swahili (anchors) plus Luganda (16% first-language share, 2014 census)', () => {
+    expect(getCountryRecord('uganda')!.languages).toEqual(['English', 'Swahili', 'Luganda'])
   })
 
   it('Ukraine lists Ukrainian only and never Russian', () => {
@@ -1225,10 +1221,10 @@ describe('getCountryRecord', () => {
     expect(getCountryRecord('yemen')!.capital).toBe("Sana'a")
   })
 
-  it('Zimbabwe carries its full 16 official languages, in the supplied order, with no truncation or reordering', () => {
+  it('Zimbabwe carries its Principal Languages: English (anchor), Shona/Ndebele (clear the 10% threshold), and its constitutional Sign Language (nationwide institutional function)', () => {
     const record = getCountryRecord('zimbabwe')!
     expect(record.languages).toEqual([...ZIMBABWE_LANGUAGES])
-    expect(record.languages).toHaveLength(16)
+    expect(record.languages).toHaveLength(4)
   })
 
   it('Zimbabwe currency is Zimbabwe Gold / ZWG / ZiG — no contradictory pre-existing project data exists (verified: no ZWL/old-Zimbabwe-dollar reference anywhere in the codebase)', () => {
@@ -1309,7 +1305,7 @@ describe('England, Scotland and Wales (this task): constituent-country completio
     expect(record.capital).toBe('Edinburgh')
     expect(record.currency).toEqual({ name: 'Pound Sterling', code: 'GBP', symbol: '£' })
     expect(record.continent).toBe('Europe')
-    expect(record.languages).toEqual(['English', 'Scots', 'Scottish Gaelic'])
+    expect(record.languages).toEqual(['English'])
     expect(record.areaKm2).toBe(77_933)
     expect(record.flag).toBe('/flags/GB-SCT.png')
   })
@@ -1389,13 +1385,14 @@ describe('Study-data Batch A (this task): the first 10 non-playable canonical co
     expect(record.languages).toEqual(['Bosnian', 'Croatian', 'Serbian'])
   })
 
-  it('Burkina Faso resolves exactly: Ouagadougou, BF/BFA, XOF · CFA, Mooré/Dioula/Fulfulde/French, preserving Unicode é in Mooré', () => {
+  it('Burkina Faso resolves exactly: Ouagadougou, BF/BFA, XOF · CFA, Mooré/Dioula/Fulfulde (French excluded — demoted to working language, Dec 2023/Jan 2024), preserving Unicode é in Mooré', () => {
     const record = getCountryRecord('burkina-faso')!
     expect(record.iso2).toBe('BF')
     expect(record.iso3).toBe('BFA')
     expect(record.capital).toBe('Ouagadougou')
     expect(record.currency).toEqual({ name: 'West African CFA Franc', code: 'XOF', symbol: 'CFA' })
-    expect(record.languages).toEqual(['Mooré', 'Dioula', 'Fulfulde', 'French'])
+    expect(record.languages).toEqual(['Mooré', 'Dioula', 'Fulfulde'])
+    expect(record.languages).not.toContain('French')
     expect(record.languages[0]).toBe('Mooré')
     expect(record.languages[0]).toContain('é')
   })
@@ -1494,23 +1491,24 @@ describe('Study-data Batch B (this task): 10 more non-playable canonical countri
     expect(record.languages).toEqual(['Macedonian', 'Albanian'])
   })
 
-  it('Papua New Guinea resolves exactly: Port Moresby, PG/PNG, PGK · K, English/Tok Pisin/Hiri Motu, fact mentions 800+ languages', () => {
+  it('Papua New Guinea resolves exactly: Port Moresby, PG/PNG, PGK · K, English/Tok Pisin/PNG Sign Language (Hiri Motu excluded — no longer nationwide), fact mentions 800+ languages', () => {
     const record = getCountryRecord('papua-new-guinea')!
     expect(record.iso2).toBe('PG')
     expect(record.iso3).toBe('PNG')
     expect(record.capital).toBe('Port Moresby')
     expect(record.currency).toEqual({ name: 'Papua New Guinean Kina', code: 'PGK', symbol: 'K' })
-    expect(record.languages).toEqual(['English', 'Tok Pisin', 'Hiri Motu'])
+    expect(record.languages).toEqual(['English', 'Tok Pisin', 'Papua New Guinean Sign Language'])
+    expect(record.languages).not.toContain('Hiri Motu')
     expect(record.fact).toContain('800')
   })
 
-  it('Philippines resolves exactly: Manila, PH/PHL, PHP · ₱, Filipino/English', () => {
+  it('Philippines resolves exactly: Manila, PH/PHL, PHP · ₱, Filipino/English/Bisaya-Binisaya (16.0% home language, PSA 2020 census)', () => {
     const record = getCountryRecord('philippines')!
     expect(record.iso2).toBe('PH')
     expect(record.iso3).toBe('PHL')
     expect(record.capital).toBe('Manila')
     expect(record.currency).toEqual({ name: 'Philippine Peso', code: 'PHP', symbol: '₱' })
-    expect(record.languages).toEqual(['Filipino', 'English'])
+    expect(record.languages).toEqual(['Filipino', 'English', 'Bisaya/Binisaya'])
   })
 
   it('Saint Kitts and Nevis resolves exactly: Basseterre, KN/KNA, XCD, English only', () => {
@@ -1594,28 +1592,22 @@ describe('Study-data Batch B (this task): 10 more non-playable canonical countri
 })
 
 describe('Study-data Batch C (this task): the final 8 non-playable canonical countries get complete reference records — invariant 3 is now globally satisfied', () => {
-  it('South Africa resolves exactly: Pretoria, ZA/ZAF, ZAR · R, all 12 official languages preserved in supplied order (including lowercase "itsonga")', () => {
+  it('South Africa resolves exactly: Pretoria, ZA/ZAF, ZAR · R, Principal Languages English/isiZulu/isiXhosa/Afrikaans + South African Sign Language', () => {
     const record = getCountryRecord('south-africa')!
     expect(record.iso2).toBe('ZA')
     expect(record.iso3).toBe('ZAF')
     expect(record.capital).toBe('Pretoria')
     expect(record.currency).toEqual({ name: 'South African Rand', code: 'ZAR', symbol: 'R' })
-    expect(record.languages).toEqual([
-      'Sepedi', 'Sesotho', 'Setswana', 'siSwati', 'Tshivenda', 'itsonga',
-      'Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'South African Sign Language',
-    ])
-    expect(record.languages).toHaveLength(12)
-    // Preserved exactly as supplied, not silently corrected to "Xitsonga".
-    expect(record.languages).toContain('itsonga')
+    expect(record.languages).toEqual(['English', 'isiZulu', 'isiXhosa', 'Afrikaans', 'South African Sign Language'])
   })
 
-  it('Switzerland resolves exactly: Bern, CH/CHE, Swiss Franc · CHF, German/French/Italian/Romansh', () => {
+  it('Switzerland resolves exactly: Bern, CH/CHE, Swiss Franc · CHF, German/French/Italian (Romansh excluded — narrower official status, below threshold)', () => {
     const record = getCountryRecord('switzerland')!
     expect(record.iso2).toBe('CH')
     expect(record.iso3).toBe('CHE')
     expect(record.capital).toBe('Bern')
     expect(record.currency).toEqual({ name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' })
-    expect(record.languages).toEqual(['German', 'French', 'Italian', 'Romansh'])
+    expect(record.languages).toEqual(['German', 'French', 'Italian'])
   })
 
   it('Trinidad and Tobago resolves exactly: Port of Spain, TT/TTO, TTD · TT$, English only', () => {
@@ -1627,13 +1619,13 @@ describe('Study-data Batch C (this task): the final 8 non-playable canonical cou
     expect(record.languages).toEqual(['English'])
   })
 
-  it('Turkmenistan resolves exactly: Ashgabat, TM/TKM, Turkmenistani Manat · m, Turkmen/Russian', () => {
+  it('Turkmenistan resolves exactly: Ashgabat, TM/TKM, Turkmenistani Manat · m, Turkmen only (Russian\'s current role is contested — sources disagree 2.7%-12%, not confirmed to clear the threshold)', () => {
     const record = getCountryRecord('turkmenistan')!
     expect(record.iso2).toBe('TM')
     expect(record.iso3).toBe('TKM')
     expect(record.capital).toBe('Ashgabat')
     expect(record.currency).toEqual({ name: 'Turkmenistani Manat', code: 'TMT', symbol: 'm' })
-    expect(record.languages).toEqual(['Turkmen', 'Russian'])
+    expect(record.languages).toEqual(['Turkmen'])
   })
 
   it('United Arab Emirates resolves exactly: Abu Dhabi, AE/ARE, AED · د.إ, Arabic/English', () => {
@@ -1645,13 +1637,13 @@ describe('Study-data Batch C (this task): the final 8 non-playable canonical cou
     expect(record.languages).toEqual(['Arabic', 'English'])
   })
 
-  it('United Kingdom resolves exactly: London, GB/GBR, GBP · £, English/Welsh/Scottish Gaelic/Irish/Scots — distinct from its own constituent country records', () => {
+  it('United Kingdom resolves exactly: London, GB/GBR, GBP · £, English (no UK-wide official language exists — Welsh\'s 2011 status is Wales-specific) — distinct from its own constituent country records', () => {
     const record = getCountryRecord('united-kingdom')!
     expect(record.iso2).toBe('GB')
     expect(record.iso3).toBe('GBR')
     expect(record.capital).toBe('London')
     expect(record.currency).toEqual({ name: 'Pound Sterling', code: 'GBP', symbol: '£' })
-    expect(record.languages).toEqual(['English', 'Welsh', 'Scottish Gaelic', 'Irish', 'Scots'])
+    expect(record.languages).toEqual(['English'])
     // Distinct record from england/scotland/wales — this is the union-wide entry.
     const england = getCountryRecord('england')!
     expect(record).not.toEqual(england)
