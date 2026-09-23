@@ -8,10 +8,10 @@ import { useQuizEngine } from '../hooks/useQuizEngine'
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useRouter } from '../hooks/useRouter'
+import { buildCountryAnswerDomain } from '../lib/quiz/countryAliases'
 import { createFlagQuestion, generateFlagQuestions, type FlagQuestion } from '../lib/quiz/flagQuestions'
 import { defaultRandom } from '../lib/quiz/random'
 import type { QuizConfig } from '../lib/quiz/types'
-import { normalizeCountryName } from '../lib/text/normalize'
 import { PATHS } from '../lib/router/routes'
 
 export interface FlagsQuizScreenProps {
@@ -94,15 +94,6 @@ function FlagsQuizRun({
   const flagCode = countryCodeForSlug(currentQuestion.country.id)
   const flagUrl = flagCode ? flagUrlForCode(flagCode) : null
 
-  const handleTypeSubmit = (text: string) => {
-    // Reuses the exact same normalization the Daily/Practice game already
-    // applies to guesses (strip diacritics, uppercase, letters only) — so
-    // case, whitespace, repeated spaces and punctuation are all handled
-    // consistently with the rest of the app, with no new matching rules.
-    const isCorrect = normalizeCountryName(text) === currentQuestion.country.normalized
-    submitText(isCorrect)
-  }
-
   return (
     <div className="quiz-play-page">
       <div className="mode-bar shrink-0">
@@ -155,7 +146,8 @@ function FlagsQuizRun({
               phase={state.phase}
               lastSubmission={state.lastSubmission}
               correctLabel={currentQuestion.country.name}
-              onSubmit={handleTypeSubmit}
+              onSubmit={submitText}
+              answerDomain={buildCountryAnswerDomain(currentQuestion.country.name)}
             />
           )}
         </div>

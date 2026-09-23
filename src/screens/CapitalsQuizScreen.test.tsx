@@ -65,7 +65,9 @@ describe('CapitalsQuizScreen (/quiz/capitals)', () => {
     expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
     const { country } = correctCountryAndCapital()
     expect(screen.getByText(country.name)).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: `Flag of ${country.name}` })).toBeInTheDocument()
+    // Same shared flag treatment/class Languages now reuses for its own
+    // forward questions — see QuizCountryFlag.tsx.
+    expect(screen.getByRole('img', { name: `Flag of ${country.name}` })).toHaveClass('quiz-play__country-flag')
     expect(screen.getAllByRole('radio')).toHaveLength(4)
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
   })
@@ -94,7 +96,12 @@ describe('CapitalsQuizScreen (/quiz/capitals)', () => {
     expect(answerButton(capital)).toHaveClass('quiz-answer--correct')
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
 
+    // Incorrect feedback holds noticeably longer than correct (see
+    // src/lib/quiz/timing.ts) — 900ms alone (correct's own advance window)
+    // is not enough here.
     act(() => vi.advanceTimersByTime(900))
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(600))
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
   })
 
@@ -104,7 +111,7 @@ describe('CapitalsQuizScreen (/quiz/capitals)', () => {
     const { capital } = correctCountryAndCapital()
     const input = screen.getByLabelText('Capital city')
     fireEvent.change(input, { target: { value: `  ${capital.toLowerCase()}  ` } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(screen.getByText('Correct!')).toBeInTheDocument()
     expect(screen.getByText('Score: 1')).toBeInTheDocument()
   })
@@ -116,17 +123,65 @@ describe('CapitalsQuizScreen (/quiz/capitals)', () => {
     const spaced = capital.replace(/ /g, '   ')
     const input = screen.getByLabelText('Capital city')
     fireEvent.change(input, { target: { value: spaced } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(screen.getByText('Correct!')).toBeInTheDocument()
   })
 
-  it('type answer: a wrong answer is rejected and reveals "Correct answer: <capital>"', () => {
+  it('type answer: a real but wrong capital is rejected and reveals "Correct answer: <capital>"', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/capitals')
+    const { capital } = correctCountryAndCapital()
+    const wrongRealCapital = capital === 'Paris' ? 'Tokyo' : 'Paris' // a real capital, guaranteed different from this question's own answer
+    const input = screen.getByLabelText('Capital city')
+    fireEvent.change(input, { target: { value: wrongRealCapital } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText(`Correct answer: ${capital}`)).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+  })
+
+  it('type answer: nonsense input shows the invalid-domain helper instead of consuming the question', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/capitals')
+    const input = screen.getByLabelText('Capital city')
+    fireEvent.change(input, { target: { value: 'Birmingham' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText('Please enter a valid capital city.')).toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+    expect(screen.queryByText(/^Correct answer:/)).not.toBeInTheDocument()
+  })
+
+  it('type answer: a close typo shows Did You Mean and accepting it counts as correct', () => {
     setConfig({ questionCount: 5, answerStyle: 'type-answer' })
     renderAt('/quiz/capitals')
     const { capital } = correctCountryAndCapital()
     const input = screen.getByLabelText('Capital city')
-    fireEvent.change(input, { target: { value: 'Definitely Not A Capital' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    // A conservative 1-edit typo (duplicated FIRST letter, not last) that
+    // stays safely within the typo threshold regardless of the capital's
+    // own length. Duplicating the LAST character specifically would break
+    // for "Washington, D.C." (ends in a period, which
+    // normalizeCountryName strips entirely) — appending another "." would
+    // normalize back to an EXACT match, not a typo, occasionally flaking
+    // this test whenever the United States is drawn.
+    const typo = capital[0] + capital
+    fireEvent.change(input, { target: { value: typo } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText('Score: 0')).toBeInTheDocument() // not yet submitted
+    const suggestion = screen.getByRole('button', { name: capital })
+    fireEvent.click(suggestion)
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+    expect(screen.getByText('Score: 1')).toBeInTheDocument()
+  })
+
+  it('Skip: partial, unsubmitted text ("To...") is overridden and ignored — confirming Skip resolves incorrect and reveals the real capital', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/capitals')
+    const { capital } = correctCountryAndCapital()
+    fireEvent.change(screen.getByLabelText('Capital city'), { target: { value: 'To...' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Are you sure you want to skip this question?')).toBeInTheDocument()
+    expect(screen.queryByText(/^Correct answer:/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, skip' }))
     expect(screen.getByText(`Correct answer: ${capital}`)).toBeInTheDocument()
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
   })
@@ -157,7 +212,7 @@ describe('CapitalsQuizScreen (/quiz/capitals)', () => {
     for (let i = 0; i < 5; i++) {
       const { capital } = correctCountryAndCapital()
       fireEvent.change(screen.getByLabelText('Capital city'), { target: { value: capital } })
-      fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      fireEvent.keyDown(screen.getByLabelText('Capital city'), { key: 'Enter' })
       act(() => vi.advanceTimersByTime(900))
     }
     expect(screen.getByText('5 / 5')).toBeInTheDocument()

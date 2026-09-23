@@ -91,7 +91,12 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     expect(answerButton(correct.name)).toHaveClass('quiz-answer--correct')
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
 
+    // Incorrect feedback holds noticeably longer than correct (see
+    // src/lib/quiz/timing.ts) — 900ms (correct's own advance window, used
+    // above) is not enough here.
     act(() => vi.advanceTimersByTime(900))
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(600))
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
   })
@@ -113,12 +118,12 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     const correct = correctCountry()
     const input = screen.getByLabelText('Country name')
     fireEvent.change(input, { target: { value: `  ${correct.name.toLowerCase()}  ` } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(screen.getByText('Correct!')).toBeInTheDocument()
     expect(screen.getByText('Score: 1')).toBeInTheDocument()
   })
 
-  it('type answer: Enter submits the same as the button', () => {
+  it('type answer: Enter submits the typed answer', () => {
     setConfig({ questionCount: 5, answerStyle: 'type-answer' })
     renderAt('/quiz/flags')
     const correct = correctCountry()
@@ -128,25 +133,162 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     expect(screen.getByText('Correct!')).toBeInTheDocument()
   })
 
-  it('type answer: a wrong answer is rejected and reveals "Correct answer: X"', () => {
+  it('type answer: a real but wrong country is rejected and reveals "Correct answer: X"', () => {
     setConfig({ questionCount: 5, answerStyle: 'type-answer' })
     renderAt('/quiz/flags')
     const correct = correctCountry()
+    const wrongRealCountry = correct.name === 'Japan' ? 'France' : 'Japan' // a real country, guaranteed different from this question's own answer
     const input = screen.getByLabelText('Country name')
-    fireEvent.change(input, { target: { value: 'Definitely Not A Country' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.change(input, { target: { value: wrongRealCountry } })
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(screen.getByText(`Correct answer: ${correct.name}`)).toBeInTheDocument()
     expect(screen.getByText('Score: 0')).toBeInTheDocument()
   })
 
-  it('type answer: double submission (Enter then button) cannot double-score', () => {
+  it('type answer: nonsense input shows the invalid-domain helper instead of consuming the question', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    const input = screen.getByLabelText('Country name')
+    fireEvent.change(input, { target: { value: 'Birmingham' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText('Please enter a valid country name.')).toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+    expect(screen.queryByText(/^Correct answer:/)).not.toBeInTheDocument()
+  })
+
+  it('type answer: a close typo shows Did You Mean and accepting it counts as correct', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    const correct = correctCountry()
+    const input = screen.getByLabelText('Country name')
+    const typo = correct.name + correct.name.slice(-1)
+    fireEvent.change(input, { target: { value: typo } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: correct.name }))
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+    expect(screen.getByText('Score: 1')).toBeInTheDocument()
+  })
+
+  it('Skip: the first click does NOT consume the question — it shows a confirmation instead', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Are you sure you want to skip this question?')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Yes, skip' })).toBeInTheDocument()
+    expect(screen.queryByText(/^Correct answer:/)).not.toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+  })
+
+  it('Skip: an empty field can be skipped directly (after confirming) — no need to type anything first', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    const correct = correctCountry()
+    expect(screen.getByLabelText('Country name')).toHaveValue('')
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, skip' }))
+    expect(screen.getByText(`Correct answer: ${correct.name}`)).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+
+    act(() => vi.advanceTimersByTime(1600)) // longer incorrect delay
+    expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+  })
+
+  it('Skip: typing after opening the confirmation cancels it', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Are you sure you want to skip this question?')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Country name'), { target: { value: 'F' } })
+    expect(screen.queryByText('Are you sure you want to skip this question?')).not.toBeInTheDocument()
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+  })
+
+  it('Skip: physical Enter cancels the confirmation and submits the typed answer normally', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    const correct = correctCountry()
+    fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correct.name } })
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Are you sure you want to skip this question?')).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
+    expect(screen.queryByText('Are you sure you want to skip this question?')).not.toBeInTheDocument()
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+  })
+
+  it('Skip: on-screen keyboard Enter cancels the confirmation and submits the typed answer normally', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    const correct = correctCountry()
+    fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correct.name } })
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Are you sure you want to skip this question?')).toBeInTheDocument()
+    fireEvent.click(within(screen.getByRole('group', { name: 'On-screen keyboard' })).getByRole('button', { name: 'Enter' }))
+    expect(screen.queryByText('Are you sure you want to skip this question?')).not.toBeInTheDocument()
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+  })
+
+  it('Skip: a skipped question counts exactly like a wrong answer in the final results (denominator includes it)', () => {
+    setConfig({ questionCount: 'unlimited', answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    // Q1 correct, Q2 skipped, Q3 correct -> 2/3 final, never 2/2.
+    fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correctCountry().name } })
+    fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
+    act(() => vi.advanceTimersByTime(900))
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, skip' }))
+    act(() => vi.advanceTimersByTime(1600))
+    fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correctCountry().name } })
+    fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
+    act(() => vi.advanceTimersByTime(900))
+    fireEvent.click(screen.getByRole('button', { name: 'End Quiz' }))
+    expect(screen.getByText('Flags Quiz Complete')).toBeInTheDocument()
+    expect(screen.getByText('2 / 3')).toBeInTheDocument()
+  })
+
+  it('Skip: no stale confirmation carries over to the next question', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, skip' }))
+    act(() => vi.advanceTimersByTime(1600))
+    expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
+    expect(screen.queryByText('Are you sure you want to skip this question?')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Skip' })).not.toBeDisabled()
+  })
+
+  it('Skip: cannot be confirmed twice, and is non-actionable once the question has resolved (no double-submit, no double-advance)', () => {
+    setConfig({ questionCount: 5, answerStyle: 'type-answer' })
+    renderAt('/quiz/flags')
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    const yesSkip = screen.getByRole('button', { name: 'Yes, skip' })
+    fireEvent.click(yesSkip)
+    fireEvent.click(yesSkip)
+    expect(screen.getByRole('button', { name: 'Skip' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.getByText('Score: 0')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(1600))
+    expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
+  })
+
+  it('Multiple Choice regression: no Skip button appears', () => {
+    setConfig({ questionCount: 5, answerStyle: 'multiple-choice' })
+    renderAt('/quiz/flags')
+    expect(screen.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
+  })
+
+  it('type answer: rapid repeated Enter cannot double-score', () => {
     setConfig({ questionCount: 5, answerStyle: 'type-answer' })
     renderAt('/quiz/flags')
     const correct = correctCountry()
     const input = screen.getByLabelText('Country name')
     fireEvent.change(input, { target: { value: correct.name } })
     fireEvent.keyDown(input, { key: 'Enter' })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(input, { key: 'Enter' })
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(screen.getByText('Score: 1')).toBeInTheDocument()
   })
 
@@ -162,7 +304,7 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     const correct = correctCountry()
     const input = screen.getByLabelText('Country name')
     fireEvent.change(input, { target: { value: correct.name } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(input, { key: 'Enter' })
     expect(input).toBeDisabled()
 
     act(() => vi.advanceTimersByTime(900))
@@ -189,7 +331,7 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     for (let i = 0; i < 5; i++) {
       const correct = correctCountry()
       fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correct.name } })
-      fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
       act(() => vi.advanceTimersByTime(900))
     }
     expect(screen.getByText('Flags Quiz Complete')).toBeInTheDocument()
@@ -254,7 +396,7 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     renderAt('/quiz/flags')
     const correct = correctCountry()
     fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correct.name } })
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
     const keyboard = screen.getByRole('group', { name: 'On-screen keyboard' })
     const key = within(keyboard).getByRole('button', { name: 'Z' })
     expect(key).toBeDisabled()
@@ -302,7 +444,7 @@ describe('FlagsQuizScreen (/quiz/flags)', () => {
     for (let i = 0; i < 5; i++) {
       const correct = correctCountry()
       fireEvent.change(screen.getByLabelText('Country name'), { target: { value: correct.name } })
-      fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      fireEvent.keyDown(screen.getByLabelText('Country name'), { key: 'Enter' })
       act(() => vi.advanceTimersByTime(900))
     }
     expect(screen.getByText('5 / 5')).toBeInTheDocument()
@@ -406,9 +548,9 @@ describe('Regression: other quiz routes and existing flows still work', () => {
     window.history.replaceState(null, '', '/')
   })
 
-  it('/quiz/currencies still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags/Capitals gameplay', () => {
-    setConfig({ mode: 'currencies' })
-    renderAt('/quiz/currencies')
+  it('/quiz/facts still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags/Capitals gameplay', () => {
+    setConfig({ mode: 'facts' })
+    renderAt('/quiz/facts')
     expect(screen.getByText('Coming soon')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Change Quiz' })).toBeInTheDocument()
   })

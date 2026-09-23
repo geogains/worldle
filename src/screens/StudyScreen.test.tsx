@@ -19,6 +19,13 @@ function tileButton(id: string): HTMLElement {
   return el
 }
 
+/** The page's own Quiz button beside the search input — distinct from the header nav's own "Quiz" tab, which shares the same accessible name. */
+function pageQuizButton(): HTMLElement {
+  const el = document.querySelector<HTMLElement>('.study-search__quiz-btn')
+  if (!el) throw new Error('no Study page Quiz button found')
+  return el
+}
+
 describe('StudyScreen (/study)', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -136,6 +143,26 @@ describe('StudyScreen (/study)', () => {
     fireEvent.click(tileButton('tanzania'))
     expect(window.location.pathname).toBe('/results/tanzania')
     expect(screen.getByRole('heading', { level: 1, name: 'Tanzania' })).toBeInTheDocument()
+  })
+
+  it('renders a primary Quiz button beside the search input, and clicking it navigates to /quiz', () => {
+    renderAt('/study')
+    const quizButton = pageQuizButton()
+    expect(quizButton).toHaveAccessibleName('Quiz')
+    expect(quizButton).toHaveClass('btn', 'btn--primary')
+    fireEvent.click(quizButton)
+    expect(window.location.pathname).toBe('/quiz')
+    expect(screen.getByRole('heading', { level: 1, name: 'Quiz' })).toBeInTheDocument()
+  })
+
+  it('search still works normally alongside the new Quiz button', () => {
+    renderAt('/study')
+    const input = screen.getByRole('searchbox', { name: 'Search countries' })
+    fireEvent.change(input, { target: { value: 'tanzania' } })
+    const grid = screen.getByRole('list', { name: 'Countries' })
+    expect(within(grid).getAllByRole('button')).toHaveLength(1)
+    expect(screen.getByText('Tanzania')).toBeInTheDocument()
+    expect(pageQuizButton()).toBeInTheDocument()
   })
 })
 

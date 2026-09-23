@@ -120,6 +120,52 @@ describe('useQuizEngine (React hook: timers/effects)', () => {
     vi.useRealTimers()
   })
 
+  it('incorrect answers get a longer auto-advance delay than correct answers (full motion)', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() =>
+      useQuizEngine<TestQuestion>([q('a'), q('b')], 2, { getCorrectAnswerId: (x) => x.correctId, reducedMotion: false }),
+    )
+    act(() => result.current.submitChoice('wrong'))
+    expect(result.current.state.phase).toBe('feedback')
+    // Correct's own delay (800ms, plus a little buffer) must NOT be enough
+    // to advance an incorrect answer.
+    act(() => vi.advanceTimersByTime(900))
+    expect(result.current.state.phase).toBe('feedback')
+    expect(result.current.state.index).toBe(0)
+    // The full incorrect delay does advance it.
+    act(() => vi.advanceTimersByTime(600))
+    expect(result.current.state.phase).toBe('answering')
+    expect(result.current.state.index).toBe(1)
+    vi.useRealTimers()
+  })
+
+  it('incorrect answers get a longer auto-advance delay than correct answers (reduced motion)', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() =>
+      useQuizEngine<TestQuestion>([q('a'), q('b')], 2, { getCorrectAnswerId: (x) => x.correctId, reducedMotion: true }),
+    )
+    act(() => result.current.submitChoice('wrong'))
+    // Correct's own reduced-motion delay (250ms) must NOT be enough.
+    act(() => vi.advanceTimersByTime(300))
+    expect(result.current.state.phase).toBe('feedback')
+    act(() => vi.advanceTimersByTime(300))
+    expect(result.current.state.phase).toBe('answering')
+    expect(result.current.state.index).toBe(1)
+    vi.useRealTimers()
+  })
+
+  it('a correct answer still uses the original, shorter delay (unchanged by the incorrect-delay addition)', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() =>
+      useQuizEngine<TestQuestion>([q('a'), q('b')], 2, { getCorrectAnswerId: (x) => x.correctId, reducedMotion: false }),
+    )
+    act(() => result.current.submitChoice('a'))
+    act(() => vi.advanceTimersByTime(850))
+    expect(result.current.state.phase).toBe('answering')
+    expect(result.current.state.index).toBe(1)
+    vi.useRealTimers()
+  })
+
   it('double-clicking submitChoice cannot double-score', () => {
     vi.useFakeTimers()
     const { result } = renderHook(() =>
@@ -145,6 +191,22 @@ describe('useQuizEngine (React hook: timers/effects)', () => {
     act(() => result.current.submitChoice('wrong-but-ignored'))
     expect(result.current.state.totalAnswered).toBe(1)
     expect(result.current.state.lastSubmission).toEqual({ isCorrect: true, selectedId: 'a' })
+    vi.useRealTimers()
+  })
+
+  it('E. submitText (the API Skip calls directly, via TypeAnswerInput\'s onSubmit) cannot double-submit — a rapid repeat call scores only once', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() =>
+      useQuizEngine<TestQuestion>([q('a'), q('b')], 2, { getCorrectAnswerId: (x) => x.correctId, reducedMotion: true }),
+    )
+    act(() => {
+      result.current.submitText(false)
+      result.current.submitText(false)
+      result.current.submitText(false)
+    })
+    expect(result.current.state.correctCount).toBe(0)
+    expect(result.current.state.totalAnswered).toBe(1)
+    expect(result.current.state.phase).toBe('feedback')
     vi.useRealTimers()
   })
 

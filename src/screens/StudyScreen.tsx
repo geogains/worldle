@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { StudyGrid } from '../components/study/StudyGrid'
 import { COUNTRIES } from '../data/countries'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useRouter } from '../hooks/useRouter'
 import { normalizeCountryName } from '../lib/text/normalize'
+import { PATHS } from '../lib/router/routes'
 
 /**
  * `/study` — a browsing/reference index over every canonical country
@@ -12,6 +14,7 @@ import { normalizeCountryName } from '../lib/text/normalize'
  */
 export function StudyScreen() {
   useDocumentTitle('Study')
+  const { navigate } = useRouter()
   const [query, setQuery] = useState('')
 
   const results = useMemo(() => {
@@ -41,6 +44,9 @@ export function StudyScreen() {
             onChange={(e) => setQuery(e.target.value)}
             autoComplete="off"
           />
+          <button type="button" className="btn btn--primary study-search__quiz-btn" onClick={() => navigate(PATHS.quiz)}>
+            Quiz
+          </button>
         </div>
 
         <p className="study-status" aria-live="polite">

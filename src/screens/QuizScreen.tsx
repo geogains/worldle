@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { DifficultyCarousel } from '../components/quiz/DifficultyCarousel'
 import { QuizOptionCard } from '../components/quiz/QuizOptionCard'
 import { QuizOptionGroup } from '../components/quiz/QuizOptionGroup'
@@ -17,14 +17,16 @@ import { PATHS } from '../lib/router/routes'
 
 // Decorative only — the visible label beside each one already names the
 // quiz type, so these are marked aria-hidden by QuizOptionCard's own icon
-// wrapper rather than announced individually.
-const MODE_ICONS: Record<QuizMode, string> = {
-  flags: '🏳️',
-  capitals: '🏛️',
-  currencies: '💰',
-  languages: '🗣️',
-  facts: '💡',
-  mixed: '🔀',
+// wrapper rather than announced individually. All six are the illustrated
+// PNGs now (Facts joined the other five), each sized/aligned identically
+// via the shared .quiz-option__icon-img class.
+const MODE_ICONS: Record<QuizMode, ReactNode> = {
+  flags: <img src="/icons/flags.png" alt="" className="quiz-option__icon-img" />,
+  capitals: <img src="/icons/capitals.png" alt="" className="quiz-option__icon-img" />,
+  currencies: <img src="/icons/currencies.png" alt="" className="quiz-option__icon-img" />,
+  languages: <img src="/icons/languages.png" alt="" className="quiz-option__icon-img" />,
+  facts: <img src="/icons/facts.png" alt="" className="quiz-option__icon-img" />,
+  mixed: <img src="/icons/mixed.png" alt="" className="quiz-option__icon-img" />,
 }
 
 /**

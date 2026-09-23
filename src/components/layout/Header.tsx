@@ -5,7 +5,7 @@ import { useRouter } from '../../hooks/useRouter'
 import { PATHS } from '../../lib/router/routes'
 import { NavigationDrawer } from './NavigationDrawer'
 import { ThemeToggle } from './ThemeToggle'
-import { BookIcon, CalendarIcon, GlobeIcon, HelpIcon, MenuIcon, ShuffleIcon } from '../ui/icons'
+import { MenuIcon } from '../ui/icons'
 
 export interface HeaderProps {
   onOpenHelp: () => void
@@ -29,26 +29,47 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
   const navLinkRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const [underline, setUnderline] = useState<{ x: number; w: number } | null>(null)
 
+  // Decorative drawer-only icons — only ever rendered inside
+  // NavigationDrawer (see its `{item.icon && ...}`); the desktop <nav>
+  // below never reads `item.icon` at all, so swapping these to the new
+  // illustrated PNGs cannot affect the desktop nav. alt="" because the
+  // drawer item button's own visible label ("Daily" etc.) is already its
+  // accessible name — see NavigationDrawer.tsx's <button>. All five source
+  // files are a uniform 512x512 transparent canvas but crop their artwork
+  // to different amounts of that canvas, so a shared fixed display size
+  // (.nav-drawer__item-icon-img, see index.css) is what actually makes
+  // them feel consistently sized next to each other, not just their shared
+  // source resolution.
   const items: NavItem[] = [
-    { label: 'Daily', path: PATHS.daily, active: route.name === 'daily', icon: <GlobeIcon size={20} /> },
+    {
+      label: 'Daily',
+      path: PATHS.daily,
+      active: route.name === 'daily',
+      icon: <img src="/icons/daily.png" alt="" className="nav-drawer__item-icon-img" />,
+    },
     {
       label: 'Practice',
       path: PATHS.practice,
       active: route.name === 'practice',
-      icon: <ShuffleIcon size={20} />,
+      icon: <img src="/icons/practice.png" alt="" className="nav-drawer__item-icon-img" />,
     },
     {
       label: 'Archive',
       path: PATHS.archive,
       active: route.name === 'archive' || route.name === 'archive-game',
-      icon: <CalendarIcon size={20} />,
+      icon: <img src="/icons/archive.png" alt="" className="nav-drawer__item-icon-img" />,
     },
-    { label: 'Study', path: PATHS.study, active: route.name === 'study', icon: <BookIcon size={20} /> },
+    {
+      label: 'Study',
+      path: PATHS.study,
+      active: route.name === 'study',
+      icon: <img src="/icons/study.png" alt="" className="nav-drawer__item-icon-img" />,
+    },
     {
       label: 'Quiz',
       path: PATHS.quiz,
       active: route.name === 'quiz' || route.name === 'quiz-play',
-      icon: <HelpIcon size={20} />,
+      icon: <img src="/icons/quiz.png" alt="" className="nav-drawer__item-icon-img" />,
     },
   ]
   const activeNavPath = items.find((item) => item.active)?.path ?? null
@@ -87,15 +108,28 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
           benefits all of them equally rather than needing any per-element
           nudge. */}
       <div className="mx-auto flex h-[60px] max-w-[1000px] items-center px-2 sm:h-[68px] sm:px-4">
-        {/* Left: menu trigger (mobile) / nav (desktop). The trigger opens the
-            NavigationDrawer, which owns its own focus trap, Escape handling
-            and focus restoration — it isn't reachable by Tab while the
-            drawer is open, so its own icon never needs to swap to a second
-            close affordance. */}
+        {/* Left: menu trigger (mobile/tablet) / nav (wide desktop). The
+            trigger opens the NavigationDrawer, which owns its own focus
+            trap, Escape handling and focus restoration — it isn't reachable
+            by Tab while the drawer is open, so its own icon never needs to
+            swap to a second close affordance.
+
+            The switch from trigger to full nav is `lg` (1024px), not the
+            smaller `sm` this row's own height/padding still use — measured
+            directly against this row's actual content, not assumed: this
+            header centers the logo via two equal `flex-1` side containers
+            (see the row below), so the logo only stays truly centered once
+            BOTH sides' real content (five nav links vs. two icon buttons +
+            the theme toggle) fits within its own half-share of the
+            available width. Below ~930px the nav's fixed ~329px content
+            starts exceeding its shrinking half-share and pushes the logo
+            visibly off-centre; below ~740px it overflows the header
+            outright. `lg` clears that crossover with comfortable margin
+            using an existing Tailwind breakpoint rather than a new one. */}
         <div className="flex flex-1 items-center gap-1">
           <button
             type="button"
-            className="icon-btn inline-flex sm:hidden"
+            className="icon-btn inline-flex lg:hidden"
             // Static label: the trigger only ever opens the drawer (its own
             // close button handles closing, and this button isn't reachable
             // by Tab while the drawer is open anyway), so it never needs to
@@ -109,7 +143,7 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
           >
             <MenuIcon />
           </button>
-          <nav ref={navRef} className="relative hidden items-center gap-1 sm:flex" aria-label="Game modes">
+          <nav ref={navRef} className="relative hidden items-center gap-1 lg:flex" aria-label="Game modes">
             {items.map((item) => (
               <button
                 key={item.path}
@@ -175,7 +209,7 @@ export function Header({ onOpenHelp, onOpenStats }: HeaderProps) {
               📊
             </span>
           </button>
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <ThemeToggle className="hidden lg:inline-flex" />
         </div>
       </div>
 

@@ -1,6 +1,8 @@
-import type { Country } from '../../data/countries'
+import { COUNTRIES, type Country } from '../../data/countries'
 import { getCountryDetails } from '../../data/countryDetails'
+import type { AnswerDomainSpec, DomainCandidate } from './answerValidation'
 import { resolveCountryPool } from './pools'
+import { normalizeCountryName } from '../text/normalize'
 import type { CountryPool } from './types'
 
 /**
@@ -28,4 +30,38 @@ export function capitalOf(country: Country): string | null {
  */
 export function eligibleCapitalCountries(pool: CountryPool): Country[] {
   return resolveCountryPool(pool).filter((c) => capitalOf(c) !== null)
+}
+
+/**
+ * Every capital across the full canonical dataset, one candidate per
+ * distinct capital (deduped by normalized form, in case two countries ever
+ * share an identical capital name) — the capital Type Answer domain, used
+ * for both the "real but wrong" check and domain-wide Did You Mean
+ * matching. A module-level constant, built once and reused unchanged for
+ * every question — this is what makes domain-wide typo matching
+ * correctness-blind (see answerValidation.ts's own doc comment): the same
+ * pool is searched whether the current question is about Japan, France, or
+ * anything else. No alias system exists for capitals in this project (same
+ * finding as countryAliases.ts) — each capital's only accepted form is its
+ * own canonical spelling.
+ */
+const CAPITAL_DOMAIN_CANDIDATES: readonly DomainCandidate[] = (() => {
+  const seen = new Map<string, DomainCandidate>()
+  for (const country of COUNTRIES) {
+    const capital = capitalOf(country)
+    if (!capital) continue
+    const key = normalizeCountryName(capital)
+    if (!seen.has(key)) seen.set(key, { display: capital, keys: [key] })
+  }
+  return [...seen.values()]
+})()
+
+/** Builds the capital-city AnswerDomainSpec for a "what is the capital of X?" question. */
+export function buildCapitalAnswerDomain(correctCapital: string): AnswerDomainSpec {
+  return {
+    label: 'capital city',
+    accepted: [{ display: correctCapital, keys: [normalizeCountryName(correctCapital)] }],
+    domainCandidates: CAPITAL_DOMAIN_CANDIDATES,
+    typoEnabled: true,
+  }
 }

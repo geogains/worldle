@@ -35,6 +35,15 @@
   --c-status-good-text: #047857;
   --c-status-bad-text: #b45309;
 
+  /* Incorrect quiz-answer feedback specifically (MultipleChoiceAnswers'
+     .quiz-answer--incorrect, TypeAnswerInput's feedback line) — deliberately
+     its own red rather than reusing --feedback-absent (a slate-grey Wordle
+     "letter not in word" colour, not an error colour) or --c-status-bad-text
+     (an amber "bad" colour used for archive labels elsewhere). Scoped to
+     quiz answer feedback only; nothing else changes. */
+  --quiz-feedback-incorrect: #dc2626;
+  --quiz-feedback-incorrect-text: #b91c1c;
+
   /* Page background: the signature GeoRanks mint -> sky diagonal. */
   --c-bg: #bdeee4;
   --c-bg-gradient: linear-gradient(135deg, var(--brand-mint) 0%, var(--brand-sky) 100%);
@@ -120,6 +129,7 @@
 
   --c-status-good-text: #34d399;
   --c-status-bad-text: #fbbf24;
+  --quiz-feedback-incorrect-text: #f87171;
 
   --c-modal-bg: var(--c-surface-glass-strong);
   --c-modal-border: var(--c-surface-glass-border);
@@ -1273,6 +1283,22 @@ h4 {
 .nav-drawer__item[aria-current='page'] .nav-drawer__item-icon {
   color: inherit;
 }
+/* Illustrated PNG nav icons (Daily/Practice/Archive/Study/Quiz) — full
+   colour, so unlike the old currentColor SVGs they don't themselves shift
+   colour on hover/active (the item's own background/border/label-weight
+   changes already carry that state, per .nav-drawer__item[aria-current]
+   above). A shared fixed box plus object-fit: contain is what makes them
+   read as one consistent icon set despite each source PNG cropping its
+   artwork to a different amount of its own 512x512 canvas — sizing off
+   the raw <img> would make some feel bigger than others. The source
+   resolution is high enough to stay sharp at this display size on any
+   real device pixel ratio. */
+.nav-drawer__item-icon-img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
 
 .nav-drawer__footer {
   display: flex;
@@ -1619,6 +1645,9 @@ h4 {
 /* ------------------------------------------------------------------ */
 
 .study-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin-top: 1.25rem;
 }
 .study-search__label {
@@ -1637,6 +1666,13 @@ h4 {
 }
 .study-search__input {
   box-sizing: border-box;
+  /* flex (not width: 100%'s old block-level full-bleed) — on desktop this
+     still caps at max-width so the input's own size is unchanged and the
+     Quiz button sits in the existing empty space to its right; on narrow
+     viewports flex-shrink lets it give up exactly the width the button
+     needs, keeping both on one row instead of wrapping. */
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
   max-width: 480px;
   min-height: 48px;
@@ -1665,6 +1701,13 @@ h4 {
 .study-search__input::-webkit-search-results-button,
 .study-search__input::-webkit-search-results-decoration {
   -webkit-appearance: none;
+}
+/* Plain .btn.btn--primary geometry/colours are untouched — this only stops
+   it shrinking or wrapping its label as the search input gives up width
+   beside it on narrow viewports. */
+.study-search__quiz-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .study-status {
@@ -1880,9 +1923,8 @@ h4 {
   box-shadow: var(--shadow-coral);
 }
 
-/* tile: emoji-on-top, centered (Quiz Type). The emoji renders as its own
-   full-colour glyph (no `color`/filter applied — emoji ignore `color`
-   anyway), so selection is communicated by the card's border/tint/glow
+/* tile: icon-on-top, centered (Quiz Type). No `color`/filter applied to
+   the icon, so selection is communicated by the card's border/tint/glow
    alone, same as every other option variant. */
 .quiz-option--tile {
   flex-direction: column;
@@ -1890,12 +1932,28 @@ h4 {
   text-align: center;
   padding: 1rem 0.6rem;
 }
+/* font-size (not used by the current illustrated-PNG icon set below, which
+   sizes itself explicitly) kept as the fallback sizing for a plain emoji
+   glyph, should any Quiz Type icon ever go back to being one. */
 .quiz-option--tile .quiz-option__icon {
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
   line-height: 1;
+}
+/* Illustrated PNG icons — all six Quiz Type modes (Flags/Capitals/
+   Currencies/Languages/Facts/Mixed) now use this same treatment. A fixed
+   square box plus object-fit: contain keeps every icon at the same
+   consistent visual footprint (sized to roughly match the original
+   emojis' own ~1.6rem footprint, so swapping never grew any tile)
+   regardless of each PNG's own artwork proportions within its source
+   canvas, without stretching or cropping. */
+.quiz-option__icon-img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 .quiz-option--tile .quiz-option__text {
   align-items: center;
@@ -2153,6 +2211,47 @@ h4 {
   color: var(--c-ink);
 }
 
+/* Languages Expert Type Answer ("complete the list") — the still-visible
+   partial language list shown above the input. Countries can list up to 5
+   languages (e.g. South Africa, Ethiopia), so this must wrap cleanly on
+   mobile rather than overflow the card; the blank stays visually attached
+   to the last shown language (nowrap) so it never wraps onto its own line
+   alone. */
+.quiz-play__language-list {
+  margin-top: 0.75rem;
+  max-width: 100%;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--c-ink);
+  overflow-wrap: break-word;
+}
+.quiz-play__language-blank {
+  white-space: nowrap;
+  color: var(--c-secondary);
+}
+
+/* Languages has no separate country-name line between the flag/question and
+   the answer UI (the prompt sentence already names the country/language,
+   unlike Capitals' dedicated .quiz-play__capital-name) — .quiz-answers/
+   .quiz-type-answer's default top margin is tuned assuming a name line's
+   own negative bottom margin will trim it back down (see
+   .quiz-play__capital-name's comment), which doesn't happen here and would
+   otherwise leave an oversized empty gap. This value (1.75rem) approximates
+   Capitals' net visual gap after that trim, so it reads consistently
+   whether or not a .quiz-play__country-flag is present above (reverse
+   Languages questions have no flag at all; forward ones do — see
+   LanguagesQuizScreen.tsx). Scoped to this one card variant so
+   Flags/Capitals are unaffected. */
+.quiz-play__card--compact .quiz-answers {
+  margin-top: 1.75rem;
+}
+.quiz-play__card--compact .quiz-type-answer {
+  margin-top: 1.75rem;
+}
+
 .quiz-play__flag {
   --flag-w: clamp(160px, 55vw, 260px);
   width: var(--flag-w);
@@ -2174,14 +2273,16 @@ h4 {
   background: var(--c-surface-2);
 }
 
-/* Capitals' central question presentation: a medium flag (smaller than
-   .quiz-play__flag's large Flags-quiz image — it supports the capital
-   question rather than being the thing to identify, closer in scale to
-   .country-result__flag) sits above the country name. Same transparent-
-   square asset convention as those: margin-block trims the PNG's
-   transparent band so layout hugs the visible flag, margin-top adds real
-   spacing below "What is the capital of:". */
-.quiz-play__capital-flag {
+/* Shared "supporting" flag presentation for question types where the
+   country is already named/implied by the prompt (Capitals' "What is the
+   capital of:", forward-direction Languages questions) — a medium flag,
+   smaller than .quiz-play__flag's large guess-the-flag image, closer in
+   scale to .country-result__flag. Rendered by the shared QuizCountryFlag
+   component (src/components/quiz/QuizCountryFlag.tsx), not duplicated per
+   mode. Same transparent-square asset convention as .quiz-play__flag:
+   margin-block trims the PNG's transparent band so layout hugs the visible
+   flag, margin-top adds real spacing below the question heading. */
+.quiz-play__country-flag {
   --flag-w: clamp(110px, 32vw, 150px);
   width: var(--flag-w);
   height: var(--flag-w);
@@ -2190,10 +2291,10 @@ h4 {
   margin-top: calc(0.9rem + var(--flag-w) * -0.17);
   filter: drop-shadow(0 6px 16px rgba(13, 49, 90, 0.22));
 }
-[data-theme='dark'] .quiz-play__capital-flag {
+[data-theme='dark'] .quiz-play__country-flag {
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
 }
-.quiz-play__capital-flag-placeholder {
+.quiz-play__country-flag-placeholder {
   width: clamp(110px, 32vw, 150px);
   aspect-ratio: 3 / 2;
   margin-top: 0.9rem;
@@ -2203,11 +2304,13 @@ h4 {
 }
 
 /* The country name — .quiz-play__question (unchanged) is the "What is the
-   capital of:" line, .quiz-play__capital-flag (above) is the new flag. The
+   capital of:" line, .quiz-play__country-flag (above) is the flag. The
    negative bottom margin plays the same role as .quiz-play__flag's own
    negative block-margin: .quiz-answers (shared with Flags) has a fixed top
    margin tuned to sit right below a flag image, so this trims that gap
-   back down to something proportionate here too. */
+   back down to something proportionate here too. Capitals-only — Languages
+   has no separate name line (the prompt sentence already names the
+   country), see .quiz-play__card--compact below. */
 .quiz-play__capital-name {
   margin-top: 0.6rem;
   margin-bottom: -2.25rem;
@@ -2289,21 +2392,9 @@ h4 {
   color: var(--c-status-good-text);
 }
 .quiz-answer--incorrect {
-  border-color: var(--feedback-absent);
-  background: color-mix(in srgb, var(--feedback-absent) 14%, var(--c-surface-glass));
-  color: var(--c-status-bad-text);
-}
-.quiz-answer__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.quiz-answer--correct .quiz-answer__icon {
-  color: var(--feedback-correct);
-}
-.quiz-answer--incorrect .quiz-answer__icon {
-  color: var(--feedback-absent);
+  border-color: var(--quiz-feedback-incorrect);
+  background: color-mix(in srgb, var(--quiz-feedback-incorrect) 14%, var(--c-surface-glass));
+  color: var(--quiz-feedback-incorrect-text);
 }
 
 .quiz-type-answer {
@@ -2362,10 +2453,6 @@ h4 {
   border-color: var(--brand-sky);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-sky) 30%, transparent);
 }
-.quiz-type-answer__submit {
-  min-height: 48px;
-  flex-shrink: 0;
-}
 .quiz-type-answer__keyboard {
   width: 100%;
   margin-top: 1.25rem;
@@ -2383,7 +2470,78 @@ h4 {
   color: var(--c-status-good-text);
 }
 .quiz-type-answer__feedback--incorrect {
-  color: var(--c-status-bad-text);
+  color: var(--quiz-feedback-incorrect-text);
+}
+
+/* Type Answer input-assistance helpers ("Did you mean X?" / "Please enter
+   a valid X.") — deliberately a distinct, quieter treatment from
+   .quiz-type-answer__feedback above: these are INPUT ASSISTANCE shown
+   while the question is still active (no engine submission has happened),
+   never question-RESULT feedback, so they never use the strong green/red
+   correct/incorrect colours. Neutral secondary/muted text, with only the
+   suggested word itself picking up a subtle brand-coloured underline to
+   read as tappable. */
+.quiz-type-answer__helper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--c-secondary);
+}
+.quiz-type-answer__helper--invalid {
+  color: var(--c-muted);
+}
+.quiz-type-answer__suggestion {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--brand-sky);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.quiz-type-answer__suggestion:hover,
+.quiz-type-answer__suggestion:focus-visible {
+  color: var(--brand-sky);
+}
+
+/* Skip: "I don't know this answer" — occupies the exact slot/geometry the
+   Submit button used to (same row as the input, same min-height/flex
+   behaviour; there is no separate Submit button any more, see
+   TypeAnswerInput.tsx). Reuses --quiz-feedback-incorrect (the same red
+   already used for incorrect quiz-answer feedback, see that token's own
+   comment above) as a solid fill rather than introducing a new colour —
+   Skip IS an incorrect answer, so it earns the same red. Unlike
+   --quiz-feedback-incorrect-text (tuned for text on a surface), this
+   token is already tuned for use as a filled background, and isn't
+   redefined in dark mode, so this button intentionally looks identical in
+   both themes rather than needing its own dark-mode override. */
+.quiz-type-answer__skip {
+  min-height: 48px;
+  flex-shrink: 0;
+  background-color: var(--quiz-feedback-incorrect);
+  color: #ffffff;
+}
+@media (hover: hover) {
+  .quiz-type-answer__skip:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--quiz-feedback-incorrect) 85%, black);
+  }
+}
+.quiz-type-answer__skip:active:not(:disabled) {
+  background-color: color-mix(in srgb, var(--quiz-feedback-incorrect) 75%, black);
+}
+.quiz-type-answer__skip:disabled {
+  /* Matches the on-screen keyboard's own disabled treatment (.key[disabled]) rather than inventing a different disabled look within the same Type Answer control cluster. */
+  cursor: default;
+  opacity: 0.6;
 }
 
 /* Rounded results surface — same glass/card language as .quiz-play__card

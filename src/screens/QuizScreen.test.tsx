@@ -223,11 +223,11 @@ describe('QuizScreen (/quiz)', () => {
 
   it('Start Quiz navigates to /quiz/:mode using the currently selected configuration', () => {
     renderAt('/quiz')
-    fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /languages/i }))
+    fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: /facts/i }))
     fireEvent.click(within(group('Question count')).getByRole('radio', { name: '5' }))
     fireEvent.click(screen.getByRole('button', { name: 'Start Quiz' }))
-    expect(window.location.pathname).toBe('/quiz/languages')
-    expect(screen.getByText('Languages · Easy · Multiple Choice · 5 Questions')).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/quiz/facts')
+    expect(screen.getByText('Facts · Easy · Multiple Choice · 5 Questions')).toBeInTheDocument()
   })
 
   it('selections made on /quiz persist and are still selected after navigating away and back (Change Quiz retains the previous configuration)', () => {
@@ -285,24 +285,27 @@ describe('QuizScreen (/quiz)', () => {
     expect(group('Quiz type')).toHaveClass('quiz-option-group--grid-3')
   })
 
-  it('Quiz Type options show the exact requested emoji, decorative to assistive tech (visible label still carries the accessible name)', () => {
+  it('Quiz Type options show the illustrated PNG icons for all six modes, decorative to assistive tech (visible label still carries the accessible name)', () => {
     renderAt('/quiz')
     const g = group('Quiz type')
-    const expected: Record<string, string> = {
-      Flags: '🏳️',
-      Capitals: '🏛️',
-      Currencies: '💰',
-      Languages: '🗣️',
-      Facts: '💡',
-      Mixed: '🔀',
+    const expectedImages: Record<string, string> = {
+      Flags: '/icons/flags.png',
+      Capitals: '/icons/capitals.png',
+      Currencies: '/icons/currencies.png',
+      Languages: '/icons/languages.png',
+      Facts: '/icons/facts.png',
+      Mixed: '/icons/mixed.png',
     }
-    for (const [name, emoji] of Object.entries(expected)) {
+    for (const [name, src] of Object.entries(expectedImages)) {
       const option = within(g).getByRole('radio', { name })
       const iconEl = option.querySelector('.quiz-option__icon') as HTMLElement
       expect(iconEl).not.toBeNull()
-      expect(iconEl).toHaveTextContent(emoji)
       expect(iconEl).toHaveAttribute('aria-hidden', 'true')
-      // The visible text label (not the emoji) is what the accessible name
+      const img = iconEl.querySelector('img')
+      expect(img).not.toBeNull()
+      expect(img).toHaveAttribute('src', src)
+      expect(img).toHaveAttribute('alt', '')
+      // The visible text label (not the icon) is what the accessible name
       // is built from — getByRole above already proves this by matching on
       // the label text alone.
       expect(within(option).getByText(name)).toBeInTheDocument()

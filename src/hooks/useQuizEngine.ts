@@ -129,7 +129,9 @@ export function useQuizEngine<TQuestion extends EngineQuestion>(
   // schedule two competing advance timers for the same question.
   useEffect(() => {
     if (state.phase !== 'feedback') return
-    const delay = quizFeedbackDelay(reducedMotion)
+    // lastSubmission is always set on entry to 'feedback' (see the SUBMIT
+    // reducer case) — the `?? true` fallback only matters for type-safety.
+    const delay = quizFeedbackDelay(reducedMotion, state.lastSubmission?.isCorrect ?? true)
     const id = setTimeout(() => {
       if (state.totalQuestions !== null) {
         dispatch({ type: 'ADVANCE' })

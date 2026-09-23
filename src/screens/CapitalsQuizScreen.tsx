@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { MultipleChoiceAnswers } from '../components/quiz/MultipleChoiceAnswers'
+import { QuizCountryFlag } from '../components/quiz/QuizCountryFlag'
 import { QuizProgress } from '../components/quiz/QuizProgress'
 import { QuizResults } from '../components/quiz/QuizResults'
 import { TypeAnswerInput } from '../components/quiz/TypeAnswerInput'
@@ -7,12 +8,10 @@ import { useQuizEngine } from '../hooks/useQuizEngine'
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useRouter } from '../hooks/useRouter'
-import { flagUrlForCode, countryCodeForSlug } from '../data/countryDetails/flags'
-import { capitalOf } from '../lib/quiz/capitals'
+import { buildCapitalAnswerDomain, capitalOf } from '../lib/quiz/capitals'
 import { createCapitalQuestion, generateCapitalQuestions, type CapitalQuestion } from '../lib/quiz/capitalQuestions'
 import { defaultRandom } from '../lib/quiz/random'
 import type { QuizConfig } from '../lib/quiz/types'
-import { normalizeCountryName } from '../lib/text/normalize'
 import { PATHS } from '../lib/router/routes'
 
 export interface CapitalsQuizScreenProps {
@@ -87,18 +86,6 @@ function CapitalsQuizRun({
 
   if (!currentQuestion) return null
 
-  const flagCode = countryCodeForSlug(currentQuestion.country.id)
-  const flagUrl = flagCode ? flagUrlForCode(flagCode) : null
-
-  const handleTypeSubmit = (text: string) => {
-    // Same normalization technique FlagsQuizScreen uses for country names
-    // (strip diacritics, uppercase, letters only) — it handles capitalization,
-    // whitespace, repeated spaces and punctuation (e.g. "Washington, D.C.")
-    // identically, with no capital-specific matching rules needed.
-    const isCorrect = normalizeCountryName(text) === normalizeCountryName(currentQuestion.capital)
-    submitText(isCorrect)
-  }
-
   return (
     <div className="quiz-play-page">
       <div className="mode-bar shrink-0">
@@ -125,22 +112,7 @@ function CapitalsQuizRun({
 
           <h1 className="quiz-play__question">What is the capital of:</h1>
 
-          {flagUrl ? (
-            // Unlike Flags' own deliberately-generic alt text (the flag *is*
-            // the puzzle there), the country name is already shown here, so
-            // a descriptive alt follows the same "already revealed" pattern
-            // as CountryResultCard's flag (alt="Flag of {name}").
-            <img
-              className="quiz-play__capital-flag"
-              src={flagUrl}
-              alt={`Flag of ${currentQuestion.country.name}`}
-              width={512}
-              height={512}
-              decoding="async"
-            />
-          ) : (
-            <div className="quiz-play__capital-flag-placeholder" aria-hidden="true" />
-          )}
+          <QuizCountryFlag country={currentQuestion.country} />
 
           <p className="quiz-play__capital-name">{currentQuestion.country.name}</p>
 
@@ -161,7 +133,8 @@ function CapitalsQuizRun({
               phase={state.phase}
               lastSubmission={state.lastSubmission}
               correctLabel={currentQuestion.capital}
-              onSubmit={handleTypeSubmit}
+              onSubmit={submitText}
+              answerDomain={buildCapitalAnswerDomain(currentQuestion.capital)}
             />
           )}
         </div>

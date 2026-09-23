@@ -1,5 +1,4 @@
 import type { QuizPhase } from '../../hooks/useQuizEngine'
-import { CheckIcon, CloseIcon } from '../ui/icons'
 
 export interface ChoiceOption {
   id: string
@@ -19,9 +18,11 @@ export interface MultipleChoiceAnswersProps {
 /**
  * Generic multiple-choice answer grid — not Flags-specific (just id/label
  * pairs), so Capitals/Currencies/Languages/Facts can reuse it unchanged.
- * Feedback never relies on colour alone: a check/cross icon and text
- * (via aria-label) both carry correct/incorrect state independently of the
- * background tint.
+ * Feedback never relies on colour alone: an .sr-only status suffix carries
+ * correct/incorrect state in the button's accessible name independently of
+ * the green/red background tint, without a visible tick/cross glyph (the
+ * card colour itself is the intended visible signal — see the
+ * quiz-answer--correct/--incorrect CSS).
  */
 export function MultipleChoiceAnswers({ choices, correctId, selectedId, phase, onSelect, groupLabel }: MultipleChoiceAnswersProps) {
   const locked = phase !== 'answering'
@@ -46,16 +47,8 @@ export function MultipleChoiceAnswers({ choices, correctId, selectedId, phase, o
             onClick={() => onSelect(choice.id)}
           >
             <span className="quiz-answer__label">{choice.label}</span>
-            {showCorrect && (
-              <span className="quiz-answer__icon" aria-label="Correct">
-                <CheckIcon size={16} />
-              </span>
-            )}
-            {showIncorrect && (
-              <span className="quiz-answer__icon" aria-label="Incorrect">
-                <CloseIcon size={16} />
-              </span>
-            )}
+            {showCorrect && <span className="sr-only"> — Correct answer</span>}
+            {showIncorrect && <span className="sr-only"> — Incorrect answer</span>}
           </button>
         )
       })}
