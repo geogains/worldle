@@ -305,7 +305,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Albanian'],
     areaKm2: 28_748,
     flag: '/flags/AL.png',
-    fact: 'Albania is one of the few countries in Europe with both Adriatic and Ionian coastlines.',
+    fact: "Albania's decades-long communist regime built hundreds of thousands of small concrete bunkers across its territory as part of a paranoid national defence program, many of which still dot the landscape today.",
   },
   algeria: {
     name: 'Algeria',
@@ -435,7 +435,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 13_943,
     flag: '/flags/BS.png',
-    fact: 'The Bahamas is an Atlantic archipelago made up of hundreds of islands and cays.',
+    fact: "The Bahamas is widely identified as the site of Christopher Columbus's first landfall in the Americas in 1492, traditionally on the island now called San Salvador.",
   },
   bahrain: {
     name: 'Bahrain',
@@ -491,7 +491,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Belarusian', 'Russian'],
     areaKm2: 207_600,
     flag: '/flags/BY.png',
-    fact: 'Belarus is a landlocked Eastern European country with extensive forests, lakes and wetlands.',
+    fact: "Belarus's capital, Minsk, was almost completely destroyed during the Second World War and was rebuilt afterward according to a single, unified Soviet city plan.",
   },
   belgium: {
     name: 'Belgium',
@@ -639,7 +639,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Bulgarian'],
     areaKm2: 110_994,
     flag: '/flags/BG.png',
-    fact: 'Bulgarian is written using the Cyrillic alphabet, which originated in the medieval Bulgarian cultural sphere.',
+    fact: "Bulgaria's Kazanlak Valley, known as the Valley of Roses, produces most of the world's rose oil used in perfumery.",
   },
   burundi: {
     name: 'Burundi',
@@ -700,7 +700,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'French'],
     areaKm2: 475_442,
     flag: '/flags/CM.png',
-    fact: 'Cameroon stretches from the Gulf of Guinea northward toward Lake Chad, giving it an unusually wide range of landscapes and climates.',
+    fact: 'Cameroon is nicknamed "Africa in Miniature" because it contains nearly every major African climate and landscape zone — from Atlantic beaches to Sahel desert, rainforest and savanna — within a single country.',
   },
   canada: {
     name: 'Canada',
@@ -927,7 +927,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Arabic', 'French', 'Somali', 'Afar'],
     areaKm2: 23_200,
     flag: '/flags/DJ.png',
-    fact: "Djibouti sits beside the Bab el-Mandeb Strait, one of the world's most important maritime shipping routes.",
+    fact: 'Djibouti hosts military bases from several foreign powers — including the United States, France, Japan and China — all within a very small area, an unusual concentration for any one country.',
   },
   dominica: {
     name: 'Dominica',
@@ -958,7 +958,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['French'],
     areaKm2: 2_344_858,
     flag: '/flags/CD.png',
-    fact: "The Democratic Republic of the Congo contains a large share of the Congo Basin, the world's second-largest tropical rainforest.",
+    fact: "DR Congo is home to Mount Nyiragongo, whose crater contains one of the world's largest and most active lava lakes, within Africa's oldest national park.",
   },
   ecuador: {
     name: 'Ecuador',
@@ -1034,7 +1034,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Estonian'],
     areaKm2: 45_339,
     flag: '/flags/EE.png',
-    fact: 'Estonia is widely known for its digital public services and was one of the earliest countries to introduce nationwide online voting.',
+    fact: "Estonia became the first country in the world to offer 'e-Residency' — a government-issued digital identity that lets people anywhere apply to start and run an EU-based business online.",
   },
   eswatini: {
     name: 'Eswatini',
@@ -1049,7 +1049,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['siSwati', 'English'],
     areaKm2: 17_364,
     flag: '/flags/SZ.png',
-    fact: 'Eswatini is one of the world\'s few remaining absolute monarchies and is ruled by a king.',
+    fact: 'Eswatini was known as Swaziland until 2018, when its king officially renamed it to mark 50 years of independence.',
   },
   ethiopia: {
     name: 'Ethiopia',
@@ -1082,7 +1082,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'iTaukei', 'Hindi'],
     areaKm2: 18_274,
     flag: '/flags/FJ.png',
-    fact: 'Fiji is an archipelago of more than 300 islands in the South Pacific Ocean.',
+    fact: "Fiji's population includes a large Indo-Fijian community, descended largely from indentured labourers brought from India to work on sugar plantations in the late nineteenth and early twentieth centuries.",
   },
   finland: {
     name: 'Finland',
@@ -1110,7 +1110,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['French'],
     areaKm2: 551_695,
     flag: '/flags/FR.png',
-    fact: 'France has territories in several parts of the world, giving it coastlines in the Atlantic, Pacific and Indian Oceans.',
+    fact: 'France spans more time zones than any other country in the world — twelve in total — thanks to its scattered overseas territories.',
   },
   gabon: {
     name: 'Gabon',
@@ -1129,7 +1129,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['French', 'Fang'],
     areaKm2: 267_668,
     flag: '/flags/GA.png',
-    fact: 'Much of Gabon is covered by tropical rainforest, and the country has created extensive national parks to protect its wildlife.',
+    fact: 'In a single day in 2002, Gabon designated roughly 11% of its total land area as national parks, creating one of the most ambitious conservation networks in Africa.',
   },
   gambia: {
     name: 'Gambia',
@@ -1202,7 +1202,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Greek'],
     areaKm2: 131_957,
     flag: '/flags/GR.png',
-    fact: 'Greece contains thousands of islands and is widely regarded as one of the major birthplaces of democracy and Western philosophy.',
+    fact: 'Greece hosted the first modern Olympic Games, held in Athens in 1896, reviving a tradition that began in ancient Olympia nearly 3,000 years earlier.',
   },
   grenada: {
     name: 'Grenada',
@@ -1230,7 +1230,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Spanish'],
     areaKm2: 108_889,
     flag: '/flags/GT.png',
-    fact: 'Guatemala was a major centre of Maya civilisation and is still home to numerous ancient Maya archaeological sites.',
+    fact: 'Guatemala is home to Tikal, one of the largest and most powerful cities of the ancient Maya civilisation, its temple pyramids rising above the surrounding rainforest.',
   },
   guinea: {
     name: 'Guinea',
@@ -1372,7 +1372,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Persian'],
     areaKm2: 1_648_195,
     flag: '/flags/IR.png',
-    fact: "Iran is home to one of the world's oldest continuous civilisations, with a recorded history stretching back thousands of years.",
+    fact: 'Iran is home to Persepolis, the ceremonial capital of the ancient Achaemenid Persian Empire, founded by Darius the Great in the sixth century BCE.',
   },
   iraq: {
     name: 'Iraq',
@@ -1433,7 +1433,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Italian'],
     areaKm2: 302_073,
     flag: '/flags/IT.png',
-    fact: 'Italy contains more UNESCO World Heritage Sites than almost any other country, reflecting its long cultural and artistic history.',
+    fact: 'Italy is home to Mount Vesuvius, the volcano whose eruption in 79 CE famously buried the Roman city of Pompeii, preserving it in remarkable detail.',
   },
   'ivory-coast': {
     // "Ivory Coast" is the gameplay display name (data/countries.ts); the
@@ -1457,7 +1457,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['French', 'Baoulé'],
     areaKm2: 322_463,
     flag: '/flags/CI.png',
-    fact: "Côte d'Ivoire is one of the world's largest producers of cocoa beans.",
+    fact: "Ivory Coast is home to the Basilica of Our Lady of Peace in Yamoussoukro, one of the largest churches in the world by area — larger than St Peter's Basilica in Rome.",
   },
   jamaica: {
     name: 'Jamaica',
@@ -1536,7 +1536,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Swahili', 'English', 'Kikuyu'],
     areaKm2: 580_367,
     flag: '/flags/KE.png',
-    fact: 'Kenya is crossed by the equator and contains landscapes ranging from the Great Rift Valley to the Indian Ocean coast.',
+    fact: "Kenya is home to Lake Turkana, the world's largest permanent desert lake and largest alkaline lake.",
   },
   kiribati: {
     name: 'Kiribati',
@@ -1586,7 +1586,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Arabic'],
     areaKm2: 17_818,
     flag: '/flags/KW.png',
-    fact: "The Kuwaiti dinar is one of the world's highest-valued currency units by exchange rate.",
+    fact: "During the 1991 Gulf War, retreating forces set hundreds of Kuwait's oil wells ablaze, creating fires that burned for months and caused one of history's largest human-made environmental disasters.",
   },
   kyrgyzstan: {
     name: 'Kyrgyzstan',
@@ -1601,7 +1601,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Kyrgyz', 'Russian'],
     areaKm2: 199_951,
     flag: '/flags/KG.png',
-    fact: 'Most of Kyrgyzstan is mountainous, with the Tian Shan range covering much of the country.',
+    fact: "Kyrgyzstan is home to Lake Issyk-Kul, one of the largest and deepest alpine lakes on Earth and the world's second-largest saline lake after the Caspian Sea.",
   },
   laos: {
     name: 'Laos',
@@ -1629,7 +1629,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Latvian'],
     areaKm2: 64_589,
     flag: '/flags/LV.png',
-    fact: 'Latvia is one of the three Baltic states and has a long coastline along the Baltic Sea.',
+    fact: "Latvia's capital, Riga, has one of the largest and best-preserved collections of Art Nouveau architecture in the world, with roughly a third of its buildings built in that style.",
   },
   lebanon: {
     name: 'Lebanon',
@@ -1689,7 +1689,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Arabic'],
     areaKm2: 1_759_540,
     flag: '/flags/LY.png',
-    fact: 'Most of Libya lies within the Sahara Desert, making it one of the driest countries in the world.',
+    fact: 'Libya is home to Leptis Magna, one of the best-preserved ancient Roman cities in the Mediterranean, once a major city of the Roman Empire.',
   },
   lithuania: {
     name: 'Lithuania',
@@ -1844,7 +1844,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 825_615,
     flag: '/flags/NA.png',
-    fact: 'Namibia is home to the Namib Desert, one of the oldest deserts in the world.',
+    fact: "Namibia's Atlantic coastline includes the Skeleton Coast, a notoriously treacherous stretch of shoreline littered with shipwrecks and named for the whale and seal bones once found there.",
   },
   nauru: {
     // Nauru has no officially designated capital; Yaren is the
@@ -1876,7 +1876,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Nepali'],
     areaKm2: 147_516,
     flag: '/flags/NP.png',
-    fact: 'Nepal is home to Mount Everest, the highest mountain above sea level in the world.',
+    fact: 'Nepal is the only country in the world with a national flag that is not rectangular — it is made up of two overlapping triangular pennants.',
   },
   'new-zealand': {
     // English became statutorily official under the English Language Act
@@ -1926,7 +1926,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Hausa'],
     areaKm2: 1_267_000,
     flag: '/flags/NE.png',
-    fact: "Much of Niger lies within the Sahara Desert, while the Niger River crosses the country's southwest.",
+    fact: "Niger has the world's youngest population by median age, with roughly half its citizens under the age of fifteen.",
   },
   nigeria: {
     name: 'Nigeria',
@@ -2075,7 +2075,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Spanish', 'Guaraní'],
     areaKm2: 406_752,
     flag: '/flags/PY.png',
-    fact: 'Paraguay is one of the few countries in the Americas where an Indigenous language is spoken widely across the general population.',
+    fact: 'Paraguay is one of the few countries where Guaraní, an Indigenous language, holds official status equal to Spanish and is spoken by a majority of the population in daily life.',
   },
   peru: {
     name: 'Peru',
@@ -2134,7 +2134,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Arabic'],
     areaKm2: 11_586,
     flag: '/flags/QA.png',
-    fact: 'Qatar occupies a peninsula extending northward into the Persian Gulf from the Arabian Peninsula.',
+    fact: "Qatar hosted the first FIFA World Cup held in the Middle East, in 2022 — also the first World Cup held in the winter months, because of the region's extreme summer heat.",
   },
   romania: {
     name: 'Romania',
@@ -2337,7 +2337,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Slovenian'],
     areaKm2: 20_273,
     flag: '/flags/SI.png',
-    fact: 'Slovenia combines Alpine mountains, Mediterranean coastline and extensive karst landscapes within a relatively small area.',
+    fact: "The word 'karst', used worldwide to describe landscapes shaped by dissolving limestone, comes from the Karst Plateau region of this country.",
   },
   somalia: {
     name: 'Somalia',
@@ -2367,7 +2367,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Korean'],
     areaKm2: 100_210,
     flag: '/flags/KR.png',
-    fact: 'The Korean alphabet, Hangul, was deliberately created in the fifteenth century during the reign of King Sejong.',
+    fact: "South Korea is the birthplace of the global 'Korean Wave' of pop culture, and its film Parasite became the first non-English-language film to win the Academy Award for Best Picture.",
   },
   'south-sudan': {
     name: 'South Sudan',
@@ -2509,7 +2509,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Mandarin', 'Hoklo/Taiwanese'],
     areaKm2: 36_197,
     flag: '/flags/TW.png',
-    fact: 'Taiwan is an island in East Asia separated from the Asian mainland by the Taiwan Strait.',
+    fact: "Taiwan is home to TSMC, the world's largest dedicated semiconductor foundry and a critical supplier to the global electronics industry.",
   },
   tajikistan: {
     name: 'Tajikistan',
@@ -2540,7 +2540,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Thai'],
     areaKm2: 513_120,
     flag: '/flags/TH.png',
-    fact: 'Thailand stretches from the mountains of mainland Southeast Asia to a long peninsula between the Andaman Sea and Gulf of Thailand.',
+    fact: 'Thailand is the only country in Southeast Asia never colonised by a European power.',
   },
   'timor-leste': {
     name: 'Timor-Leste',
@@ -2570,7 +2570,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['French'],
     areaKm2: 56_785,
     flag: '/flags/TG.png',
-    fact: 'Togo is a narrow West African country stretching from the Gulf of Guinea north toward Burkina Faso.',
+    fact: "After German colonial rule ended, Togo's territory was split between British and French administration; the British-administered western part later voted to join Ghana instead of remaining part of the country.",
   },
   tonga: {
     name: 'Tonga',
@@ -2644,7 +2644,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Arabic'],
     areaKm2: 1_030_700,
     flag: '/flags/MR.png',
-    fact: 'Much of Mauritania lies within the Sahara Desert, while its Atlantic coast contains important fishing grounds.',
+    fact: "Mauritania is home to the Richat Structure, also called the 'Eye of the Sahara' — a massive circular geological formation so large it is easily visible from space.",
   },
   mauritius: {
     name: 'Mauritius',
@@ -2696,7 +2696,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 702,
     flag: '/flags/FM.png',
-    fact: 'The Federated States of Micronesia consists of more than 600 islands spread across a vast area of the western Pacific Ocean.',
+    fact: "The Federated States of Micronesia is home to Nan Madol, a mysterious ancient city built on a series of small artificial islands from massive basalt logs, sometimes called the 'Venice of the Pacific'.",
   },
   moldova: {
     name: 'Moldova',
@@ -2787,7 +2787,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Portuguese'],
     areaKm2: 801_590,
     flag: '/flags/MZ.png',
-    fact: 'Mozambique has a long Indian Ocean coastline stretching for more than 2,000 kilometres.',
+    fact: 'Mozambique takes its name from the Island of Mozambique, a small coral island off its northern coast that served as a Portuguese colonial capital and is now a UNESCO World Heritage Site.',
   },
   uganda: {
     name: 'Uganda',
@@ -2806,7 +2806,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'Swahili', 'Luganda'],
     areaKm2: 241_550,
     flag: '/flags/UG.png',
-    fact: 'Uganda contains part of Lake Victoria and is one of the countries through which the Nile flows.',
+    fact: 'Uganda is home to Jinja, the point where the Nile River leaves Lake Victoria and begins its long journey north to the Mediterranean.',
   },
   ukraine: {
     name: 'Ukraine',
@@ -2850,7 +2850,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Uzbek'],
     areaKm2: 448_978,
     flag: '/flags/UZ.png',
-    fact: 'Uzbekistan is one of only two doubly landlocked countries in the world, meaning every country it borders is itself landlocked.',
+    fact: 'Uzbekistan is home to Samarkand, one of the oldest continuously inhabited cities in Central Asia and a major hub on the historic Silk Road, famous for its Registan square.',
   },
   vanuatu: {
     name: 'Vanuatu',
@@ -2866,7 +2866,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Bislama', 'English', 'French'],
     areaKm2: 12_189,
     flag: '/flags/VU.png',
-    fact: 'Vanuatu is a volcanic Pacific archipelago located along the seismically active Pacific Ring of Fire.',
+    fact: 'Vanuatu is home to a traditional land-diving ritual on Pentecost Island, in which men jump from tall wooden towers with vines tied to their ankles — widely regarded as a precursor to modern bungee jumping.',
   },
   venezuela: {
     name: 'Venezuela',
@@ -2949,7 +2949,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'Shona', 'Ndebele', 'Sign Language'],
     areaKm2: 390_757,
     flag: '/flags/ZW.png',
-    fact: 'Zimbabwe takes its name from Great Zimbabwe, the ruins of a major medieval stone-built city in southern Africa.',
+    fact: 'Zimbabwe experienced one of the most extreme cases of hyperinflation in recorded history in the late 2000s, at one point issuing a 100 trillion dollar banknote.',
   },
   england: {
     // Constituent country of the United Kingdom, not a sovereign ISO
@@ -3013,7 +3013,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'Welsh'],
     areaKm2: 20_779,
     flag: '/flags/GB-WLS.png',
-    fact: 'Wales has two principal languages, English and Welsh, and is known for its mountainous landscape and extensive coastline.',
+    fact: 'Wales is home to a village with one of the longest place names in the world — commonly shortened to Llanfairpwllgwyngyll — as well as Snowdon, its highest peak.',
   },
   afghanistan: {
     // Not a playable answer (AFGHANISTAN is 11 letters, over
@@ -3030,7 +3030,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Dari', 'Pashto'],
     areaKm2: 652_230,
     flag: '/flags/AF.png',
-    fact: 'Afghanistan lies at a historic crossroads linking Central Asia, South Asia and the Middle East.',
+    fact: "Afghanistan's narrow Wakhan Corridor stretches east to touch the border of China, separating Tajikistan from Pakistan.",
   },
   'antigua-and-barbuda': {
     // Not a playable answer (ANTIGUAANDBARBUDA is 17 letters) but a
@@ -3046,7 +3046,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 442,
     flag: '/flags/AG.png',
-    fact: 'Antigua and Barbuda is an island nation made up primarily of Antigua, Barbuda and several smaller islands.',
+    fact: "Antigua and Barbuda is home to Nelson's Dockyard, the only continuously working Georgian-era naval dockyard in the world, a UNESCO World Heritage Site where Horatio Nelson was once stationed.",
   },
   'bosnia-and-herzegovina': {
     // Not a playable answer (BOSNIAANDHERZEGOVINA is 20 letters) but a
@@ -3099,7 +3099,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Sango', 'French'],
     areaKm2: 622_984,
     flag: '/flags/CF.png',
-    fact: 'The Central African Republic is a landlocked country located close to the geographic centre of the African continent.',
+    fact: "In the 1970s, this country's president crowned himself emperor in a lavish ceremony reportedly costing a significant share of the national budget, and briefly renamed the nation to reflect the new monarchy.",
   },
   'dominican-republic': {
     // Not a playable answer (DOMINICANREPUBLIC is 17 letters) but a
@@ -3163,7 +3163,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['German'],
     areaKm2: 160,
     flag: '/flags/LI.png',
-    fact: 'Liechtenstein is one of only two doubly landlocked countries in the world.',
+    fact: 'Liechtenstein has had no standing army since 1868, when it dissolved its military and adopted permanent neutrality.',
   },
   'marshall-islands': {
     // Not a playable answer (MARSHALLISLANDS is 15 letters) but a
@@ -3179,7 +3179,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['Marshallese', 'English'],
     areaKm2: 181,
     flag: '/flags/MH.png',
-    fact: 'The Marshall Islands consists mainly of low-lying coral atolls spread across a vast area of the Pacific Ocean.',
+    fact: 'The Marshall Islands includes Bikini Atoll, the site of extensive US nuclear weapons testing in the 1940s and 1950s, including Castle Bravo, one of the largest nuclear detonations in history.',
   },
   netherlands: {
     // Not a playable answer (NETHERLANDS is 11 letters, over
@@ -3296,7 +3296,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 389,
     flag: '/flags/VC.png',
-    fact: 'Saint Vincent and the Grenadines consists of the main island of Saint Vincent and a chain of smaller Grenadine islands.',
+    fact: 'Saint Vincent and the Grenadines was the original homeland of the Garifuna people, who formed there from the intermixing of Indigenous Caribs and shipwrecked or escaped Africans, before the British exiled them to Central America in 1797.',
   },
   'sao-tome-and-principe': {
     // Not a playable answer (SAOTOMEANDPRINCIPE is 18 letters) but a
@@ -3366,7 +3366,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English', 'Solomon Islands Pijin'],
     areaKm2: 28_896,
     flag: '/flags/SB.png',
-    fact: 'The Solomon Islands is an archipelago of hundreds of islands in the southwestern Pacific Ocean.',
+    fact: 'The Solomon Islands was the site of the Battle of Guadalcanal, one of the fiercest and most pivotal battles of the Pacific Theatre in the Second World War.',
   },
   'south-africa': {
     // Not a playable answer (SOUTHAFRICA is 11 letters) but a canonical
@@ -3434,7 +3434,7 @@ export const COUNTRY_RECORDS: Readonly<Record<string, CountryRecord>> = Object.f
     languages: ['English'],
     areaKm2: 5_130,
     flag: '/flags/TT.png',
-    fact: "Trinidad and Tobago consists of two main islands, with Trinidad accounting for most of the country's land area and population.",
+    fact: 'Trinidad and Tobago is the birthplace of steelpan (steel drum) music, invented in the twentieth century and now recognised as its national instrument.',
   },
   turkmenistan: {
     // Not a playable answer (TURKMENISTAN is 12 letters) but a canonical

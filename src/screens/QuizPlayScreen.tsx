@@ -7,6 +7,7 @@ import { useRouter } from '../hooks/useRouter'
 import { PATHS } from '../lib/router/routes'
 import { CapitalsQuizScreen } from './CapitalsQuizScreen'
 import { CurrenciesQuizScreen } from './CurrenciesQuizScreen'
+import { FactsQuizScreen } from './FactsQuizScreen'
 import { FlagsQuizScreen } from './FlagsQuizScreen'
 import { LanguagesQuizScreen } from './LanguagesQuizScreen'
 
@@ -15,13 +16,13 @@ export interface QuizPlayScreenProps {
 }
 
 /**
- * `/quiz/:mode`. Flags (Phase 2), Capitals (Phase 3), Languages (Phase 4)
- * and Currencies (Phase 5) are real gameplay modes now — every other mode
- * still renders the Phase 1 placeholder shell, unchanged, until its own
- * phase builds on the same shared engine these four already use. Adding a
- * new mode here is a one-line addition: a new `if (mode === '<mode>')
- * return <...QuizScreen config={config} />` above the placeholder
- * fallback, same shape as the four below.
+ * `/quiz/:mode`. Flags (Phase 2), Capitals (Phase 3), Languages (Phase 4),
+ * Currencies (Phase 5) and Facts (Phase 6) are real gameplay modes now —
+ * Mixed still renders the Phase 1 placeholder shell, unchanged, until it
+ * builds on the same shared engine these five already use. Adding a new
+ * mode here is a one-line addition: a new `if (mode === '<mode>') return
+ * <...QuizScreen config={config} />` above the placeholder fallback, same
+ * shape as the five below.
  *
  * The persisted QuizConfig is captured exactly once here (not re-read by
  * the gameplay screen itself), with the route's own `mode` authoritative
@@ -36,6 +37,7 @@ export function QuizPlayScreen({ mode }: QuizPlayScreenProps) {
   if (mode === 'capitals') return <CapitalsQuizScreen config={config} />
   if (mode === 'languages') return <LanguagesQuizScreen config={config} />
   if (mode === 'currencies') return <CurrenciesQuizScreen config={config} />
+  if (mode === 'facts') return <FactsQuizScreen config={config} />
   return <QuizComingSoon mode={mode} config={config} />
 }
 

@@ -548,11 +548,18 @@ describe('Regression: other quiz routes and existing flows still work', () => {
     window.history.replaceState(null, '', '/')
   })
 
-  it('/quiz/facts still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags/Capitals gameplay', () => {
-    setConfig({ mode: 'facts' })
-    renderAt('/quiz/facts')
+  it('/quiz/mixed still shows the Phase 1 "Coming soon" placeholder, unaffected by Flags/Capitals gameplay', () => {
+    setConfig({ mode: 'mixed' })
+    renderAt('/quiz/mixed')
     expect(screen.getByText('Coming soon')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Change Quiz' })).toBeInTheDocument()
+  })
+
+  it('/quiz/facts now renders real gameplay, not the placeholder, unaffected by Flags/Capitals gameplay', () => {
+    setConfig({ mode: 'facts', questionCount: 5 })
+    renderAt('/quiz/facts')
+    expect(screen.queryByText('Coming soon')).not.toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 5')).toBeInTheDocument()
   })
 
   it('/quiz setup screen still renders and Start Quiz still routes to /quiz/flags for the Flags mode', () => {

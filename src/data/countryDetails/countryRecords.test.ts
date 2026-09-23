@@ -1257,7 +1257,7 @@ describe('Mauritania completion (the final playable country, follow-up to Batch 
       languages: ['Arabic'],
       areaKm2: 1_030_700,
       flag: '/flags/MR.png',
-      fact: "Much of Mauritania lies within the Sahara Desert, while its Atlantic coast contains important fishing grounds.",
+      fact: "Mauritania is home to the Richat Structure, also called the 'Eye of the Sahara' — a massive circular geological formation so large it is easily visible from space.",
     })
   })
 
