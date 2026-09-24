@@ -142,7 +142,6 @@ function DifficultyCardFace({
             </>
           )}
         </span>
-        <span className="quiz-option__description">{option.description}</span>
       </span>
     </div>
   )

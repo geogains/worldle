@@ -1862,6 +1862,29 @@ h4 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Mixed: the 7th item in Quiz Type's grid-3 radiogroup (six subject tiles,
+   then Mixed) — spans the full grid row so it can be centered independently
+   of the 2/3-column subject grid above it, rather than auto-placing into a
+   single column like a seventh tile would. `justify-self: center` then
+   centers its own (narrower, width set below) box within that spanned row.
+   Mobile (2-column grid): full width, matching the subject grid's own
+   column count exactly, no separate rule needed. Desktop (3-column grid,
+   ≥480px, same breakpoint as the grid above): shrinks to exactly two
+   subject-card widths plus the one gap between them — derived from the
+   grid's own known column count (3) and gap (0.65rem) via calc(), so it
+   stays correct if the container is resized, rather than a hard-coded
+   pixel width. */
+.quiz-option-group--grid-3 .quiz-option--mixed {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 100%;
+}
+@media (min-width: 480px) {
+  .quiz-option-group--grid-3 .quiz-option--mixed {
+    width: calc((200% - 0.65rem) / 3);
+  }
+}
 .quiz-option-group--row {
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   grid-auto-flow: column;
@@ -1942,13 +1965,15 @@ h4 {
   font-size: 1.6rem;
   line-height: 1;
 }
-/* Illustrated PNG icons — all six Quiz Type modes (Flags/Capitals/
-   Currencies/Languages/Facts/Mixed) now use this same treatment. A fixed
-   square box plus object-fit: contain keeps every icon at the same
-   consistent visual footprint (sized to roughly match the original
-   emojis' own ~1.6rem footprint, so swapping never grew any tile)
-   regardless of each PNG's own artwork proportions within its source
-   canvas, without stretching or cropping. */
+/* Illustrated PNG icons — five Quiz Type modes (Flags/Capitals/Currencies/
+   Languages/Facts) plus Mixed use this same treatment. A fixed square box
+   plus object-fit: contain keeps every icon at the same consistent visual
+   footprint (sized to roughly match the original emojis' own ~1.6rem
+   footprint, so swapping never grew any tile) regardless of each PNG's own
+   artwork proportions within its source canvas, without stretching or
+   cropping. Population is the one current exception — a temporary plain
+   emoji (see .quiz-option--tile .quiz-option__icon's font-size above),
+   sized/replaced independently of this class until it gets its own asset. */
 .quiz-option__icon-img {
   display: block;
   width: 28px;
@@ -1957,6 +1982,20 @@ h4 {
 }
 .quiz-option--tile .quiz-option__text {
   align-items: center;
+}
+
+/* mixed: the final combined Quiz Type option — icon and label arranged
+   horizontally (the base .quiz-option row layout, not --tile's stacked
+   column), centered as a unit, and deliberately more compact than a
+   standard subject tile (shorter padding, same font sizes/border/selected
+   treatment as every other .quiz-option). Visual hierarchy comes entirely
+   from this shorter height plus the grid-level width/centering rules above
+   (.quiz-option-group--grid-3 .quiz-option--mixed) — never a different
+   color system: unselected/selected treatment is exactly the shared
+   .quiz-option / .quiz-option--selected rules every other variant uses. */
+.quiz-option--mixed {
+  justify-content: center;
+  padding: 0.95rem 0.9rem;
 }
 
 /* card: label + description, left-aligned (Difficulty) */
@@ -2019,15 +2058,48 @@ h4 {
 .difficulty-carousel__card {
   position: absolute;
   inset: 0;
+  display: flex;
   cursor: default;
-  /* Centered title/description, scoped to this carousel's card only (not
-     the shared .quiz-option--card rule, which stays left-aligned for any
-     other future consumer). Vertical placement (.quiz-option--card's own
-     align-items: flex-start) is untouched. */
+  /* Horizontally centered title (text-align, plus the full-width
+     .quiz-option__text rule below) AND vertically centered within the
+     card's full height — overrides the shared .quiz-option--card's own
+     align-items: flex-start, scoped to this carousel's card only (not the
+     shared rule itself, which any other future --card consumer still
+     gets). Now that the description is gone, this is what keeps the
+     (single-line) title sitting in the visual centre of the card rather
+     than pinned to the top with empty space below. */
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  /* Deliberately NOT the shared navy/coral .quiz-option--selected
+     border+tint+glow every other .quiz-option consumer gets — this card
+     always shows the current selection (cycled via the arrows, never
+     chosen from a set of visible alternatives), so a permanent "selected"
+     outline would just read as a stray highlight rather than communicate a
+     choice. It keeps the ordinary UNSELECTED card treatment instead
+     (border/background/shadow, identical to the base .quiz-option rule).
+     This override is scoped to .difficulty-carousel__card only — every
+     other .quiz-option--selected consumer (Quiz Type, Answer Style,
+     Questions) is completely unaffected. */
+  border-color: var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
   animation-duration: 220ms;
   animation-timing-function: var(--ease-out-quad);
   animation-fill-mode: both;
+}
+[data-theme='dark'] .difficulty-carousel__card {
+  border-color: var(--c-surface-glass-border);
+  background: var(--c-surface-glass);
+  box-shadow: var(--shadow-soft);
+}
+/* The description's removal leaves room for real prominence — sized/
+   weighted to match the app's other heavy titles (.quiz-section__title,
+   the page H1) rather than the small 0.9rem shared by every other
+   .quiz-option label (Quiz Type/Answer Style/Questions, all untouched). */
+.difficulty-carousel__card .quiz-option__label {
+  font-size: 1.3rem;
+  font-weight: 800;
 }
 /* Root cause of the desktop-only left shift: .quiz-option__text is a flex
    item with no explicit width, so it shrink-wraps to its own content's
@@ -2044,12 +2116,13 @@ h4 {
   width: 100%;
 }
 /* Not a button any more (only the arrows navigate), so suppress the
-   hover-lift .quiz-option normally gets — the selected border/tint/glow
-   stays, just without implying the card itself is clickable. */
+   hover-lift .quiz-option normally gets — stays the same plain unselected
+   shadow at rest and on hover, since it no longer carries any selected-style
+   glow to preserve. */
 @media (hover: hover) {
   .difficulty-carousel__card:hover {
     transform: none;
-    box-shadow: var(--shadow-coral);
+    box-shadow: var(--shadow-soft);
   }
 }
 @keyframes difficulty-out-left {

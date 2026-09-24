@@ -22,8 +22,8 @@ describe('DEFAULT_QUIZ_CONFIG', () => {
 })
 
 describe('option metadata', () => {
-  it('has exactly 6 quiz mode options, 3 country pool options, 2 answer style options, 3 question count options', () => {
-    expect(QUIZ_MODE_OPTIONS).toHaveLength(6)
+  it('has exactly 7 quiz mode options, 3 country pool options, 2 answer style options, 3 question count options', () => {
+    expect(QUIZ_MODE_OPTIONS).toHaveLength(7)
     expect(COUNTRY_POOL_OPTIONS).toHaveLength(3)
     expect(ANSWER_STYLE_OPTIONS).toHaveLength(2)
     expect(QUESTION_COUNT_OPTIONS).toHaveLength(3)
@@ -31,6 +31,17 @@ describe('option metadata', () => {
   it('Facts is described in country-is-the-answer terms, not as multiple-choice-only', () => {
     const facts = QUIZ_MODE_OPTIONS.find((o) => o.id === 'facts')!
     expect(facts.description.toLowerCase()).toContain('country')
+  })
+  it('Population sits immediately before Mixed, as the seventh and sixth options respectively', () => {
+    expect(QUIZ_MODE_OPTIONS.map((o) => o.id)).toEqual([
+      'flags',
+      'capitals',
+      'currencies',
+      'languages',
+      'facts',
+      'population',
+      'mixed',
+    ])
   })
   it('Difficulty options display as Easy/Medium/Expert, with their difficulty-dot emoji kept separate from the plain label', () => {
     const [easy, medium, expert] = COUNTRY_POOL_OPTIONS

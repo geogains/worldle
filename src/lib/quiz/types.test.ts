@@ -12,8 +12,8 @@ import {
 } from './types'
 
 describe('QuizMode', () => {
-  it('has exactly the six specified quiz types', () => {
-    expect(QUIZ_MODES).toEqual(['flags', 'capitals', 'currencies', 'languages', 'facts', 'mixed'])
+  it('has exactly the seven specified quiz types, Population immediately before Mixed', () => {
+    expect(QUIZ_MODES).toEqual(['flags', 'capitals', 'currencies', 'languages', 'facts', 'population', 'mixed'])
   })
   it('isQuizMode accepts every listed mode and rejects anything else', () => {
     for (const mode of QUIZ_MODES) expect(isQuizMode(mode)).toBe(true)
@@ -62,8 +62,9 @@ describe('QuestionCount', () => {
 })
 
 describe('MixedCategory', () => {
-  it('is exactly the five substantive categories, excluding "mixed" itself', () => {
+  it('is exactly the five substantive categories, excluding "mixed" itself and "population" (no question generator yet)', () => {
     expect(MIXED_CATEGORIES).toEqual(['flags', 'capitals', 'currencies', 'languages', 'facts'])
     expect(MIXED_CATEGORIES).not.toContain('mixed')
+    expect(MIXED_CATEGORIES).not.toContain('population')
   })
 })

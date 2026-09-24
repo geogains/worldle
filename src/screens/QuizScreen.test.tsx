@@ -104,7 +104,7 @@ describe('QuizScreen (/quiz)', () => {
   it('every Quiz Type option can be selected, exclusively', () => {
     renderAt('/quiz')
     const g = group('Quiz type')
-    for (const name of ['Flags', 'Capitals', 'Currencies', 'Languages', 'Facts', 'Mixed']) {
+    for (const name of ['Flags', 'Capitals', 'Currencies', 'Languages', 'Facts', 'Population', 'Mixed']) {
       fireEvent.click(within(g).getByRole('radio', { name }))
       expect(within(g).getByRole('radio', { name }), name).toHaveAttribute('aria-checked', 'true')
       const others = within(g)
@@ -112,6 +112,33 @@ describe('QuizScreen (/quiz)', () => {
         .filter((el) => el.getAttribute('aria-checked') === 'true')
       expect(others).toHaveLength(1)
     }
+  })
+
+  it('renders all seven Quiz Type options in the exact intended order — six subject categories, then Mixed last', () => {
+    renderAt('/quiz')
+    const g = group('Quiz type')
+    const labels = within(g)
+      .getAllByRole('radio')
+      .map((el) => el.querySelector('.quiz-option__label')?.textContent)
+    expect(labels).toEqual(['Flags', 'Capitals', 'Currencies', 'Languages', 'Facts', 'Population', 'Mixed'])
+  })
+
+  it('selecting Population selects it exclusively (deselecting the previous choice) without affecting any other option', () => {
+    renderAt('/quiz')
+    const g = group('Quiz type')
+    // Start from a different selection so this genuinely exercises deselect.
+    fireEvent.click(within(g).getByRole('radio', { name: 'Facts' }))
+    expect(within(g).getByRole('radio', { name: 'Facts' })).toHaveAttribute('aria-checked', 'true')
+
+    fireEvent.click(within(g).getByRole('radio', { name: 'Population' }))
+    expect(within(g).getByRole('radio', { name: 'Population' })).toHaveAttribute('aria-checked', 'true')
+    expect(within(g).getByRole('radio', { name: 'Population' })).toHaveClass('quiz-option--selected')
+    expect(within(g).getByRole('radio', { name: 'Facts' })).toHaveAttribute('aria-checked', 'false')
+    expect(within(g).getByRole('radio', { name: 'Facts' })).not.toHaveClass('quiz-option--selected')
+    const checked = within(g)
+      .getAllByRole('radio')
+      .filter((el) => el.getAttribute('aria-checked') === 'true')
+    expect(checked).toHaveLength(1)
   })
 
   it('Next loops Easy -> Medium -> Expert -> Easy', () => {
@@ -285,7 +312,7 @@ describe('QuizScreen (/quiz)', () => {
     expect(group('Quiz type')).toHaveClass('quiz-option-group--grid-3')
   })
 
-  it('Quiz Type options show the illustrated PNG icons for all six modes, decorative to assistive tech (visible label still carries the accessible name)', () => {
+  it('Quiz Type options show the illustrated PNG icons for the five completed modes plus Mixed, decorative to assistive tech (visible label still carries the accessible name)', () => {
     renderAt('/quiz')
     const g = group('Quiz type')
     const expectedImages: Record<string, string> = {
@@ -312,14 +339,52 @@ describe('QuizScreen (/quiz)', () => {
     }
   })
 
+  it('Population shows a temporary 👥 emoji icon, not a PNG — decorative to assistive tech, easily swappable for a real asset later', () => {
+    renderAt('/quiz')
+    const option = within(group('Quiz type')).getByRole('radio', { name: 'Population' })
+    const iconEl = option.querySelector('.quiz-option__icon') as HTMLElement
+    expect(iconEl).not.toBeNull()
+    expect(iconEl).toHaveAttribute('aria-hidden', 'true')
+    expect(iconEl).toHaveTextContent('👥')
+    expect(iconEl.querySelector('img')).toBeNull()
+    expect(within(option).getByText('Population')).toBeInTheDocument()
+  })
+
+  it('Mixed is visually distinct (variant="mixed") from the six subject-category tiles (variant="tile")', () => {
+    renderAt('/quiz')
+    const g = group('Quiz type')
+    expect(within(g).getByRole('radio', { name: 'Mixed' })).toHaveClass('quiz-option--mixed')
+    for (const name of ['Flags', 'Capitals', 'Currencies', 'Languages', 'Facts', 'Population']) {
+      expect(within(g).getByRole('radio', { name }), name).toHaveClass('quiz-option--tile')
+    }
+  })
+
   describe('Difficulty carousel', () => {
-    it('preserves the existing descriptions for each difficulty (unchanged wording)', () => {
+    it('no longer renders a description under the difficulty title, for any of the three difficulties, and leaves no empty description element behind', () => {
       renderAt('/quiz')
-      expect(screen.getByText('The most recognisable, widely known countries.')).toBeInTheDocument()
-      clickNextDifficulty()
-      expect(screen.getByText('A balanced mix of familiar and less obvious countries.')).toBeInTheDocument()
-      clickNextDifficulty()
-      expect(screen.getByText('The full supported country pool.')).toBeInTheDocument()
+      const descriptions = [
+        'The most recognisable, widely known countries.',
+        'A balanced mix of familiar and less obvious countries.',
+        'The full supported country pool.',
+      ]
+      for (const text of descriptions) expect(screen.queryByText(text)).not.toBeInTheDocument()
+      for (let i = 0; i < 3; i++) {
+        expect(difficultyCard().querySelector('.quiz-option__description')).toBeNull()
+        clickNextDifficulty()
+      }
+    })
+
+    it('the difficulty card no longer carries the shared selected-state border/tint class treatment other selected controls use', () => {
+      renderAt('/quiz')
+      // Still structurally "selected" (aria/semantics/internal value are
+      // unchanged — see the countryPool-sync test below) — only its visual
+      // border/background/shadow no longer come from .quiz-option--selected;
+      // .difficulty-carousel__card's own rule overrides them back to the
+      // plain unselected treatment. Quiz Type/Answer Style/Questions keep
+      // the shared selected styling untouched (covered by their own tests).
+      expect(difficultyCard()).toHaveClass('quiz-option--selected')
+      const flagsOption = within(group('Quiz type')).getByRole('radio', { name: /flags/i })
+      expect(flagsOption).toHaveClass('quiz-option--selected')
     })
 
     it('shows the exact new visible labels — Easy 🔵⚪️⚪️, Medium 🟠🟠⚪️, Expert 🔴🔴🔴', () => {
@@ -360,8 +425,8 @@ describe('QuizScreen (/quiz)', () => {
     it('only one difficulty card is present in the DOM at rest (not three)', () => {
       renderAt('/quiz')
       expect(document.querySelectorAll('.difficulty-carousel__card')).toHaveLength(1)
-      expect(screen.queryByText('A balanced mix of familiar and less obvious countries.')).not.toBeInTheDocument()
-      expect(screen.queryByText('The full supported country pool.')).not.toBeInTheDocument()
+      expect(screen.queryByText('Medium')).not.toBeInTheDocument()
+      expect(screen.queryByText('Expert')).not.toBeInTheDocument()
     })
 
     it('exposes an accessible status announcing the current position and difficulty, using the plain label (no emoji)', () => {
@@ -385,6 +450,45 @@ describe('QuizScreen (/quiz)', () => {
       const saved = JSON.parse(window.localStorage.getItem(storageKey('quizConfig')) ?? '{}')
       expect(saved.countryPool).toBe('world-expert')
     })
+  })
+})
+
+describe('Population: UI-only placeholder, not real gameplay yet', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(EPOCH_UTC + 3600_000)
+    set('prefs', { theme: 'light', hasSeenHelp: true })
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe() {}
+        disconnect() {}
+        unobserve() {}
+      },
+    )
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('starting a Population quiz routes to /quiz/population and shows the shared "Coming soon" placeholder — never another mode\'s real gameplay', () => {
+    renderAt('/quiz')
+    fireEvent.click(within(group('Quiz type')).getByRole('radio', { name: 'Population' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Start Quiz' }))
+    expect(window.location.pathname).toBe('/quiz/population')
+    expect(screen.getByText('Coming soon')).toBeInTheDocument()
+    expect(screen.getByText('Population · Easy · Multiple Choice · 10 Questions')).toBeInTheDocument()
+    // Not silently routed into an already-implemented mode's real gameplay.
+    expect(screen.queryByText(/Question 1 of/)).not.toBeInTheDocument()
+    expect(document.querySelector('[data-quiz-correct-id]')).toBeNull()
+  })
+
+  it('/quiz/mixed still shows the same placeholder — Mixed also remains unimplemented', () => {
+    set('quizConfig', { mode: 'mixed', countryPool: 'familiar', answerStyle: 'multiple-choice', questionCount: 10 })
+    renderAt('/quiz/mixed')
+    expect(screen.getByText('Coming soon')).toBeInTheDocument()
   })
 })
 

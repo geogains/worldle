@@ -7,11 +7,14 @@ export interface QuizOptionCardProps {
   selected: boolean
   onSelect: () => void
   /**
-   * 'tile': icon-on-top, centered (Quiz Type).
+   * 'tile': icon-on-top, centered (Quiz Type subject categories).
    * 'card': label + description, left-aligned, full-width (Difficulty).
    * 'pill': compact, label-only, one row (Answer Style, Question Count).
+   * 'mixed': icon-and-label horizontal, centered, shorter than 'tile' — the
+   * final combined Quiz Type option (Mixed), visually distinct from the six
+   * subject-category tiles above it. See .quiz-option--mixed in index.css.
    */
-  variant: 'tile' | 'card' | 'pill'
+  variant: 'tile' | 'card' | 'pill' | 'mixed'
 }
 
 /**

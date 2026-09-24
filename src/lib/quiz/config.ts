@@ -34,6 +34,7 @@ export const QUIZ_MODE_OPTIONS: readonly QuizModeOption[] = [
   { id: 'currencies', label: 'Currencies', description: 'Test your knowledge of country currencies.' },
   { id: 'languages', label: 'Languages', description: 'Test your knowledge of languages spoken around the world.' },
   { id: 'facts', label: 'Facts', description: 'Guess the country from a fact about it.' },
+  { id: 'population', label: 'Population', description: 'Test your knowledge of country populations.' },
   { id: 'mixed', label: 'Mixed', description: 'A balanced mix of flags, capitals, currencies, languages and facts.' },
 ]
 
@@ -52,13 +53,12 @@ export interface CountryPoolOption {
    * to `label` itself, so the summary/accessible-status text stays plain.
    */
   emoji: string
-  description: string
 }
 
 export const COUNTRY_POOL_OPTIONS: readonly CountryPoolOption[] = [
-  { id: 'familiar', label: 'Easy', emoji: '🔵⚪️⚪️', description: 'The most recognisable, widely known countries.' },
-  { id: 'explorer', label: 'Medium', emoji: '🟠🟠⚪️', description: 'A balanced mix of familiar and less obvious countries.' },
-  { id: 'world-expert', label: 'Expert', emoji: '🔴🔴🔴', description: 'The full supported country pool.' },
+  { id: 'familiar', label: 'Easy', emoji: '🔵⚪️⚪️' },
+  { id: 'explorer', label: 'Medium', emoji: '🟠🟠⚪️' },
+  { id: 'world-expert', label: 'Expert', emoji: '🔴🔴🔴' },
 ]
 
 export interface AnswerStyleOption {

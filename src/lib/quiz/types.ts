@@ -10,10 +10,17 @@
  * duplicating it per quiz mode.
  */
 
-/** The six selectable quiz types on the `/quiz` setup screen. */
-export type QuizMode = 'flags' | 'capitals' | 'currencies' | 'languages' | 'facts' | 'mixed'
+/**
+ * The seven selectable quiz types on the `/quiz` setup screen. 'population'
+ * is currently a UI-only placeholder — introduced visually (see QuizScreen's
+ * MODE_ICONS/QUIZ_MODE_OPTIONS) ahead of its actual gameplay, question bank
+ * and difficulty logic, which are a later phase. Until then it falls
+ * through to the same "Coming soon" placeholder Mixed uses (see
+ * QuizPlayScreen.tsx) — no gameplay branch exists for it.
+ */
+export type QuizMode = 'flags' | 'capitals' | 'currencies' | 'languages' | 'facts' | 'population' | 'mixed'
 
-export const QUIZ_MODES: readonly QuizMode[] = ['flags', 'capitals', 'currencies', 'languages', 'facts', 'mixed']
+export const QUIZ_MODES: readonly QuizMode[] = ['flags', 'capitals', 'currencies', 'languages', 'facts', 'population', 'mixed']
 
 export function isQuizMode(value: unknown): value is QuizMode {
   return typeof value === 'string' && (QUIZ_MODES as readonly string[]).includes(value)
@@ -66,10 +73,13 @@ export interface QuizConfig {
 /**
  * The five substantive categories a Mixed quiz eventually draws from.
  * 'mixed' is deliberately excluded — it is the combination, not a category
- * of its own. See distributeMixedCounts() in config.ts for how a future
- * Mixed generator should balance questions across these.
+ * of its own. 'population' is also deliberately excluded for now: it has no
+ * question generator yet, so it isn't a real drawable category until its own
+ * gameplay phase ships — add it here only once that exists. See
+ * distributeMixedCounts() in config.ts for how a future Mixed generator
+ * should balance questions across these.
  */
-export type MixedCategory = Exclude<QuizMode, 'mixed'>
+export type MixedCategory = Exclude<QuizMode, 'mixed' | 'population'>
 
 export const MIXED_CATEGORIES: readonly MixedCategory[] = ['flags', 'capitals', 'currencies', 'languages', 'facts']
 

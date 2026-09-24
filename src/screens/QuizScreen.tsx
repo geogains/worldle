@@ -17,15 +17,22 @@ import { PATHS } from '../lib/router/routes'
 
 // Decorative only — the visible label beside each one already names the
 // quiz type, so these are marked aria-hidden by QuizOptionCard's own icon
-// wrapper rather than announced individually. All six are the illustrated
-// PNGs now (Facts joined the other five), each sized/aligned identically
-// via the shared .quiz-option__icon-img class.
+// wrapper rather than announced individually. Six are the illustrated PNGs
+// (Facts joined the other five), each sized/aligned identically via the
+// shared .quiz-option__icon-img class. Population is a deliberate,
+// TEMPORARY exception: a plain emoji glyph, not yet a custom asset — the
+// real Quiz Type icon set already anticipates this exact case (see
+// .quiz-option--tile .quiz-option__icon's font-size in index.css, sized for
+// a plain emoji), so swapping it out later is a one-line change here:
+// `population: <img src="/icons/population.png" alt="" className="quiz-option__icon-img" />`,
+// identical to every other entry.
 const MODE_ICONS: Record<QuizMode, ReactNode> = {
   flags: <img src="/icons/flags.png" alt="" className="quiz-option__icon-img" />,
   capitals: <img src="/icons/capitals.png" alt="" className="quiz-option__icon-img" />,
   currencies: <img src="/icons/currencies.png" alt="" className="quiz-option__icon-img" />,
   languages: <img src="/icons/languages.png" alt="" className="quiz-option__icon-img" />,
   facts: <img src="/icons/facts.png" alt="" className="quiz-option__icon-img" />,
+  population: '👥',
   mixed: <img src="/icons/mixed.png" alt="" className="quiz-option__icon-img" />,
 }
 
@@ -64,11 +71,22 @@ export function QuizScreen() {
         <p className="mt-1 text-[0.9rem] text-muted">Choose a quiz type, difficulty, answer style and length, then start.</p>
 
         <div className="quiz-setup-card">
+          {/*
+            Six subject-category tiles (Flags..Population) plus Mixed, the
+            final combined option, all rendered as one map into the SAME
+            grid-3 radiogroup (so single-select semantics stay exactly as
+            before — Mixed is just another radio in the same group, not a
+            separate control). Mixed alone gets variant="mixed" instead of
+            "tile": index.css spans it across the full grid row and centers/
+            shrinks it there (see .quiz-option-group--grid-3 .quiz-option--mixed),
+            giving it the deliberately distinct "final combined option" look
+            without any extra markup or a second radiogroup.
+          */}
           <QuizOptionGroup title="Quiz Type" groupLabel="Quiz type" layout="grid-3">
             {QUIZ_MODE_OPTIONS.map((option) => (
               <QuizOptionCard
                 key={option.id}
-                variant="tile"
+                variant={option.id === 'mixed' ? 'mixed' : 'tile'}
                 label={option.label}
                 icon={MODE_ICONS[option.id]}
                 selected={config.mode === option.id}
